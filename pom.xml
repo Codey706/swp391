@@ -33,7 +33,12 @@
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.1.0</version>
         </dependency>
-
+       
+        <dependency>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc</artifactId>
+    <version>13.2.1.jre11</version>
+</dependency>
         <!-- Jersey REST implementation -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
