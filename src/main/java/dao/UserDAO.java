@@ -48,7 +48,7 @@ public class UserDAO {
         }
         return null;
     }
-    public boolean updateUser(User user) {
+  public boolean updateUser(User user) {
 
     String sql = "UPDATE Users "
             + "SET email = ?, "
@@ -59,7 +59,8 @@ public class UserDAO {
             + "WHERE user_id = ?";
 
     try (Connection connection = DBcontext.getConnection();
-         PreparedStatement statement = connection.prepareStatement(sql)) {
+         PreparedStatement statement =
+                 connection.prepareStatement(sql)) {
 
         statement.setString(1, user.getEmail());
         statement.setString(2, user.getFullName());
@@ -69,10 +70,15 @@ public class UserDAO {
 
         int rowsAffected = statement.executeUpdate();
 
+        System.out.println("Rows affected: " + rowsAffected);
+
         return rowsAffected > 0;
 
     } catch (SQLException e) {
+
+        System.out.println("UPDATE USER ERROR:");
         e.printStackTrace();
+
     }
 
     return false;
