@@ -48,4 +48,33 @@ public class UserDAO {
         }
         return null;
     }
+    public boolean updateUser(User user) {
+
+    String sql = "UPDATE Users "
+            + "SET email = ?, "
+            + "full_name = ?, "
+            + "phone = ?, "
+            + "address = ?, "
+            + "updated_at = GETDATE() "
+            + "WHERE user_id = ?";
+
+    try (Connection connection = DBcontext.getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setString(1, user.getEmail());
+        statement.setString(2, user.getFullName());
+        statement.setString(3, user.getPhone());
+        statement.setString(4, user.getAddress());
+        statement.setInt(5, user.getUserId());
+
+        int rowsAffected = statement.executeUpdate();
+
+        return rowsAffected > 0;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
 }
