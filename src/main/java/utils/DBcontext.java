@@ -16,6 +16,11 @@ public class DBcontext {
     private static final String PASSWORD = "123";
 
     public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("SQL Server JDBC Driver not found", e);
+        }
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
