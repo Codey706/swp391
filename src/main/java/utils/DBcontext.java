@@ -21,7 +21,6 @@ public class DBcontext {
         } catch (ClassNotFoundException e) {
             throw new SQLException("SQL Server JDBC Driver not found", e);
         }
-
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
