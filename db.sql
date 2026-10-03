@@ -1,4 +1,4 @@
--- =========================================================
+ï»¿-- =========================================================
 -- SYSTEM: Light Ticket Management (LTM)
 -- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES)
 -- =========================================================
@@ -20,6 +20,8 @@ CREATE TABLE Users (
     address NVARCHAR(255),
     role VARCHAR(20) NOT NULL, -- Customer, Staff, Organizer, Admin
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -30,6 +32,8 @@ CREATE TABLE Categories (
     category_name NVARCHAR(100) NOT NULL,
     description NVARCHAR(500),
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -42,6 +46,8 @@ CREATE TABLE Venues (
     description NVARCHAR(1000),
     capacity INT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -53,6 +59,8 @@ CREATE TABLE Seat_Maps (
     map_name NVARCHAR(150) NOT NULL,
     description NVARCHAR(500),
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -107,6 +115,8 @@ CREATE TABLE Event_Tickets (
     quantity INT NOT NULL,
     available_quantity INT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -134,6 +144,8 @@ CREATE TABLE Vouchers (
     usage_limit INT NOT NULL,
     used_count INT DEFAULT 0,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -205,7 +217,9 @@ CREATE TABLE Reviews (
     ticket_id INT NOT NULL FOREIGN KEY REFERENCES Tickets(ticket_id),
     rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     comment NVARCHAR(1000),
-    status VARCHAR(20) NOT NULL DEFAULT 'Active',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    failed_attempts INT DEFAULT 0,
+    locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -218,26 +232,26 @@ GO
 -- 1. Users
 INSERT INTO Users (username, email, password, full_name, phone, address, role, status)
 VALUES 
-('organizer01', 'organizer1@ltm.vn', 'Pass@1234', N'Mây Lang Thang Production', '0901234567', N'?à L?t, Lâm ??ng', 'Organizer', 'ACTIVE'),
+('organizer01', 'organizer1@ltm.vn', 'Pass@1234', N'Mï¿½y Lang Thang Production', '0901234567', N'?ï¿½ L?t, Lï¿½m ??ng', 'Organizer', 'ACTIVE'),
 ('customer01', 'customer1@gmail.com', 'Pass@1234', N'Nguy?n V?n A', '0912345678', N'C?n Th?', 'Customer', 'ACTIVE');
 
 -- 2. Categories
 INSERT INTO Categories (category_name, description, status)
 VALUES 
-(N'Concert Âm Nh?c', N'S? ki?n bi?u di?n âm nh?c, liveshow', 'ACTIVE'),
-(N'Sân Kh?u & K?ch', N'V? k?ch, bi?u di?n ngh? thu?t sân kh?u', 'ACTIVE');
+(N'Concert ï¿½m Nh?c', N'S? ki?n bi?u di?n ï¿½m nh?c, liveshow', 'ACTIVE'),
+(N'Sï¿½n Kh?u & K?ch', N'V? k?ch, bi?u di?n ngh? thu?t sï¿½n kh?u', 'ACTIVE');
 
 -- 3. Venues
 INSERT INTO Venues (venue_name, address, description, capacity, status)
 VALUES 
-(N'Sân v?n ??ng M? ?ình', N'???ng Lê ??c Th?, Nam T? Liêm, Hà N?i', N'Sân v?n ??ng qu?c gia', 40000, 'ACTIVE'),
-(N'Nhà Hát L?n Hà N?i', N'S? 1 Tràng Ti?n, Hoàn Ki?m, Hà N?i', N'Nhà hát c? ?i?n', 600, 'ACTIVE');
+(N'Sï¿½n v?n ??ng M? ?ï¿½nh', N'???ng Lï¿½ ??c Th?, Nam T? Liï¿½m, Hï¿½ N?i', N'Sï¿½n v?n ??ng qu?c gia', 40000, 'ACTIVE'),
+(N'Nhï¿½ Hï¿½t L?n Hï¿½ N?i', N'S? 1 Trï¿½ng Ti?n, Hoï¿½n Ki?m, Hï¿½ N?i', N'Nhï¿½ hï¿½t c? ?i?n', 600, 'ACTIVE');
 
 -- 4. Seat_Maps
 INSERT INTO Seat_Maps (venue_id, map_name, description, status)
 VALUES 
-(1, N'S? ?? Concert 2026 M? ?ình', N'S? ?? cho s? ki?n l?n', 'ACTIVE'),
-(2, N'S? ?? Khán phòng Nhà Hát L?n', N'S? ?? tiêu chu?n nhà hát', 'ACTIVE');
+(1, N'S? ?? Concert 2026 M? ?ï¿½nh', N'S? ?? cho s? ki?n l?n', 'ACTIVE'),
+(2, N'S? ?? Khï¿½n phï¿½ng Nhï¿½ Hï¿½t L?n', N'S? ?? tiï¿½u chu?n nhï¿½ hï¿½t', 'ACTIVE');
 
 -- 5. Seats
 INSERT INTO Seats (seat_map_id, row_label, seat_number, seat_label, seat_type, status)
@@ -248,8 +262,8 @@ VALUES
 -- 6. Events
 INSERT INTO Events (organizer_id, category_id, venue_id, event_name, description, event_image, start_time, end_time, status)
 VALUES 
-(1, 1, 1, N'Chuy?n Bay Hoàng Hôn: Live Concert 2026', N'Concert âm nh?c ??nh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'Active'),
-(1, 2, 2, N'V? K?ch Kinh ?i?n: Ng??i Tình Mùa Thu', N'V? k?ch sân kh?u tâm lý', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'Active');
+(1, 1, 1, N'Chuy?n Bay Hoï¿½ng Hï¿½n: Live Concert 2026', N'Concert ï¿½m nh?c ??nh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'Active'),
+(1, 2, 2, N'V? K?ch Kinh ?i?n: Ng??i Tï¿½nh Mï¿½a Thu', N'V? k?ch sï¿½n kh?u tï¿½m lï¿½', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'Active');
 
 -- 7. Event_Seats
 INSERT INTO Event_Seats (event_id, source_seat_id, row_label, seat_number, seat_label, seat_type, status)
@@ -260,8 +274,8 @@ VALUES
 -- 8. Event_Tickets
 INSERT INTO Event_Tickets (event_id, ticket_name, description, price, quantity, available_quantity, status)
 VALUES 
-(1, N'Vé VIP Zone A', N'Bao g?m quà t?ng & l?i ?i riêng', 2800000.00, 100, 99, 'ACTIVE'),
-(1, N'Vé GA Ph? Thông', N'Khu ??ng t? do', 650000.00, 500, 500, 'ACTIVE');
+(1, N'Vï¿½ VIP Zone A', N'Bao g?m quï¿½ t?ng & l?i ?i riï¿½ng', 2800000.00, 100, 99, 'ACTIVE'),
+(1, N'Vï¿½ GA Ph? Thï¿½ng', N'Khu ??ng t? do', 650000.00, 500, 500, 'ACTIVE');
 
 -- 9. Event_Staff
 INSERT INTO Event_Staff (event_id, staff_id, status)
@@ -272,7 +286,7 @@ VALUES
 -- 10. Vouchers
 INSERT INTO Vouchers (voucher_code, voucher_name, discount_type, discount_value, min_order_amount, max_discount_amount, start_time, end_time, usage_limit, used_count, status)
 VALUES 
-('EARLYBIRD10', N'Gi?m 10% vé s?m', 'Percentage', 10.00, 500000.00, 200000.00, '2026-10-01 00:00:00', '2026-10-31 23:59:59', 100, 1, 'ACTIVE'),
+('EARLYBIRD10', N'Gi?m 10% vï¿½ s?m', 'Percentage', 10.00, 500000.00, 200000.00, '2026-10-01 00:00:00', '2026-10-31 23:59:59', 100, 1, 'ACTIVE'),
 ('LTMVIP50K', N'Gi?m tr?c ti?p 50k', 'Fixed', 50000.00, 300000.00, 50000.00, '2026-10-01 00:00:00', '2026-12-31 23:59:59', 200, 0, 'ACTIVE');
 
 -- 11. Orders
@@ -308,6 +322,6 @@ VALUES
 -- 16. Reviews
 INSERT INTO Reviews (customer_id, event_id, ticket_id, rating, comment, status)
 VALUES 
-(2, 1, 2, 5, N'S? ki?n r?t tuy?t v?i, âm thanh ??nh cao!', 'Active'),
-(2, 2, 1, 4, N'Sân kh?u ??p nh?ng gh? ng?i h?i ch?t.', 'Active');
+(2, 1, 2, 5, N'S? ki?n r?t tuy?t v?i, ï¿½m thanh ??nh cao!', 'Active'),
+(2, 2, 1, 4, N'Sï¿½n kh?u ??p nh?ng gh? ng?i h?i ch?t.', 'Active');
 GO

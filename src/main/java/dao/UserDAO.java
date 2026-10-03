@@ -1,8 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
+
+import model.User;
+import utils.DBcontext;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +38,8 @@ public class UserDAO {
                     user.setAddress(resultSet.getString("address"));
                     user.setRole(resultSet.getString("role"));
                     user.setStatus(resultSet.getString("status"));
+                    user.setCreatedAt(resultSet.getTimestamp("created_at"));
+                    user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
 
                     return user;
                 }
