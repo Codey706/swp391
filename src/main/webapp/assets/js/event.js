@@ -1,6 +1,19 @@
 // Validate phía client chỉ để phản hồi nhanh; backend (EventController) vẫn là nơi quyết định.
+// Xác nhận trước khi xóa sự kiện (trang danh sách)
 (function () {
-    var form = document.getElementById('create-event-form');
+    document.querySelectorAll('.js-confirm-delete').forEach(function (deleteForm) {
+        deleteForm.addEventListener('submit', function (e) {
+            var name = deleteForm.getAttribute('data-event-name');
+            if (!window.confirm('Xóa sự kiện "' + name + '"? Thao tác này không thể hoàn tác.')) {
+                e.preventDefault();
+            }
+        });
+    });
+})();
+
+// Form tạo / sửa sự kiện dùng chung một bộ validate
+(function () {
+    var form = document.getElementById('create-event-form') || document.getElementById('edit-event-form');
     if (!form) {
         return;
     }

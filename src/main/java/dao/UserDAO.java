@@ -34,8 +34,8 @@ public class UserDAO {
                 user.setAddress(resultSet.getString("address"));
                 user.setRole(resultSet.getString("role"));
                 user.setStatus(resultSet.getString("status"));
-                user.setCreatedAt(resultSet.getTimestamp("created_at"));
-                user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
+                //user.setCreatedAt(resultSet.getTimestamp("created_at"));
+                //user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
 
                 users.add(user);
             }
@@ -65,8 +65,8 @@ public class UserDAO {
                     user.setAddress(resultSet.getString("address"));
                     user.setRole(resultSet.getString("role"));
                     user.setStatus(resultSet.getString("status"));
-                    user.setCreatedAt(resultSet.getTimestamp("created_at"));
-                    user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
+                    //user.setCreatedAt(resultSet.getTimestamp("created_at"));
+                    //user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
 
                     return user;
                 }
