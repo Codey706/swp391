@@ -83,7 +83,9 @@
                     </div>
 
                     <a href="#">▣ &nbsp; Events</a>
-                    <a href="#">▤ &nbsp; Categories</a>
+                    <a href="<%= contextPath%>/admin/categories">
+                        ▤ &nbsp; Categories
+                    </a>
                     <a href="#">⌖ &nbsp; Venues</a>
                     <a href="#">🎟 &nbsp; Vouchers</a>
                     <a href="#">☆ &nbsp; Reviews</a>
