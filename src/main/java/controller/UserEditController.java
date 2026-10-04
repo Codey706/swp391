@@ -11,8 +11,8 @@ import model.User;
 import java.io.IOException;
 import java.sql.SQLException;
 
-@WebServlet("/admin/user-detail")
-public class UserDetailController extends HttpServlet {
+@WebServlet("/admin/user-edit")
+public class UserEditController extends HttpServlet {
 
     private UserDAO userDAO;
 
@@ -21,6 +21,7 @@ public class UserDetailController extends HttpServlet {
         userDAO = new UserDAO();
     }
 
+    // Mở trang Edit User
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -28,6 +29,7 @@ public class UserDetailController extends HttpServlet {
         String id = request.getParameter("id");
 
         try {
+
             int userId = Integer.parseInt(id);
 
             User user = userDAO.getUserById(userId);
@@ -43,7 +45,7 @@ public class UserDetailController extends HttpServlet {
             request.setAttribute("user", user);
 
             request.getRequestDispatcher(
-                    "/WEB-INF/views/admin/user-detail.jsp"
+                    "/WEB-INF/views/admin/user-edit.jsp"
             ).forward(request, response);
 
         } catch (NumberFormatException e) {
@@ -56,23 +58,42 @@ public class UserDetailController extends HttpServlet {
         } catch (SQLException e) {
 
             throw new ServletException(
-                    "Cannot load user detail",
+                    "Cannot load user for editing",
                     e
             );
         }
     }
 
-    // Đổi status nhanh
+    // Update User
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String id = request.getParameter("id");
-        String status = request.getParameter("status");
+        request.setCharacterEncoding("UTF-8");
 
         try {
 
-            int userId = Integer.parseInt(id);
+            int userId = Integer.parseInt(
+                    request.getParameter("userId")
+            );
+
+            String fullName = request.getParameter("fullName");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address");
+            String role = request.getParameter("role");
+            String status = request.getParameter("status");
+
+            if (!"ADMIN".equalsIgnoreCase(role)
+                    && !"ORGANIZER".equalsIgnoreCase(role)
+                    && !"STAFF".equalsIgnoreCase(role)
+                    && !"CUSTOMER".equalsIgnoreCase(role)) {
+
+                response.sendError(
+                        HttpServletResponse.SC_BAD_REQUEST,
+                        "Invalid role"
+                );
+                return;
+            }
 
             if (!"ACTIVE".equalsIgnoreCase(status)
                     && !"INACTIVE".equalsIgnoreCase(status)) {
@@ -84,7 +105,16 @@ public class UserDetailController extends HttpServlet {
                 return;
             }
 
-            userDAO.updateUserStatus(userId, status.toUpperCase());
+            User user = new User();
+
+            user.setUserId(userId);
+            user.setFullName(fullName);
+            user.setPhone(phone);
+            user.setAddress(address);
+            user.setRole(role.toUpperCase());
+            user.setStatus(status.toUpperCase());
+
+            userDAO.updateUser(user);
 
             response.sendRedirect(
                     request.getContextPath()
@@ -102,7 +132,7 @@ public class UserDetailController extends HttpServlet {
         } catch (SQLException e) {
 
             throw new ServletException(
-                    "Cannot update user status",
+                    "Cannot update user",
                     e
             );
         }

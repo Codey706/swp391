@@ -36,6 +36,7 @@ public class UserDAO {
                 user.setAddress(resultSet.getString("address"));
                 user.setRole(resultSet.getString("role"));
                 user.setStatus(resultSet.getString("status"));
+
                 Timestamp createdAt = resultSet.getTimestamp("created_at");
                 Timestamp updatedAt = resultSet.getTimestamp("updated_at");
 
@@ -79,6 +80,7 @@ public class UserDAO {
                     user.setAddress(resultSet.getString("address"));
                     user.setRole(resultSet.getString("role"));
                     user.setStatus(resultSet.getString("status"));
+
                     Timestamp createdAt = resultSet.getTimestamp("created_at");
                     Timestamp updatedAt = resultSet.getTimestamp("updated_at");
 
@@ -98,23 +100,43 @@ public class UserDAO {
         return null;
     }
 
+    // Update thông tin user
     public boolean updateUser(User user) throws SQLException {
 
         String sql = "UPDATE Users "
-                + "SET email = ?, "
-                + "full_name = ?, "
+                + "SET full_name = ?, "
                 + "phone = ?, "
                 + "address = ?, "
+                + "role = ?, "
+                + "status = ?, "
                 + "updated_at = GETDATE() "
                 + "WHERE user_id = ?";
 
         try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, user.getEmail());
-            statement.setString(2, user.getFullName());
-            statement.setString(3, user.getPhone());
-            statement.setString(4, user.getAddress());
-            statement.setInt(5, user.getUserId());
+            statement.setString(1, user.getFullName());
+            statement.setString(2, user.getPhone());
+            statement.setString(3, user.getAddress());
+            statement.setString(4, user.getRole());
+            statement.setString(5, user.getStatus());
+            statement.setInt(6, user.getUserId());
+
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    // Đổi status nhanh
+    public boolean updateUserStatus(int userId, String status) throws SQLException {
+
+        String sql = "UPDATE Users "
+                + "SET status = ?, "
+                + "updated_at = GETDATE() "
+                + "WHERE user_id = ?";
+
+        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, status);
+            statement.setInt(2, userId);
 
             return statement.executeUpdate() > 0;
         }
