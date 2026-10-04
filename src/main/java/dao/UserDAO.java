@@ -7,29 +7,70 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import model.User;
-import utils.DBcontext;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- *
- * @author TRUC MAI
- */
 public class UserDAO {
 
-    private DBcontext dbContext = new DBcontext();
+    public List<User> getAllUsers() throws SQLException {
 
-    public User getUserById(int userId) {
+        List<User> users = new ArrayList<User>();
+
         String sql = "SELECT user_id, username, email, full_name, "
-                + "phone, address, role, status "
+                + "phone, address, role, status, created_at, updated_at "
+                + "FROM Users "
+                + "ORDER BY user_id";
+
+        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql); ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+
+                User user = new User();
+
+                user.setUserId(resultSet.getInt("user_id"));
+                user.setUsername(resultSet.getString("username"));
+                user.setEmail(resultSet.getString("email"));
+                user.setFullName(resultSet.getString("full_name"));
+                user.setPhone(resultSet.getString("phone"));
+                user.setAddress(resultSet.getString("address"));
+                user.setRole(resultSet.getString("role"));
+                user.setStatus(resultSet.getString("status"));
+                Timestamp createdAt = resultSet.getTimestamp("created_at");
+                Timestamp updatedAt = resultSet.getTimestamp("updated_at");
+
+                if (createdAt != null) {
+                    user.setCreatedAt(createdAt.toLocalDateTime());
+                }
+
+                if (updatedAt != null) {
+                    user.setUpdatedAt(updatedAt.toLocalDateTime());
+                }
+
+                users.add(user);
+            }
+        }
+
+        return users;
+    }
+
+    public User getUserById(int userId) throws SQLException {
+
+        String sql = "SELECT user_id, username, email, full_name, "
+                + "phone, address, role, status, created_at, updated_at "
                 + "FROM Users "
                 + "WHERE user_id = ?";
+
         try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setInt(1, userId);
+
             try (ResultSet resultSet = statement.executeQuery()) {
+
                 if (resultSet.next()) {
+
                     User user = new User();
+
                     user.setUserId(resultSet.getInt("user_id"));
                     user.setUsername(resultSet.getString("username"));
                     user.setEmail(resultSet.getString("email"));
@@ -38,50 +79,44 @@ public class UserDAO {
                     user.setAddress(resultSet.getString("address"));
                     user.setRole(resultSet.getString("role"));
                     user.setStatus(resultSet.getString("status"));
-                    user.setCreatedAt(resultSet.getTimestamp("created_at"));
-                    user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
+                    Timestamp createdAt = resultSet.getTimestamp("created_at");
+                    Timestamp updatedAt = resultSet.getTimestamp("updated_at");
+
+                    if (createdAt != null) {
+                        user.setCreatedAt(createdAt.toLocalDateTime());
+                    }
+
+                    if (updatedAt != null) {
+                        user.setUpdatedAt(updatedAt.toLocalDateTime());
+                    }
 
                     return user;
                 }
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         return null;
     }
-  public boolean updateUser(User user) {
 
-    String sql = "UPDATE Users "
-            + "SET email = ?, "
-            + "full_name = ?, "
-            + "phone = ?, "
-            + "address = ?, "
-            + "updated_at = GETDATE() "
-            + "WHERE user_id = ?";
+    public boolean updateUser(User user) throws SQLException {
 
-    try (Connection connection = DBcontext.getConnection();
-         PreparedStatement statement =
-                 connection.prepareStatement(sql)) {
+        String sql = "UPDATE Users "
+                + "SET email = ?, "
+                + "full_name = ?, "
+                + "phone = ?, "
+                + "address = ?, "
+                + "updated_at = GETDATE() "
+                + "WHERE user_id = ?";
 
-        statement.setString(1, user.getEmail());
-        statement.setString(2, user.getFullName());
-        statement.setString(3, user.getPhone());
-        statement.setString(4, user.getAddress());
-        statement.setInt(5, user.getUserId());
+        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        int rowsAffected = statement.executeUpdate();
+            statement.setString(1, user.getEmail());
+            statement.setString(2, user.getFullName());
+            statement.setString(3, user.getPhone());
+            statement.setString(4, user.getAddress());
+            statement.setInt(5, user.getUserId());
 
-        System.out.println("Rows affected: " + rowsAffected);
-
-        return rowsAffected > 0;
-
-    } catch (SQLException e) {
-
-        System.out.println("UPDATE USER ERROR:");
-        e.printStackTrace();
-
+            return statement.executeUpdate() > 0;
+        }
     }
-
-    return false;
-}
 }
