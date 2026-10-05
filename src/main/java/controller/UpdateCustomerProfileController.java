@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Auth;
 import model.User;
 
 @WebServlet(
@@ -19,6 +20,9 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
     private UserDAO userDao = new UserDAO();
 
+    // TẠM THỜI: user_id của customer01 trong db.sql (dùng khi chưa có login)
+    private static final int TEST_USER_ID = 2;
+
     @Override
     protected void doGet(
             HttpServletRequest request,
@@ -27,16 +31,16 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId =
-                (Integer) session.getAttribute("userId");
-
-        // Chưa đăng nhập
-        if (userId == null) {
-            response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login"
-);
-            return;
-        }
+        // ===== TẠM THỜI TẮT LOGIN (bật lại: bỏ comment khối bên dưới, xoá dòng "int userId = TEST_USER_ID") =====
+        // Auth sessionUser = (Auth) session.getAttribute("user");
+        // Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
+        //
+        // // Chưa đăng nhập
+        // if (userId == null) {
+        //     response.sendRedirect(request.getContextPath() + "/Auth?action=login");
+        //     return;
+        // }
+        int userId = TEST_USER_ID;
 
         try {
 
@@ -78,16 +82,16 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId =
-                (Integer) session.getAttribute("userId");
-
-        // Chưa đăng nhập
-        if (userId == null) {
-           response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login"
-);
-            return;
-        }
+        // ===== TẠM THỜI TẮT LOGIN (bật lại: bỏ comment khối bên dưới, xoá dòng "int userId = TEST_USER_ID") =====
+        // Auth sessionUser = (Auth) session.getAttribute("user");
+        // Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
+        //
+        // // Chưa đăng nhập
+        // if (userId == null) {
+        //     response.sendRedirect(request.getContextPath() + "/Auth?action=login");
+        //     return;
+        // }
+        int userId = TEST_USER_ID;
 
         // ==============================
         // Lấy dữ liệu từ form
