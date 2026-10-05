@@ -1,4 +1,3 @@
-
 * {
     box-sizing: border-box;
 }
@@ -15,7 +14,10 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* =========================
+   Sidebar
+   ========================= */
+
 .sidebar {
     width: 240px;
     background: #FFFFFF;
@@ -38,7 +40,10 @@ body {
     color: #FF7043;
 }
 
-/* Menu */
+/* =========================
+   Menu
+   ========================= */
+
 .menu {
     display: flex;
     flex-direction: column;
@@ -66,6 +71,7 @@ body {
 }
 
 /* Users expandable menu */
+
 .menu-group {
     display: flex;
     flex-direction: column;
@@ -116,13 +122,19 @@ body {
     font-weight: bold;
 }
 
-/* Main */
+/* =========================
+   Main
+   ========================= */
+
 .main {
     flex: 1;
     min-width: 0;
 }
 
-/* Topbar */
+/* =========================
+   Topbar
+   ========================= */
+
 .topbar {
     height: 76px;
     background: #FFFFFF;
@@ -151,7 +163,10 @@ body {
     font-weight: 600;
 }
 
-/* Content */
+/* =========================
+   Content
+   ========================= */
+
 .content {
     padding: 32px;
 }
@@ -175,7 +190,10 @@ body {
     font-size: 14px;
 }
 
-/* Statistics */
+/* =========================
+   Statistics
+   ========================= */
+
 .stats {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -226,7 +244,10 @@ body {
     border-top: 3px solid #5B91E8;
 }
 
-/* User panel */
+/* =========================
+   User Panel
+   ========================= */
+
 .user-panel {
     background: #FFFFFF;
     border: 1px solid #E9EDF6;
@@ -254,7 +275,10 @@ body {
     font-size: 13px;
 }
 
-/* Add User Button */
+/* =========================
+   Add User Button
+   ========================= */
+
 .add-button {
     background: linear-gradient(135deg, #FF7043, #FF8A5B);
     color: white;
@@ -272,7 +296,10 @@ body {
     transform: translateY(-1px);
 }
 
-/* Table */
+/* =========================
+   Table
+   ========================= */
+
 .table-wrapper {
     width: 100%;
     overflow-x: auto;
@@ -306,7 +333,10 @@ tbody tr:hover {
     background: #FFFAF8;
 }
 
-/* Role */
+/* =========================
+   Role
+   ========================= */
+
 .role {
     display: inline-block;
     padding: 6px 12px;
@@ -332,7 +362,10 @@ tbody tr:hover {
     color: #A87900;
 }
 
-/* Status */
+/* =========================
+   Status
+   ========================= */
+
 .status {
     display: inline-block;
     padding: 6px 12px;
@@ -351,7 +384,10 @@ tbody tr:hover {
     color: #D94B4B;
 }
 
-/* View Button */
+/* =========================
+   View Button
+   ========================= */
+
 .view-button {
     display: inline-block;
     text-decoration: none;
@@ -375,8 +411,393 @@ tbody tr:hover {
     padding: 30px;
 }
 
-/* Responsive */
+/* =========================
+   User Detail
+   ========================= */
+
+.detail-container {
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+.breadcrumb {
+    color: #8290A7;
+    font-size: 13px;
+    margin-bottom: 22px;
+}
+
+.detail-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E9EDF6;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(40, 55, 90, 0.04);
+}
+
+/* Profile */
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 25px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #EDF0F7;
+}
+
+.avatar {
+    width: 75px;
+    height: 75px;
+    min-width: 75px;
+    border-radius: 22px;
+    background: #FFE3D9;
+    color: #E95427;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.profile-info {
+    min-width: 0;
+}
+
+.profile-info h2 {
+    margin: 0 0 8px;
+    font-size: 23px;
+    color: #202B3C;
+}
+
+.profile-info p {
+    color: #8290A7;
+    margin: 0 0 12px;
+    font-size: 14px;
+}
+
+/* Information section */
+
+.section-title {
+    font-size: 17px;
+    color: #202B3C;
+    margin: 0 0 20px;
+}
+
+.account-section-title {
+    margin-top: 30px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    background: #F8F9FD;
+    border: 1px solid #EDF0F7;
+    border-radius: 11px;
+    padding: 17px;
+    min-width: 0;
+}
+
+.detail-label {
+    display: block;
+    color: #8290A7;
+    font-size: 12px;
+    margin-bottom: 9px;
+}
+
+.detail-value {
+    color: #202B3C;
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* Status dropdown */
+
+.status-form {
+    margin: 0;
+}
+
+.status-select {
+    border: 1px solid #DDE3EE;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: #FFFFFF;
+    color: #202B3C;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+.status-select:focus {
+    border-color: #FF7043;
+    box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.12);
+}
+
+/* Buttons */
+
+.detail-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid #EDF0F7;
+}
+
+.action-left {
+    display: flex;
+    gap: 10px;
+}
+
+.back-button,
+.update-button {
+    display: inline-block;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.back-button {
+    background: #F1F3F8;
+    color: #596579;
+}
+
+.back-button:hover {
+    background: #E5E8EF;
+    color: #202B3C;
+}
+
+.update-button {
+    background: #FF7043;
+    color: #FFFFFF;
+}
+
+.update-button:hover {
+    background: #E95427;
+    color: #FFFFFF;
+}
+
+/* =========================
+   User Edit
+   ========================= */
+
+.edit-container {
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+.edit-card {
+    background: #FFFFFF;
+    border: 1px solid #E9EDF6;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(40, 55, 90, 0.04);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.edit-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-form-group.full {
+    grid-column: 1 / -1;
+}
+
+.edit-form-label {
+    color: #596579;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.edit-form-input,
+.edit-form-select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 13px;
+    border: 1px solid #DDE3EE;
+    border-radius: 9px;
+    background: #FFFFFF;
+    color: #202B3C;
+    font-size: 14px;
+    outline: none;
+}
+
+.edit-form-input:focus,
+.edit-form-select:focus {
+    border-color: #FF7043;
+    box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.12);
+}
+
+.edit-form-input.readonly {
+    background: #F4F6FA;
+    color: #8290A7;
+    cursor: not-allowed;
+}
+
+.edit-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid #EDF0F7;
+}
+
+.edit-cancel-button,
+.edit-save-button {
+    text-decoration: none;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.edit-cancel-button {
+    background: #F1F3F8;
+    color: #596579;
+}
+
+.edit-cancel-button:hover {
+    background: #E5E8EF;
+    color: #202B3C;
+}
+
+.edit-save-button {
+    background: #FF7043;
+    color: #FFFFFF;
+}
+
+.edit-save-button:hover {
+    background: #E95427;
+}
+
+/* =========================
+   Create Category
+   ========================= */
+
+.category-form-panel {
+    background: #FFFFFF;
+    border: 1px solid #E9EDF6;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 800px;
+    box-shadow: 0 5px 20px rgba(40, 55, 90, 0.04);
+}
+
+.category-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.category-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #596579;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.category-form-group input,
+.category-form-group textarea,
+.category-form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 13px;
+    border: 1px solid #DDE3EE;
+    border-radius: 9px;
+    background: #FFFFFF;
+    color: #202B3C;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+
+.category-form-group input:focus,
+.category-form-group textarea:focus,
+.category-form-group select:focus {
+    border-color: #FF7043;
+    box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.12);
+}
+
+.category-form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.category-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid #EDF0F7;
+}
+
+.create-button {
+    background: #FF7043;
+    color: #FFFFFF;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.create-button:hover {
+    background: #E95427;
+}
+
+.category-cancel-button {
+    background: #F1F3F8;
+    color: #596579;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.category-cancel-button:hover {
+    background: #E5E8EF;
+    color: #202B3C;
+}
+
+.error-message {
+    background: #FFEBEE;
+    color: #C62828;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
 @media (max-width: 1100px) {
+
     .stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -387,6 +808,7 @@ tbody tr:hover {
 }
 
 @media (max-width: 700px) {
+
     .sidebar {
         width: 70px;
         padding: 20px 7px;
@@ -468,5 +890,61 @@ tbody tr:hover {
     .panel-heading {
         align-items: flex-start;
         flex-direction: column;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .detail-card,
+    .edit-card,
+    .category-form-panel {
+        padding: 18px;
+    }
+
+    .detail-grid,
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .edit-form-group.full {
+        grid-column: auto;
+    }
+
+    .profile-header {
+        align-items: flex-start;
+    }
+
+    .avatar {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        font-size: 23px;
+    }
+
+    .profile-info h2 {
+        font-size: 19px;
+    }
+
+    .detail-actions,
+    .edit-form-actions,
+    .category-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .action-left {
+        flex-direction: column;
+    }
+
+    .back-button,
+    .update-button,
+    .edit-cancel-button,
+    .edit-save-button,
+    .category-cancel-button,
+    .create-button {
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
     }
 }

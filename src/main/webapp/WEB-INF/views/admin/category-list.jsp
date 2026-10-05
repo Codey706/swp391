@@ -161,9 +161,11 @@
                                 </p>
                             </div>
 
-                            <button class="add-button" type="button">
+                            <button class="add-button"
+                                    type="button"
+                                    onclick="window.location.href = '<%= contextPath%>/admin/category-create'">
                                 + &nbsp; Add New Category
-                            </button>
+                            </button>   
 
                         </div>
 

@@ -161,7 +161,9 @@
                                 <p>Danh sách tất cả người dùng trong hệ thống</p>
                             </div>
 
-                            <button class="add-button" type="button">
+                            <button class="add-button"
+                                    type="button"
+                                    onclick="window.location.href = '<%= contextPath%>/admin/user-create'">
                                 + &nbsp; Add New User
                             </button>
                         </div>
