@@ -26,28 +26,56 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
- * Create Event + Validate Event Information (Organizer).
+ * Event Management (Organizer): Create / Update / Delete / View Event List + Validate Event Information.
  * Sự kiện mới luôn ở trạng thái DRAFT; gửi duyệt là task "Submit Event for Approval" (I6).
  */
-@WebServlet(name = "EventController", urlPatterns = {"/organizer/event/create"})
+@WebServlet(name = "EventController", urlPatterns = {
+    "/organizer/event/create", "/organizer/event/list",
+    "/organizer/event/update", "/organizer/event/delete"})
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 6 * 1024 * 1024)
 public class EventController extends HttpServlet {
 
     private static final String CREATE_EVENT_VIEW = "/WEB-INF/views/organizer/create-event.jsp";
+    private static final String EDIT_EVENT_VIEW = "/WEB-INF/views/organizer/edit-event.jsp";
+    private static final String EVENT_LIST_VIEW = "/WEB-INF/views/organizer/event-list.jsp";
+    private static final String PATH_LIST = "/organizer/event/list";
+    private static final String PATH_UPDATE = "/organizer/event/update";
+    private static final String PATH_DELETE = "/organizer/event/delete";
     private static final List<String> ALLOWED_IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "webp");
+    // Chỉ cho sửa/xóa khi sự kiện chưa được gửi duyệt hoặc đã bị từ chối
+    private static final List<String> MODIFIABLE_STATUSES =
+            Arrays.asList(Constants.EVENT_DRAFT, Constants.EVENT_REJECTED);
+    private static final List<String> LIST_STATUSES = Arrays.asList(
+            Constants.EVENT_DRAFT, Constants.EVENT_PENDING_APPROVAL, Constants.EVENT_ACTIVE,
+            Constants.EVENT_REJECTED, Constants.EVENT_CANCELLED);
 
     private final EventDAO eventDAO = new EventDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (getAuthenticatedOrganizer(request, response) == null) {
+        User organizer = getAuthenticatedOrganizer(request, response);
+        if (organizer == null) {
             return;
         }
-        loadFormOptions(request);
-        request.getRequestDispatcher(CREATE_EVENT_VIEW).forward(request, response);
+        switch (request.getServletPath()) {
+            case PATH_LIST:
+                showEventList(request, response, organizer);
+                break;
+            case PATH_UPDATE:
+                showEditForm(request, response, organizer);
+                break;
+            case PATH_DELETE: // xóa chỉ nhận POST
+                response.sendRedirect(request.getContextPath() + PATH_LIST);
+                break;
+            default:
+                loadFormOptions(request);
+                request.getRequestDispatcher(CREATE_EVENT_VIEW).forward(request, response);
+        }
     }
 
     @Override
@@ -59,9 +87,22 @@ public class EventController extends HttpServlet {
         if (organizer == null) {
             return;
         }
+        switch (request.getServletPath()) {
+            case PATH_UPDATE:
+                updateEvent(request, response, organizer);
+                return;
+            case PATH_DELETE:
+                deleteEvent(request, response, organizer);
+                return;
+            case PATH_LIST:
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                return;
+            default:
+                break; // create
+        }
 
         Event event = buildEventFromRequest(request, organizer.getUserId());
-        Map<String, String> errors = validateEventInformation(event);
+        Map<String, String> errors = validateEventInformation(event, 0);
 
         // Ảnh sự kiện (không bắt buộc)
         Part imagePart = null;
@@ -96,13 +137,148 @@ public class EventController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/organizer/event/create");
     }
 
+    // ---------------------------------------------------------------- View Event List
+
+    private void showEventList(HttpServletRequest request, HttpServletResponse response, User organizer)
+            throws ServletException, IOException {
+        String keyword = trimToNull(request.getParameter("keyword"));
+        String status = trimToNull(request.getParameter("status"));
+        if (status != null) {
+            status = status.toUpperCase(Locale.ROOT);
+            if (!LIST_STATUSES.contains(status)) {
+                status = null; // không tin dữ liệu từ browser
+            }
+        }
+        if (keyword != null && keyword.length() > Constants.EVENT_NAME_MAX_LENGTH) {
+            keyword = keyword.substring(0, Constants.EVENT_NAME_MAX_LENGTH);
+        }
+
+        int total = eventDAO.countEventsByOrganizer(organizer.getUserId(), keyword, status);
+        int totalPages = Math.max(1, (int) Math.ceil(total / (double) Constants.EVENT_PAGE_SIZE));
+        int page = Math.min(Math.max(1, ValidationUtils.parseIntOrDefault(request.getParameter("page"), 1)), totalPages);
+
+        request.setAttribute("events", eventDAO.getEventsByOrganizer(
+                organizer.getUserId(), keyword, status, page, Constants.EVENT_PAGE_SIZE));
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("selectedStatus", status);
+        request.setAttribute("statuses", LIST_STATUSES);
+        request.setAttribute("page", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalEvents", total);
+        request.setAttribute("modifiableStatuses", MODIFIABLE_STATUSES);
+        moveFlashMessages(request);
+        request.getRequestDispatcher(EVENT_LIST_VIEW).forward(request, response);
+    }
+
+    // ---------------------------------------------------------------- Update Event
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response, User organizer)
+            throws ServletException, IOException {
+        Event event = loadOwnedEvent(request, organizer);
+        if (event == null) {
+            redirectToList(request, response, "errorMessage", "Không tìm thấy sự kiện.");
+            return;
+        }
+        if (!isModifiable(event)) {
+            redirectToList(request, response, "errorMessage", notModifiableMessage("chỉnh sửa", event));
+            return;
+        }
+        request.setAttribute("event", event);
+        loadFormOptions(request);
+        request.getRequestDispatcher(EDIT_EVENT_VIEW).forward(request, response);
+    }
+
+    private void updateEvent(HttpServletRequest request, HttpServletResponse response, User organizer)
+            throws ServletException, IOException {
+        Event existing = loadOwnedEvent(request, organizer);
+        if (existing == null) {
+            redirectToList(request, response, "errorMessage", "Không tìm thấy sự kiện.");
+            return;
+        }
+        if (!isModifiable(existing)) {
+            redirectToList(request, response, "errorMessage", notModifiableMessage("chỉnh sửa", existing));
+            return;
+        }
+
+        // organizerId và eventId lấy từ DB/session, không nhận từ form
+        Event event = buildEventFromRequest(request, organizer.getUserId());
+        event.setEventId(existing.getEventId());
+        event.setEventImage(existing.getEventImage());
+        // Sự kiện bị từ chối được sửa xong sẽ quay về nháp để gửi duyệt lại
+        event.setStatus(Constants.EVENT_DRAFT);
+
+        Map<String, String> errors = validateEventInformation(event, existing.getEventId());
+
+        Part imagePart = null;
+        String imageError;
+        try {
+            imagePart = request.getPart("eventImage");
+            imageError = validateEventImage(imagePart);
+        } catch (IllegalStateException e) {
+            imageError = "Ảnh vượt quá dung lượng tối đa 5MB.";
+        }
+        if (imageError != null) {
+            errors.put("eventImage", imageError);
+        }
+
+        if (errors.isEmpty() && !eventDAO.updateEvent(event)) {
+            errors.put("general", "Không thể cập nhật sự kiện. Vui lòng thử lại sau.");
+        }
+
+        if (!errors.isEmpty()) {
+            request.setAttribute("errors", errors);
+            request.setAttribute("event", event);
+            loadFormOptions(request);
+            request.getRequestDispatcher(EDIT_EVENT_VIEW).forward(request, response);
+            return;
+        }
+
+        if (hasFile(imagePart)) {
+            saveEventImage(imagePart, event.getEventId());
+            // Đổi đuôi ảnh (png -> jpg...) thì xóa file cũ để không bị sót
+            String newPath = "assets/uploads/event-" + event.getEventId() + "-banner."
+                    + getExtension(imagePart.getSubmittedFileName());
+            if (existing.getEventImage() != null && !existing.getEventImage().equals(newPath)) {
+                deleteEventImageFile(existing.getEventImage());
+            }
+        }
+        redirectToList(request, response, "successMessage", "Cập nhật sự kiện thành công.");
+    }
+
+    // ---------------------------------------------------------------- Delete Event
+
+    private void deleteEvent(HttpServletRequest request, HttpServletResponse response, User organizer)
+            throws IOException {
+        Event event = loadOwnedEvent(request, organizer);
+        if (event == null) {
+            redirectToList(request, response, "errorMessage", "Không tìm thấy sự kiện.");
+            return;
+        }
+        if (!isModifiable(event)) {
+            redirectToList(request, response, "errorMessage", notModifiableMessage("xóa", event));
+            return;
+        }
+        if (eventDAO.hasSalesData(event.getEventId())) {
+            redirectToList(request, response, "errorMessage",
+                    "Sự kiện đã phát sinh đơn hàng/vé/đánh giá nên không thể xóa.");
+            return;
+        }
+        if (!eventDAO.deleteEvent(event.getEventId(), organizer.getUserId())) {
+            redirectToList(request, response, "errorMessage", "Không thể xóa sự kiện. Vui lòng thử lại sau.");
+            return;
+        }
+        deleteEventImageFile(event.getEventImage());
+        redirectToList(request, response, "successMessage", "Đã xóa sự kiện \"" + event.getEventName() + "\".");
+    }
+
     // ---------------------------------------------------------------- Validate Event Information
 
     /**
      * Kiểm tra toàn bộ thông tin sự kiện ở backend.
+     * @param excludeEventId id sự kiện đang sửa để bỏ qua khi kiểm tra trùng (0 khi tạo mới)
      * @return map field -> thông báo lỗi; rỗng nếu hợp lệ.
      */
-    private Map<String, String> validateEventInformation(Event event) {
+    private Map<String, String> validateEventInformation(Event event, int excludeEventId) {
         Map<String, String> errors = new LinkedHashMap<>();
 
         // Tên sự kiện
@@ -152,7 +328,7 @@ public class EventController extends HttpServlet {
         // Trùng sự kiện của chính organizer
         if (!errors.containsKey("eventName") && !errors.containsKey("startTime")
                 && eventDAO.existsDuplicateEvent(event.getOrganizerId(), event.getEventName(),
-                        Timestamp.valueOf(event.getStartTime()))) {
+                        Timestamp.valueOf(event.getStartTime()), excludeEventId)) {
             errors.put("eventName", "Bạn đã có sự kiện cùng tên và cùng thời gian bắt đầu.");
         }
 
@@ -160,7 +336,7 @@ public class EventController extends HttpServlet {
         if (!errors.containsKey("venueId") && !errors.containsKey("startTime") && !errors.containsKey("endTime")
                 && eventDAO.existsVenueConflict(event.getVenueId(),
                         Timestamp.valueOf(event.getStartTime()), Timestamp.valueOf(event.getEndTime()),
-                        Constants.EVENT_CANCELLED, Constants.EVENT_REJECTED)) {
+                        Constants.EVENT_CANCELLED, Constants.EVENT_REJECTED, excludeEventId)) {
             errors.put("venueId", "Địa điểm đã có sự kiện khác trong khoảng thời gian này.");
         }
 
@@ -261,6 +437,65 @@ public class EventController extends HttpServlet {
             return null;
         }
         return user;
+    }
+
+    /** Lấy sự kiện theo tham số eventId, chỉ trả về nếu thuộc organizer đang đăng nhập. */
+    private Event loadOwnedEvent(HttpServletRequest request, User organizer) {
+        int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("eventId"), 0);
+        return eventId <= 0 ? null : eventDAO.getEventByIdAndOrganizer(eventId, organizer.getUserId());
+    }
+
+    private boolean isModifiable(Event event) {
+        for (String status : MODIFIABLE_STATUSES) {
+            if (status.equalsIgnoreCase(event.getStatus())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String notModifiableMessage(String action, Event event) {
+        return "Không thể " + action + " sự kiện ở trạng thái " + event.getStatus()
+                + ". Chỉ sự kiện nháp hoặc bị từ chối mới được " + action + ".";
+    }
+
+    private void redirectToList(HttpServletRequest request, HttpServletResponse response,
+                                String attribute, String message) throws IOException {
+        request.getSession().setAttribute(attribute, message);
+        response.sendRedirect(request.getContextPath() + PATH_LIST);
+    }
+
+    private void moveFlashMessages(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return;
+        }
+        for (String key : new String[]{"successMessage", "errorMessage"}) {
+            if (session.getAttribute(key) != null) {
+                request.setAttribute(key, session.getAttribute(key));
+                session.removeAttribute(key);
+            }
+        }
+    }
+
+    /** Xóa file ảnh trong assets/uploads; chỉ xóa file nằm trong thư mục upload. */
+    private void deleteEventImageFile(String imagePath) {
+        if (ValidationUtils.isNullOrBlank(imagePath) || !imagePath.startsWith("assets/uploads/")) {
+            return;
+        }
+        String uploadDir = getServletContext().getRealPath(Constants.UPLOAD_DIR);
+        if (uploadDir == null) {
+            return;
+        }
+        try {
+            Path directory = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path file = directory.resolve(Paths.get(imagePath).getFileName().toString()).normalize();
+            if (file.startsWith(directory)) {
+                Files.deleteIfExists(file);
+            }
+        } catch (IOException e) {
+            e.printStackTrace(); // sự kiện đã xóa, chỉ còn sót file ảnh
+        }
     }
 
     private String trimToNull(String value) {
