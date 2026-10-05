@@ -19,6 +19,10 @@ public class Event {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // Chỉ dùng để hiển thị (JOIN Categories / Venues), không phải cột của bảng Events
+    private String categoryName;
+    private String venueName;
+
     public Event() {
     }
 
@@ -60,4 +64,10 @@ public class Event {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public String getVenueName() { return venueName; }
+    public void setVenueName(String venueName) { this.venueName = venueName; }
 }

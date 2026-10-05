@@ -29,4 +29,7 @@ public final class Constants {
     // Upload ảnh sự kiện
     public static final long EVENT_IMAGE_MAX_SIZE = 5L * 1024 * 1024;
     public static final String UPLOAD_DIR = "/assets/uploads";
+
+    // View Event List
+    public static final int EVENT_PAGE_SIZE = 10;
 }
