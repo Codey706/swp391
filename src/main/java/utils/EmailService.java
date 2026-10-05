@@ -12,9 +12,8 @@ import java.util.Random;
 
 public class EmailService {
 
-    
     private static final String SMTP_USER = "duynvnce201168@gmail.com";
-    private static final String SMTP_PASSWORD = "tomb uoaf jwei igdm"; 
+    private static final String SMTP_PASSWORD = "tomb uoaf jwei igdm";
 
     public static String createOtp() {
         return String.format("%06d", new Random().nextInt(1000000));
@@ -22,26 +21,54 @@ public class EmailService {
 
     public static boolean sendOtp(String toEmail, String otp) {
         Properties props = new Properties();
+
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
-        
+
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.writetimeout", "5000");
+
+        props.put("mail.smtp.quitwait", "false");
+        props.put("mail.smtp.localhost", "localhost");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(SMTP_USER, SMTP_PASSWORD);
+                return new PasswordAuthentication(
+                        SMTP_USER,
+                        SMTP_PASSWORD
+                );
             }
-        });
+        }
+        );
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(SMTP_USER, "Light Ticket"));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+
+            message.setFrom(
+                    new InternetAddress(SMTP_USER, "Light Ticket")
+            );
+
+            message.setRecipients(
+                    Message.RecipientType.TO,
+                    InternetAddress.parse(toEmail)
+            );
+
             message.setSubject("Mã xác thực OTP - Light Ticket");
-            message.setText("Mã xác thực OTP của bạn là: " + otp + "\nCó hiệu lực trong vòng 3 phút. Vui lòng không chia sẻ mã này cho ai.");
+
+            message.setText(
+                    "Mã xác thực OTP của bạn là: " + otp
+                    + "\nCó hiệu lực trong vòng 3 phút."
+            );
+
             Transport.send(message);
+
             return true;
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;

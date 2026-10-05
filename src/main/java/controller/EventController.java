@@ -429,7 +429,7 @@ public class EventController extends HttpServlet {
         User user = session == null ? null : (User) session.getAttribute(Constants.SESSION_USER);
 
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login"); // TODO: đổi theo URL của LoginController
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login"); // TODO: đổi theo URL của LoginController
             return null;
         }
         if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(user.getRole())) {
