@@ -28,16 +28,15 @@ public class CustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // ===== TẠM THỜI TẮT LOGIN (bật lại: bỏ comment khối bên dưới, xoá dòng "int userId = TEST_USER_ID") =====
-        // Auth sessionUser = (Auth) session.getAttribute("user");
-        // Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
-        //
-        // // Chưa đăng nhập
-        // if (userId == null) {
-        //     response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-        //     return;
-        // }
-        int userId = TEST_USER_ID;
+        Auth sessionUser = (Auth) session.getAttribute("user");
+        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
+
+        //Chưa đăng nhập
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
+            return;
+        }
+       
 
         try {
 
