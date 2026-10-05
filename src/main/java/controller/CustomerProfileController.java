@@ -28,7 +28,8 @@ public class CustomerProfileController extends HttpServlet {
 
         // Chưa đăng nhập
         if (userId == null) {
-            response.sendRedirect("login");
+            response.sendRedirect(
+        request.getContextPath() + "/Auth?action=login");
             return;
         }
 

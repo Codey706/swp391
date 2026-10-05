@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.Payment;
-import utils.DBcontext;
+import utils.DBContext;
 
 /**
  *
@@ -27,7 +27,7 @@ public class PaymentDAO {
             VALUES (?, ?, ?, ?, ?, ?, GETDATE())
             """;
 
-        try (Connection conn = DBcontext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, payment.getOrderId());
             ps.setString(2, payment.getPaymentMethod());
@@ -51,7 +51,7 @@ public class PaymentDAO {
         WHERE order_id = ?
         """;
 
-    try (Connection conn = DBcontext.getConnection();
+    try (Connection conn = DBContext.getConnection();
          PreparedStatement ps = conn.prepareStatement(sql)) {
 
         ps.setInt(1, orderId);

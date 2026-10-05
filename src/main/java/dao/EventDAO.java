@@ -1,7 +1,7 @@
 package dao;
 
 import model.Event;
-import utils.DBcontext; // TODO: giả định DBcontext.getConnection() là static, trả về java.sql.Connection
+import utils.DBContext; // TODO: giả định DBContext.getConnection() là static, trả về java.sql.Connection
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,7 +44,7 @@ public class EventDAO {
 
     /** Tạo sự kiện mới. Thành công thì gán eventId được sinh ra vào đối tượng event. */
     public boolean createEvent(Event event) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(INSERT_EVENT, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setInt(1, event.getOrganizerId());
@@ -78,7 +78,7 @@ public class EventDAO {
 
     /** Cập nhật đường dẫn ảnh sau khi đã biết eventId (tên file ảnh chứa eventId). */
     public boolean updateEventImage(int eventId, String imagePath) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT_IMAGE)) {
             statement.setString(1, imagePath);
             statement.setInt(2, eventId);
@@ -91,7 +91,7 @@ public class EventDAO {
 
     /** Organizer đã có sự kiện cùng tên và cùng giờ bắt đầu chưa. */
     public boolean existsDuplicateEvent(int organizerId, String eventName, Timestamp startTime) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE)) {
             statement.setInt(1, organizerId);
             statement.setString(2, eventName);
@@ -108,7 +108,7 @@ public class EventDAO {
     /** Địa điểm đã có sự kiện khác (chưa hủy/từ chối) trùng khoảng thời gian chưa. */
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
                                        String cancelledStatus, String rejectedStatus) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT)) {
             statement.setInt(1, venueId);
             statement.setString(2, cancelledStatus);
@@ -143,7 +143,7 @@ public class EventDAO {
     }
 
     private boolean existsById(String sql, int id) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -157,7 +157,7 @@ public class EventDAO {
 
     private Map<Integer, String> getIdNameMap(String sql) {
         Map<Integer, String> items = new LinkedHashMap<>();
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {

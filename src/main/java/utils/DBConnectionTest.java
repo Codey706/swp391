@@ -6,7 +6,7 @@ public class DBConnectionTest {
 
     public static void main(String[] args) {
 
-        try (Connection connection = DBcontext.getConnection()) {
+        try (Connection connection = DBContext.getConnection()) {
 
             if (connection != null) {
                 System.out.println("=================================");

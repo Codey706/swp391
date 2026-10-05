@@ -17,7 +17,7 @@
     <div class="auth-card">
       <div class="text-center mb-4">
         <h1 class="auth-title">Nhập mã OTP</h1>
-        <p class="auth-subtitle mb-0">Mã gồm 6 số, hiệu lực 3 phút. Ki\u1ec3m tra h\u1ed9p th\u01b0 email c\u1ee7a b\u1ea1n.</p>
+        <p class="auth-subtitle mb-0">Mã gồm 6 số, hiệu lực 3 phút. Kiểm tra hộp thư email của bạn.</p>
       </div>
 
       <% if (request.getAttribute("error") != null) { %>

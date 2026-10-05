@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import model.Auth;
-import utils.DBcontext;
+import utils.DBContext;
 
 public class AuthDAO {
 
@@ -14,7 +14,7 @@ public class AuthDAO {
 
     public Auth findByUsernameOrEmail(String identifier) throws SQLException {
         String sql = SELECT_FIELDS + "WHERE username = ? OR email = ?";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, identifier);
             ps.setString(2, identifier);
@@ -27,7 +27,7 @@ public class AuthDAO {
 
     public Auth findByEmail(String email) throws SQLException {
         String sql = SELECT_FIELDS + "WHERE email = ?";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
@@ -39,7 +39,7 @@ public class AuthDAO {
 
     public Auth findById(int userId) throws SQLException {
         String sql = SELECT_FIELDS + "WHERE user_id = ?";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -64,7 +64,7 @@ public class AuthDAO {
     public boolean insertCustomer(Auth user) throws SQLException {
         String sql = "INSERT INTO Users (username, email, password, full_name, phone, address, role, status, failed_attempts) "
                 + "VALUES (?, ?, ?, ?, ?, ?, 'Customer', 'ACTIVE', 0)";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
@@ -78,7 +78,7 @@ public class AuthDAO {
 
     public boolean updatePassword(int userId, String password) throws SQLException {
         String sql = "UPDATE Users SET password = ?, updated_at = GETDATE() WHERE user_id = ?";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, password);
             ps.setInt(2, userId);
@@ -88,7 +88,7 @@ public class AuthDAO {
 
     public void recordFailedAttempt(int userId, int failedAttempts, Timestamp lockedUntil) throws SQLException {
         String sql = "UPDATE Users SET failed_attempts = ?, locked_until = ? WHERE user_id = ?";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, failedAttempts);
             ps.setTimestamp(2, lockedUntil);
@@ -99,7 +99,7 @@ public class AuthDAO {
 
     public void resetFailedAttempts(int userId) throws SQLException {
         String sql = "UPDATE Users SET failed_attempts = 0, locked_until = NULL WHERE user_id = ?";
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.executeUpdate();
@@ -107,7 +107,7 @@ public class AuthDAO {
     }
 
     private boolean exists(String sql, String value) throws SQLException {
-        try (Connection con = DBcontext.getConnection();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, value);
             try (ResultSet rs = ps.executeQuery()) {

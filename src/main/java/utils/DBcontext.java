@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBcontext {
+public class DBContext {
 
     private static final String URL =
               "jdbc:sqlserver://localhost:1433;"

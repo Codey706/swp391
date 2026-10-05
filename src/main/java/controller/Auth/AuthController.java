@@ -1,4 +1,4 @@
-package controller;
+package controller.Auth;
 
 import dao.AuthDAO;
 import jakarta.servlet.ServletException;
@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import model.Auth;
 import org.mindrot.jbcrypt.BCrypt;
 import utils.EmailService;
-import utils.Validator;
+import utils.ValidationUtils;
 import utils.GoogleUtils;
 import utils.GoogleUtils.GoogleProfile;
 
 @WebServlet(name = "AuthServlet", urlPatterns = {"/Auth"})
-public class AuthServlet extends HttpServlet {
+public class AuthController extends HttpServlet {
 
     private final AuthDAO authDAO = new AuthDAO();
     private final Map<String, Integer> otpFail = new ConcurrentHashMap<>();
@@ -53,9 +53,6 @@ public class AuthServlet extends HttpServlet {
                 break;
             case "changePassword":
                 showChangePassword(request, response);
-                break;
-            case "logout":
-                logout(request, response);
                 break;
             default:
                 showLogin(request, response);
@@ -89,7 +86,7 @@ public class AuthServlet extends HttpServlet {
                 break;
             case "googleLogin":
                 googleLogin(request, response);
-                break;
+                break;     
             default:
                 login(request, response);
                 break;
@@ -241,7 +238,7 @@ public class AuthServlet extends HttpServlet {
         String rememberMe = request.getParameter("rememberMe");
         request.setAttribute("identifier", identifier);
 
-        if (Validator.isBlank(identifier) || Validator.isBlank(password)) {
+        if (ValidationUtils.isNullOrBlank(identifier) || ValidationUtils.isNullOrBlank(password)) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
             forward(request, response, "login.jsp");
             return;
@@ -304,7 +301,7 @@ public class AuthServlet extends HttpServlet {
             } else if ("Staff".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/staff");
             } else if ("Organizer".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/organizer");
+                response.sendRedirect(request.getContextPath() + "/organizer/event/create");
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }
@@ -330,28 +327,28 @@ public class AuthServlet extends HttpServlet {
         request.setAttribute("email", email);
         request.setAttribute("phone", phone);
 
-        if (Validator.isBlank(fullName) || Validator.isBlank(username) || Validator.isBlank(email)
-                || Validator.isBlank(phone) || Validator.isBlank(password) || Validator.isBlank(confirm)) {
+        if (ValidationUtils.isNullOrBlank(fullName) || ValidationUtils.isNullOrBlank(username) || ValidationUtils.isNullOrBlank(email)
+                || ValidationUtils.isNullOrBlank(phone) || ValidationUtils.isNullOrBlank(password) || ValidationUtils.isNullOrBlank(confirm)) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ thông tin đăng ký.");
             forward(request, response, "register.jsp");
             return;
         }
-        if (!Validator.isUsername(username)) {
+        if (!ValidationUtils.isUsername(username)) {
             request.setAttribute("error", "Username chỉ gồm chữ, số, dấu chấm hoặc gạch dưới (4-50 ký tự).");
             forward(request, response, "register.jsp");
             return;
         }
-        if (!Validator.isEmail(email)) {
+        if (!ValidationUtils.isEmail(email)) {
             request.setAttribute("error", "Email không đúng định dạng.");
             forward(request, response, "register.jsp");
             return;
         }
-        if (!Validator.isPhone(phone)) {
+        if (!ValidationUtils.isPhone(phone)) {
             request.setAttribute("error", "Số điện thoại không hợp lệ.");
             forward(request, response, "register.jsp");
             return;
         }
-        if (!Validator.isStrongPassword(password)) {
+        if (!ValidationUtils.isStrongPassword(password)) {
             request.setAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
             forward(request, response, "register.jsp");
             return;
@@ -401,7 +398,7 @@ public class AuthServlet extends HttpServlet {
         String email = trim(request.getParameter("email"));
         request.setAttribute("email", email);
 
-        if (!Validator.isEmail(email)) {
+        if (!ValidationUtils.isEmail(email)) {
             request.setAttribute("error", "Vui lòng nhập email đã đăng ký.");
             forward(request, response, "forgot.jsp");
             return;
@@ -531,12 +528,12 @@ public class AuthServlet extends HttpServlet {
         String newPassword = request.getParameter("newPassword");
         String confirm = request.getParameter("confirmPassword");
 
-        if (Validator.isBlank(newPassword) || Validator.isBlank(confirm) || (requireOld && Validator.isBlank(oldPassword))) {
+        if (ValidationUtils.isNullOrBlank(newPassword) || ValidationUtils.isNullOrBlank(confirm) || (requireOld && ValidationUtils.isNullOrBlank(oldPassword))) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ thông tin mật khẩu.");
             forward(request, response, "change-password.jsp");
             return;
         }
-        if (!Validator.isStrongPassword(newPassword)) {
+        if (!ValidationUtils.isStrongPassword(newPassword)) {
             request.setAttribute("error", "Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
             forward(request, response, "change-password.jsp");
             return;
@@ -583,19 +580,7 @@ public class AuthServlet extends HttpServlet {
             request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
             forward(request, response, "change-password.jsp");
         }
-    }
-
-    private void logout(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        HttpSession next = request.getSession(true);
-        next.setAttribute("success", "Bạn đã đăng xuất.");
-        response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-    }
-
+    } 
     private boolean startOtp(HttpServletRequest request, String purpose, Auth pending, String email) {
         String key = email.toLowerCase();
         if (isLocked(otpLock, key)) {
@@ -666,6 +651,6 @@ public class AuthServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Auth Servlet";
+        return "Auth Controller";
     }
 }
