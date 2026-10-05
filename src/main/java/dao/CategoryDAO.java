@@ -68,4 +68,20 @@ public class CategoryDAO {
 
         return categories;
     }
+
+    public void createCategory(Category category) throws SQLException {
+
+        String sql = "INSERT INTO Categories "
+                + "(category_name, description, status) "
+                + "VALUES (?, ?, ?)";
+
+        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, category.getCategoryName());
+            statement.setString(2, category.getDescription());
+            statement.setString(3, category.getStatus());
+
+            statement.executeUpdate();
+        }
+    }
 }
