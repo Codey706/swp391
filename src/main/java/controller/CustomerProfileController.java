@@ -17,8 +17,6 @@ public class CustomerProfileController extends HttpServlet {
 
     private UserDAO userDao = new UserDAO();
 
-    // TẠM THỜI: user_id của customer01 trong db.sql (dùng khi chưa có login)
-    private static final int TEST_USER_ID = 2;
 
     @Override
     protected void doGet(
