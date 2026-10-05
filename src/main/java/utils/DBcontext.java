@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class DBContext {
 
-    private static final String URL =
-              "jdbc:sqlserver://localhost:1433;"
+    private static final String URL
+            = "jdbc:sqlserver://localhost:1433;"
             + "databaseName=LightTicketDB;"
             + "encrypt=false;"
             + "trustServerCertificate=true";

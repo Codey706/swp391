@@ -171,7 +171,7 @@ public class EventDAO {
 
     /** Lấy sự kiện theo id nhưng chỉ khi thuộc về organizer (kiểm tra ownership). */
     public Event getEventByIdAndOrganizer(int eventId, int organizerId) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_EVENT_BY_ID_AND_ORGANIZER)) {
             statement.setInt(1, eventId);
             statement.setInt(2, organizerId);
@@ -198,7 +198,7 @@ public class EventDAO {
         params.add((page - 1) * pageSize);
         params.add(pageSize);
 
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -216,7 +216,7 @@ public class EventDAO {
         List<Object> params = new ArrayList<>();
         String where = buildListFilter(organizerId, keyword, status, params);
         String sql = "SELECT COUNT(*) FROM Events e " + where;
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -230,7 +230,7 @@ public class EventDAO {
 
     /** Cập nhật thông tin sự kiện (ảnh được cập nhật riêng bằng updateEventImage). */
     public boolean updateEvent(Event event) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT)) {
             statement.setInt(1, event.getCategoryId());
             statement.setInt(2, event.getVenueId());
@@ -250,7 +250,7 @@ public class EventDAO {
 
     /** Trùng tên + giờ bắt đầu với sự kiện KHÁC của cùng organizer. */
     public boolean existsDuplicateEvent(int organizerId, String eventName, Timestamp startTime, int excludeEventId) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE_EXCLUDING)) {
             statement.setInt(1, organizerId);
             statement.setString(2, eventName);
@@ -268,7 +268,7 @@ public class EventDAO {
     /** Địa điểm đã có sự kiện KHÁC (chưa hủy/từ chối) trùng khoảng thời gian. */
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
                                        String cancelledStatus, String rejectedStatus, int excludeEventId) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
             statement.setInt(1, venueId);
             statement.setString(2, cancelledStatus);
@@ -287,7 +287,7 @@ public class EventDAO {
 
     /** Sự kiện đã có đơn hàng / vé / đánh giá hay chưa. Lỗi DB được coi là "có" để tránh xóa nhầm. */
     public boolean hasSalesData(int eventId) {
-        try (Connection connection = DBcontext.getConnection();
+        try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(HAS_SALES_DATA)) {
             for (int i = 1; i <= 4; i++) {
                 statement.setInt(i, eventId);
@@ -306,7 +306,7 @@ public class EventDAO {
      * Chỉ xóa khi sự kiện thuộc organizer.
      */
     public boolean deleteEvent(int eventId, int organizerId) {
-        try (Connection connection = DBcontext.getConnection()) {
+        try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 for (int i = 0; i < DELETE_EVENT_STATEMENTS.length; i++) {
