@@ -9,7 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import utils.DBcontext;
+import utils.DBContext;
 
 /**
  *
@@ -26,7 +26,7 @@ public class OrderDAO {
             WHERE order_id = ?
             """;
 
-        try (Connection conn = DBcontext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             // Set the order ID
             ps.setInt(1, orderId);
 

@@ -33,8 +33,8 @@ public class UpdateCustomerProfileController extends HttpServlet {
         // Chưa đăng nhập
         if (userId == null) {
             response.sendRedirect(
-                    request.getContextPath() + "/login"
-            );
+        request.getContextPath() + "/Auth?action=login"
+);
             return;
         }
 
@@ -83,9 +83,9 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         // Chưa đăng nhập
         if (userId == null) {
-            response.sendRedirect(
-                    request.getContextPath() + "/login"
-            );
+           response.sendRedirect(
+        request.getContextPath() + "/Auth?action=login"
+);
             return;
         }
 
