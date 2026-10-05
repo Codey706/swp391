@@ -17,37 +17,39 @@ import java.util.Map;
 
 public class EventDAO {
 
-    private static final String INSERT_EVENT =
-            "INSERT INTO Events (organizer_id, category_id, venue_id, event_name, description, "
+    private static final String INSERT_EVENT
+            = "INSERT INTO Events (organizer_id, category_id, venue_id, event_name, description, "
             + "event_image, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String UPDATE_EVENT_IMAGE =
-            "UPDATE Events SET event_image = ?, updated_at = GETDATE() WHERE event_id = ?";
+    private static final String UPDATE_EVENT_IMAGE
+            = "UPDATE Events SET event_image = ?, updated_at = GETDATE() WHERE event_id = ?";
 
-    private static final String CHECK_DUPLICATE =
-            "SELECT 1 FROM Events WHERE organizer_id = ? AND LOWER(event_name) = LOWER(?) AND start_time = ?";
+    private static final String CHECK_DUPLICATE
+            = "SELECT 1 FROM Events WHERE organizer_id = ? AND LOWER(event_name) = LOWER(?) AND start_time = ?";
 
     // Hai khoảng thời gian giao nhau khi: start_cũ < end_mới AND end_cũ > start_mới
-    private static final String CHECK_VENUE_CONFLICT =
-            "SELECT 1 FROM Events WHERE venue_id = ? AND status NOT IN (?, ?) "
+    private static final String CHECK_VENUE_CONFLICT
+            = "SELECT 1 FROM Events WHERE venue_id = ? AND status NOT IN (?, ?) "
             + "AND start_time < ? AND end_time > ?";
 
-    private static final String CHECK_CATEGORY =
-            "SELECT 1 FROM Categories WHERE category_id = ? AND status = 'ACTIVE'";
+    private static final String CHECK_CATEGORY
+            = "SELECT 1 FROM Categories WHERE category_id = ? AND status = 'ACTIVE'";
 
-    private static final String CHECK_VENUE =
-            "SELECT 1 FROM Venues WHERE venue_id = ? AND status = 'ACTIVE'";
+    private static final String CHECK_VENUE
+            = "SELECT 1 FROM Venues WHERE venue_id = ? AND status = 'ACTIVE'";
 
-    private static final String LIST_CATEGORIES =
-            "SELECT category_id, category_name FROM Categories WHERE status = 'ACTIVE' ORDER BY category_name";
+    private static final String LIST_CATEGORIES
+            = "SELECT category_id, category_name FROM Categories WHERE status = 'ACTIVE' ORDER BY category_name";
 
-    private static final String LIST_VENUES =
-            "SELECT venue_id, venue_name FROM Venues WHERE status = 'ACTIVE' ORDER BY venue_name";
+    private static final String LIST_VENUES
+            = "SELECT venue_id, venue_name FROM Venues WHERE status = 'ACTIVE' ORDER BY venue_name";
 
-    /** Tạo sự kiện mới. Thành công thì gán eventId được sinh ra vào đối tượng event. */
+    /**
+     * Tạo sự kiện mới. Thành công thì gán eventId được sinh ra vào đối tượng
+     * event.
+     */
     public boolean createEvent(Event event) {
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(INSERT_EVENT, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(INSERT_EVENT, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setInt(1, event.getOrganizerId());
             statement.setInt(2, event.getCategoryId());
@@ -78,10 +80,12 @@ public class EventDAO {
         }
     }
 
-    /** Cập nhật đường dẫn ảnh sau khi đã biết eventId (tên file ảnh chứa eventId). */
+    /**
+     * Cập nhật đường dẫn ảnh sau khi đã biết eventId (tên file ảnh chứa
+     * eventId).
+     */
     public boolean updateEventImage(int eventId, String imagePath) {
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT_IMAGE)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT_IMAGE)) {
             statement.setString(1, imagePath);
             statement.setInt(2, eventId);
             return statement.executeUpdate() > 0;
@@ -91,10 +95,11 @@ public class EventDAO {
         }
     }
 
-    /** Organizer đã có sự kiện cùng tên và cùng giờ bắt đầu chưa. */
+    /**
+     * Organizer đã có sự kiện cùng tên và cùng giờ bắt đầu chưa.
+     */
     public boolean existsDuplicateEvent(int organizerId, String eventName, Timestamp startTime) {
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE)) {
             statement.setInt(1, organizerId);
             statement.setString(2, eventName);
             statement.setTimestamp(3, startTime);
@@ -107,11 +112,13 @@ public class EventDAO {
         }
     }
 
-    /** Địa điểm đã có sự kiện khác (chưa hủy/từ chối) trùng khoảng thời gian chưa. */
+    /**
+     * Địa điểm đã có sự kiện khác (chưa hủy/từ chối) trùng khoảng thời gian
+     * chưa.
+     */
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
-                                       String cancelledStatus, String rejectedStatus) {
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT)) {
+            String cancelledStatus, String rejectedStatus) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT)) {
             statement.setInt(1, venueId);
             statement.setString(2, cancelledStatus);
             statement.setString(3, rejectedStatus);
@@ -126,36 +133,40 @@ public class EventDAO {
         }
     }
 
-
     // ------------------------------------------------------------ Update / Delete / View List
-
-    private static final String SELECT_EVENT_COLUMNS =
-            "SELECT e.event_id, e.organizer_id, e.category_id, e.venue_id, e.event_name, e.description, "
+    private static final String SELECT_EVENT_COLUMNS
+            = "SELECT e.event_id, e.organizer_id, e.category_id, e.venue_id, e.event_name, e.description, "
             + "e.event_image, e.start_time, e.end_time, e.status, e.cancellation_reason, e.created_at, "
-            + "e.updated_at, c.category_name, v.venue_name "
+            + "e.updated_at, c.category_name, v.venue_name, "
+            + "(SELECT ISNULL(SUM(t.quantity), 0) FROM Event_Tickets t WHERE t.event_id = e.event_id) AS ticket_total, "
+            + "(SELECT ISNULL(SUM(t.quantity - t.available_quantity), 0) FROM Event_Tickets t WHERE t.event_id = e.event_id) AS ticket_sold, "
+            + "(SELECT ISNULL(SUM(od.subtotal), 0) FROM Order_Details od "
+            + "JOIN Event_Tickets t ON t.event_ticket_id = od.event_ticket_id "
+            + "JOIN Orders o ON o.order_id = od.order_id "
+            + "WHERE t.event_id = e.event_id AND o.status = 'Paid') AS revenue "
             + "FROM Events e JOIN Categories c ON c.category_id = e.category_id "
             + "JOIN Venues v ON v.venue_id = e.venue_id ";
 
-    private static final String GET_EVENT_BY_ID_AND_ORGANIZER =
-            SELECT_EVENT_COLUMNS + "WHERE e.event_id = ? AND e.organizer_id = ?";
+    private static final String GET_EVENT_BY_ID_AND_ORGANIZER
+            = SELECT_EVENT_COLUMNS + "WHERE e.event_id = ? AND e.organizer_id = ?";
 
-    private static final String UPDATE_EVENT =
-            "UPDATE Events SET category_id = ?, venue_id = ?, event_name = ?, description = ?, "
+    private static final String UPDATE_EVENT
+            = "UPDATE Events SET category_id = ?, venue_id = ?, event_name = ?, description = ?, "
             + "start_time = ?, end_time = ?, status = ?, updated_at = GETDATE() "
             + "WHERE event_id = ? AND organizer_id = ?";
 
     // Phiên bản "loại trừ chính nó" của hai hàm kiểm tra trùng khi tạo
-    private static final String CHECK_DUPLICATE_EXCLUDING =
-            "SELECT 1 FROM Events WHERE organizer_id = ? AND LOWER(event_name) = LOWER(?) "
+    private static final String CHECK_DUPLICATE_EXCLUDING
+            = "SELECT 1 FROM Events WHERE organizer_id = ? AND LOWER(event_name) = LOWER(?) "
             + "AND start_time = ? AND event_id <> ?";
 
-    private static final String CHECK_VENUE_CONFLICT_EXCLUDING =
-            "SELECT 1 FROM Events WHERE venue_id = ? AND status NOT IN (?, ?) "
+    private static final String CHECK_VENUE_CONFLICT_EXCLUDING
+            = "SELECT 1 FROM Events WHERE venue_id = ? AND status NOT IN (?, ?) "
             + "AND start_time < ? AND end_time > ? AND event_id <> ?";
 
     // Sự kiện đã phát sinh dữ liệu bán hàng (đơn, vé, đánh giá) thì không được xóa
-    private static final String HAS_SALES_DATA =
-            "SELECT CASE WHEN EXISTS (SELECT 1 FROM Order_Details od JOIN Event_Tickets et "
+    private static final String HAS_SALES_DATA
+            = "SELECT CASE WHEN EXISTS (SELECT 1 FROM Order_Details od JOIN Event_Tickets et "
             + "ON et.event_ticket_id = od.event_ticket_id WHERE et.event_id = ?) "
             + "OR EXISTS (SELECT 1 FROM Order_Seats os JOIN Event_Seats es "
             + "ON es.event_seat_id = os.event_seat_id WHERE es.event_id = ?) "
@@ -169,10 +180,12 @@ public class EventDAO {
         "DELETE FROM Events WHERE event_id = ? AND organizer_id = ?" // câu cuối có thêm organizer_id
     };
 
-    /** Lấy sự kiện theo id nhưng chỉ khi thuộc về organizer (kiểm tra ownership). */
+    /**
+     * Lấy sự kiện theo id nhưng chỉ khi thuộc về organizer (kiểm tra
+     * ownership).
+     */
     public Event getEventByIdAndOrganizer(int eventId, int organizerId) {
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_EVENT_BY_ID_AND_ORGANIZER)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(GET_EVENT_BY_ID_AND_ORGANIZER)) {
             statement.setInt(1, eventId);
             statement.setInt(2, organizerId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -185,11 +198,13 @@ public class EventDAO {
     }
 
     /**
-     * Danh sách sự kiện của organizer, có tìm theo tên, lọc theo trạng thái, phân trang.
+     * Danh sách sự kiện của organizer, có tìm theo tên, lọc theo trạng thái,
+     * phân trang.
+     *
      * @param keyword null/rỗng = không lọc; @param status null/rỗng = tất cả
      */
     public List<Event> getEventsByOrganizer(int organizerId, String keyword, String status,
-                                            int page, int pageSize) {
+            int page, int pageSize) {
         List<Event> events = new ArrayList<>();
         List<Object> params = new ArrayList<>();
         String where = buildListFilter(organizerId, keyword, status, params);
@@ -198,8 +213,7 @@ public class EventDAO {
         params.add((page - 1) * pageSize);
         params.add(pageSize);
 
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -216,8 +230,7 @@ public class EventDAO {
         List<Object> params = new ArrayList<>();
         String where = buildListFilter(organizerId, keyword, status, params);
         String sql = "SELECT COUNT(*) FROM Events e " + where;
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt(1) : 0;
@@ -228,10 +241,12 @@ public class EventDAO {
         }
     }
 
-    /** Cập nhật thông tin sự kiện (ảnh được cập nhật riêng bằng updateEventImage). */
+    /**
+     * Cập nhật thông tin sự kiện (ảnh được cập nhật riêng bằng
+     * updateEventImage).
+     */
     public boolean updateEvent(Event event) {
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT)) {
             statement.setInt(1, event.getCategoryId());
             statement.setInt(2, event.getVenueId());
             statement.setString(3, event.getEventName());
@@ -248,10 +263,11 @@ public class EventDAO {
         }
     }
 
-    /** Trùng tên + giờ bắt đầu với sự kiện KHÁC của cùng organizer. */
+    /**
+     * Trùng tên + giờ bắt đầu với sự kiện KHÁC của cùng organizer.
+     */
     public boolean existsDuplicateEvent(int organizerId, String eventName, Timestamp startTime, int excludeEventId) {
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE_EXCLUDING)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE_EXCLUDING)) {
             statement.setInt(1, organizerId);
             statement.setString(2, eventName);
             statement.setTimestamp(3, startTime);
@@ -265,11 +281,12 @@ public class EventDAO {
         }
     }
 
-    /** Địa điểm đã có sự kiện KHÁC (chưa hủy/từ chối) trùng khoảng thời gian. */
+    /**
+     * Địa điểm đã có sự kiện KHÁC (chưa hủy/từ chối) trùng khoảng thời gian.
+     */
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
-                                       String cancelledStatus, String rejectedStatus, int excludeEventId) {
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
+            String cancelledStatus, String rejectedStatus, int excludeEventId) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
             statement.setInt(1, venueId);
             statement.setString(2, cancelledStatus);
             statement.setString(3, rejectedStatus);
@@ -285,10 +302,12 @@ public class EventDAO {
         }
     }
 
-    /** Sự kiện đã có đơn hàng / vé / đánh giá hay chưa. Lỗi DB được coi là "có" để tránh xóa nhầm. */
+    /**
+     * Sự kiện đã có đơn hàng / vé / đánh giá hay chưa. Lỗi DB được coi là "có"
+     * để tránh xóa nhầm.
+     */
     public boolean hasSalesData(int eventId) {
-        try (Connection connection = DBcontext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(HAS_SALES_DATA)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(HAS_SALES_DATA)) {
             for (int i = 1; i <= 4; i++) {
                 statement.setInt(i, eventId);
             }
@@ -302,11 +321,11 @@ public class EventDAO {
     }
 
     /**
-     * Xóa sự kiện cùng cấu hình đi kèm (nhân viên, loại vé, ghế) trong một transaction.
-     * Chỉ xóa khi sự kiện thuộc organizer.
+     * Xóa sự kiện cùng cấu hình đi kèm (nhân viên, loại vé, ghế) trong một
+     * transaction. Chỉ xóa khi sự kiện thuộc organizer.
      */
     public boolean deleteEvent(int eventId, int organizerId) {
-        try (Connection connection = DBcontext.getConnection()) {
+        try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 for (int i = 0; i < DELETE_EVENT_STATEMENTS.length; i++) {
@@ -336,6 +355,66 @@ public class EventDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Số sự kiện của organizer theo từng trạng thái (phục vụ thẻ thống kê trang
+     * danh sách).
+     */
+    public Map<String, Integer> countEventsByStatus(int organizerId) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        String sql = "SELECT status, COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY status";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, organizerId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    counts.put(resultSet.getString(1), resultSet.getInt(2));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return counts;
+    }
+
+    /**
+     * Tổng vé phát hành / đã bán / doanh thu (đơn Paid) của toàn bộ sự kiện
+     * thuộc organizer.
+     */
+    public Map<String, Number> getOrganizerSalesSummary(int organizerId) {
+        Map<String, Number> summary = new LinkedHashMap<>();
+        summary.put("ticketTotal", 0);
+        summary.put("ticketSold", 0);
+        summary.put("revenue", java.math.BigDecimal.ZERO);
+        String ticketSql = "SELECT ISNULL(SUM(t.quantity), 0), ISNULL(SUM(t.quantity - t.available_quantity), 0) "
+                + "FROM Event_Tickets t JOIN Events e ON e.event_id = t.event_id WHERE e.organizer_id = ?";
+        String revenueSql = "SELECT ISNULL(SUM(od.subtotal), 0) FROM Order_Details od "
+                + "JOIN Event_Tickets t ON t.event_ticket_id = od.event_ticket_id "
+                + "JOIN Events e ON e.event_id = t.event_id "
+                + "JOIN Orders o ON o.order_id = od.order_id "
+                + "WHERE e.organizer_id = ? AND o.status = 'Paid'";
+        try (Connection connection = DBContext.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(ticketSql)) {
+                statement.setInt(1, organizerId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        summary.put("ticketTotal", resultSet.getInt(1));
+                        summary.put("ticketSold", resultSet.getInt(2));
+                    }
+                }
+            }
+            try (PreparedStatement statement = connection.prepareStatement(revenueSql)) {
+                statement.setInt(1, organizerId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        summary.put("revenue", resultSet.getBigDecimal(1));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return summary;
     }
 
     private String buildListFilter(int organizerId, String keyword, String status, List<Object> params) {
@@ -384,11 +463,13 @@ public class EventDAO {
         event.setUpdatedAt(updated == null ? null : updated.toLocalDateTime());
         event.setCategoryName(rs.getString("category_name"));
         event.setVenueName(rs.getString("venue_name"));
+        event.setTicketTotal(rs.getInt("ticket_total"));
+        event.setTicketSold(rs.getInt("ticket_sold"));
+        event.setRevenue(rs.getBigDecimal("revenue"));
         return event;
     }
 
     // Các hàm dưới đây nên chuyển sang CategoryDAO / VenueDAO khi hai module đó hoàn thành.
-
     public boolean existsActiveCategory(int categoryId) {
         return existsById(CHECK_CATEGORY, categoryId);
     }
@@ -406,8 +487,7 @@ public class EventDAO {
     }
 
     private boolean existsById(String sql, int id) {
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next();
@@ -420,9 +500,7 @@ public class EventDAO {
 
     private Map<Integer, String> getIdNameMap(String sql) {
         Map<Integer, String> items = new LinkedHashMap<>();
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql); ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 items.put(resultSet.getInt(1), resultSet.getString(2));
             }
