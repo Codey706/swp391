@@ -66,6 +66,14 @@ public class EventController extends HttpServlet {
             return;
         }
 
+//        Auth organizer = getAuthenticatedOrganizer(request, response);
+//        if (organizer == null) {
+//            return;
+//        }
+        Auth organizer = new Auth();
+        organizer.setUserId(1);
+        organizer.setRole("Organizer");
+
         User organizer = getAuthenticatedOrganizer(request, response);
         if (organizer == null) {
             return;
@@ -484,6 +492,20 @@ public class EventController extends HttpServlet {
         }
         return user;
 
+        Auth user = new Auth();
+
+        // Temporary test user
+        user.setUserId(1);
+        user.setRole("Organizer");
+
+
+    private User getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+        User user = session == null ? null : (User) session.getAttribute(Constants.SESSION_USER);
+
+        return user;
+      
 //    private Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
 //            throws IOException {
 //        HttpSession session = request.getSession(false);

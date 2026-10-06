@@ -221,6 +221,7 @@ public class EventDAO {
 
         try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
+
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -392,7 +393,11 @@ public class EventDAO {
      */
     public Map<String, Integer> countEventsByStatus(int organizerId) {
         Map<String, Integer> counts = new LinkedHashMap<>();
+
+        String sql = "SELECT status, COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY status";
+
         String sql = "SELECT UPPER(status), COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY UPPER(status)";
+
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, organizerId);
             try (ResultSet resultSet = statement.executeQuery()) {
