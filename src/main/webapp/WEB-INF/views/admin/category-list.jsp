@@ -47,7 +47,9 @@
 
                 <nav class="menu">
 
-                    <a href="#">⌂ &nbsp; Dashboard</a>
+                    <a href="<%= request.getContextPath()%>/admin">
+                        📊 Dashboard
+                    </a>
 
                     <!-- Users Menu -->
                     <div class="menu-group">
