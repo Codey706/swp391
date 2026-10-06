@@ -89,7 +89,7 @@
                 <!-- Vé của tôi -->
                 <li>
                     <a class="dropdown-item d-flex align-items-center gap-2 py-2"
-                       href="${pageContext.request.contextPath}/my-tickets">
+                       href="${pageContext.request.contextPath}/customer/booking-history">
                         <span class="material-symbols-outlined">
                             confirmation_number
                         </span>

@@ -13,6 +13,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class EventDAO {
@@ -186,6 +187,9 @@ public class EventDAO {
      */
     public Event getEventByIdAndOrganizer(int eventId, int organizerId) {
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(GET_EVENT_BY_ID_AND_ORGANIZER)) {
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(GET_EVENT_BY_ID_AND_ORGANIZER)) {
             statement.setInt(1, eventId);
             statement.setInt(2, organizerId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -214,6 +218,10 @@ public class EventDAO {
         params.add(pageSize);
 
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -230,7 +238,12 @@ public class EventDAO {
         List<Object> params = new ArrayList<>();
         String where = buildListFilter(organizerId, keyword, status, params);
         String sql = "SELECT COUNT(*) FROM Events e " + where;
+
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
             bindParams(statement, params);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() ? resultSet.getInt(1) : 0;
@@ -247,6 +260,10 @@ public class EventDAO {
      */
     public boolean updateEvent(Event event) {
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT)) {
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(UPDATE_EVENT)) {
+
             statement.setInt(1, event.getCategoryId());
             statement.setInt(2, event.getVenueId());
             statement.setString(3, event.getEventName());
@@ -267,7 +284,12 @@ public class EventDAO {
      * Trùng tên + giờ bắt đầu với sự kiện KHÁC của cùng organizer.
      */
     public boolean existsDuplicateEvent(int organizerId, String eventName, Timestamp startTime, int excludeEventId) {
+
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE_EXCLUDING)) {
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(CHECK_DUPLICATE_EXCLUDING)) {
+
             statement.setInt(1, organizerId);
             statement.setString(2, eventName);
             statement.setTimestamp(3, startTime);
@@ -287,6 +309,11 @@ public class EventDAO {
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
             String cancelledStatus, String rejectedStatus, int excludeEventId) {
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
+
+                                       String cancelledStatus, String rejectedStatus, int excludeEventId) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
+
             statement.setInt(1, venueId);
             statement.setString(2, cancelledStatus);
             statement.setString(3, rejectedStatus);
@@ -308,6 +335,9 @@ public class EventDAO {
      */
     public boolean hasSalesData(int eventId) {
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(HAS_SALES_DATA)) {
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(HAS_SALES_DATA)) {
             for (int i = 1; i <= 4; i++) {
                 statement.setInt(i, eventId);
             }
@@ -363,7 +393,11 @@ public class EventDAO {
      */
     public Map<String, Integer> countEventsByStatus(int organizerId) {
         Map<String, Integer> counts = new LinkedHashMap<>();
+
         String sql = "SELECT status, COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY status";
+
+        String sql = "SELECT UPPER(status), COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY UPPER(status)";
+
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, organizerId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -457,7 +491,9 @@ public class EventDAO {
         Timestamp updated = rs.getTimestamp("updated_at");
         event.setStartTime(start == null ? null : start.toLocalDateTime());
         event.setEndTime(end == null ? null : end.toLocalDateTime());
-        event.setStatus(rs.getString("status"));
+        String status = rs.getString("status");
+        // JSP so sánh phân biệt hoa/thường nên luôn chuẩn hóa về chữ HOA (DB mẫu cũ có 'Active')
+        event.setStatus(status == null ? null : status.trim().toUpperCase(Locale.ROOT));
         event.setCancellationReason(rs.getString("cancellation_reason"));
         event.setCreatedAt(created == null ? null : created.toLocalDateTime());
         event.setUpdatedAt(updated == null ? null : updated.toLocalDateTime());
