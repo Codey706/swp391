@@ -3,9 +3,22 @@
 -- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES)
 -- =========================================================
 
+USE master;
+GO
+
+-- Xóa database cũ nếu đã tồn tại
+IF DB_ID('LightTicketDB') IS NOT NULL
+BEGIN
+    ALTER DATABASE LightTicketDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE LightTicketDB;
+END
+GO
+
+-- Tạo database mới
 CREATE DATABASE LightTicketDB;
 GO
 
+-- Sử dụng database mới
 USE LightTicketDB;
 GO
 
@@ -232,26 +245,28 @@ GO
 -- 1. Users
 INSERT INTO Users (username, email, password, full_name, phone, address, role, status)
 VALUES 
-('organizer01', 'organizer1@ltm.vn', 'Pass@1234', N'M�y Lang Thang Production', '0901234567', N'?� L?t, L�m ??ng', 'Organizer', 'ACTIVE'),
-('customer01', 'customer1@gmail.com', 'Pass@1234', N'Nguy?n V?n A', '0912345678', N'C?n Th?', 'Customer', 'ACTIVE');
+('organizer01', 'organizer1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Mây Lang Thang Production', '0901234567', N'Đà Lạt, Lâm Đồng', 'Organizer', 'ACTIVE'),
+('admin01', 'admin1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn C', '0903434567', N'Cần Thơ', 'Admin', 'ACTIVE'),
+('staff01', 'staff1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn B', '0561434567', N'Cần Thơ', 'Staff', 'ACTIVE'),
+('customer01', 'customer1@gmail.com', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn A', '0912345678', N'Cần Thơ', 'Customer', 'ACTIVE');
 
 -- 2. Categories
 INSERT INTO Categories (category_name, description, status)
 VALUES 
-(N'Concert �m Nh?c', N'S? ki?n bi?u di?n �m nh?c, liveshow', 'ACTIVE'),
-(N'S�n Kh?u & K?ch', N'V? k?ch, bi?u di?n ngh? thu?t s�n kh?u', 'ACTIVE');
+(N'Concert Âm Nhạc', N'Sự kiện biểu diễn âm nhạc, liveshow', 'ACTIVE'),
+(N'Sân Khấu & Kịch', N'Vở kịch, biểu diễn nghệ thuật sân khấu', 'ACTIVE');
 
 -- 3. Venues
 INSERT INTO Venues (venue_name, address, description, capacity, status)
 VALUES 
-(N'S�n v?n ??ng M? ?�nh', N'???ng L� ??c Th?, Nam T? Li�m, H� N?i', N'S�n v?n ??ng qu?c gia', 40000, 'ACTIVE'),
-(N'Nh� H�t L?n H� N?i', N'S? 1 Tr�ng Ti?n, Ho�n Ki?m, H� N?i', N'Nh� h�t c? ?i?n', 600, 'ACTIVE');
+(N'Sân vận động Mỹ Đình', N'Đường Lê Đức Thọ, Nam Từ Liêm, Hà Nội', N'Sân vận động quốc gia', 40000, 'ACTIVE'),
+(N'Nhà Hát Lớn Hà Nội', N'Số 1 Tràng Tiền, Hoàn Kiếm, Hà Nội', N'Nhà hát cổ điển', 600, 'ACTIVE');
 
 -- 4. Seat_Maps
 INSERT INTO Seat_Maps (venue_id, map_name, description, status)
 VALUES 
-(1, N'S? ?? Concert 2026 M? ?�nh', N'S? ?? cho s? ki?n l?n', 'ACTIVE'),
-(2, N'S? ?? Kh�n ph�ng Nh� H�t L?n', N'S? ?? ti�u chu?n nh� h�t', 'ACTIVE');
+(1, N'Sơ đồ Concert 2026 Mỹ Đình', N'Sơ đồ cho sự kiện lớn', 'ACTIVE'),
+(2, N'Sơ đồ Khán phòng Nhà Hát Lớn', N'Sơ đồ tiêu chuẩn nhà hát', 'ACTIVE');
 
 -- 5. Seats
 INSERT INTO Seats (seat_map_id, row_label, seat_number, seat_label, seat_type, status)
@@ -262,8 +277,8 @@ VALUES
 -- 6. Events
 INSERT INTO Events (organizer_id, category_id, venue_id, event_name, description, event_image, start_time, end_time, status)
 VALUES 
-(1, 1, 1, N'Chuy?n Bay Ho�ng H�n: Live Concert 2026', N'Concert �m nh?c ??nh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'Active'),
-(1, 2, 2, N'V? K?ch Kinh ?i?n: Ng??i T�nh M�a Thu', N'V? k?ch s�n kh?u t�m l�', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'Active');
+(1, 1, 1, N'Chuyến Bay Hoàng Hôn: Live Concert 2026', N'Concert âm nhạc đỉnh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'ACTIVE'),
+(1, 2, 2, N'Vở Kịch Kinh Điển: Người Tình Mùa Thu', N'Vở kịch sân khấu tâm lý', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'ACTIVE');
 
 -- 7. Event_Seats
 INSERT INTO Event_Seats (event_id, source_seat_id, row_label, seat_number, seat_label, seat_type, status)
@@ -274,8 +289,8 @@ VALUES
 -- 8. Event_Tickets
 INSERT INTO Event_Tickets (event_id, ticket_name, description, price, quantity, available_quantity, status)
 VALUES 
-(1, N'V� VIP Zone A', N'Bao g?m qu� t?ng & l?i ?i ri�ng', 2800000.00, 100, 99, 'ACTIVE'),
-(1, N'V� GA Ph? Th�ng', N'Khu ??ng t? do', 650000.00, 500, 500, 'ACTIVE');
+(1, N'Vé VIP Zone A', N'Bao gồm quà tặng & lối đi riêng', 2800000.00, 100, 99, 'ACTIVE'),
+(1, N'Vé GA Phổ Thông', N'Khu đứng tự do', 650000.00, 500, 500, 'ACTIVE');
 
 -- 9. Event_Staff
 INSERT INTO Event_Staff (event_id, staff_id, status)
@@ -286,8 +301,8 @@ VALUES
 -- 10. Vouchers
 INSERT INTO Vouchers (voucher_code, voucher_name, discount_type, discount_value, min_order_amount, max_discount_amount, start_time, end_time, usage_limit, used_count, status)
 VALUES 
-('EARLYBIRD10', N'Gi?m 10% v� s?m', 'Percentage', 10.00, 500000.00, 200000.00, '2026-10-01 00:00:00', '2026-10-31 23:59:59', 100, 1, 'ACTIVE'),
-('LTMVIP50K', N'Gi?m tr?c ti?p 50k', 'Fixed', 50000.00, 300000.00, 50000.00, '2026-10-01 00:00:00', '2026-12-31 23:59:59', 200, 0, 'ACTIVE');
+('EARLYBIRD10', N'Giảm 10% vé sớm', 'Percentage', 10.00, 500000.00, 200000.00, '2026-10-01 00:00:00', '2026-10-31 23:59:59', 100, 1, 'ACTIVE'),
+('LTMVIP50K', N'Giảm trực tiếp 50k', 'Fixed', 50000.00, 300000.00, 50000.00, '2026-10-01 00:00:00', '2026-12-31 23:59:59', 200, 0, 'ACTIVE');
 
 -- 11. Orders
 INSERT INTO Orders (customer_id, voucher_id, order_code, total_amount, discount_amount, final_amount, status, hold_started_at, hold_expired_at)
@@ -322,6 +337,6 @@ VALUES
 -- 16. Reviews
 INSERT INTO Reviews (customer_id, event_id, ticket_id, rating, comment, status)
 VALUES 
-(2, 1, 2, 5, N'S? ki?n r?t tuy?t v?i, �m thanh ??nh cao!', 'Active'),
-(2, 2, 1, 4, N'S�n kh?u ??p nh?ng gh? ng?i h?i ch?t.', 'Active');
+(2, 1, 2, 5, N'Sự kiện rất tuyệt vời, âm thanh đỉnh cao!', 'ACTIVE'),
+(2, 2, 1, 4, N'Sân khấu đẹp nhưng ghế ngồi hơi chật.', 'ACTIVE');
 GO

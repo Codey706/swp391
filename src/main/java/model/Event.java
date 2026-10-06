@@ -2,7 +2,9 @@ package model;
 
 import java.time.LocalDateTime;
 
-/** Khớp bảng Events. */
+/**
+ * Khớp bảng Events.
+ */
 public class Event {
 
     private int eventId;
@@ -23,51 +25,162 @@ public class Event {
     private String categoryName;
     private String venueName;
 
+    // Số liệu bán vé (tính từ Event_Tickets / Order_Details), chỉ dùng để hiển thị
+    private int ticketTotal;
+    private int ticketSold;
+    private java.math.BigDecimal revenue = java.math.BigDecimal.ZERO;
+
     public Event() {
     }
 
-    public int getEventId() { return eventId; }
-    public void setEventId(int eventId) { this.eventId = eventId; }
+    public int getEventId() {
+        return eventId;
+    }
 
-    public int getOrganizerId() { return organizerId; }
-    public void setOrganizerId(int organizerId) { this.organizerId = organizerId; }
+    public void setEventId(int eventId) {
+        this.eventId = eventId;
+    }
 
-    public int getCategoryId() { return categoryId; }
-    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
+    public int getOrganizerId() {
+        return organizerId;
+    }
 
-    public int getVenueId() { return venueId; }
-    public void setVenueId(int venueId) { this.venueId = venueId; }
+    public void setOrganizerId(int organizerId) {
+        this.organizerId = organizerId;
+    }
 
-    public String getEventName() { return eventName; }
-    public void setEventName(String eventName) { this.eventName = eventName; }
+    public int getCategoryId() {
+        return categoryId;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
 
-    public String getEventImage() { return eventImage; }
-    public void setEventImage(String eventImage) { this.eventImage = eventImage; }
+    public int getVenueId() {
+        return venueId;
+    }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    public void setVenueId(int venueId) {
+        this.venueId = venueId;
+    }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public String getEventName() {
+        return eventName;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
 
-    public String getCancellationReason() { return cancellationReason; }
-    public void setCancellationReason(String cancellationReason) { this.cancellationReason = cancellationReason; }
+    public String getDescription() {
+        return description;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public String getEventImage() {
+        return eventImage;
+    }
 
-    public String getCategoryName() { return categoryName; }
-    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    public void setEventImage(String eventImage) {
+        this.eventImage = eventImage;
+    }
 
-    public String getVenueName() { return venueName; }
-    public void setVenueName(String venueName) { this.venueName = venueName; }
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getVenueName() {
+        return venueName;
+    }
+
+    public void setVenueName(String venueName) {
+        this.venueName = venueName;
+    }
+
+    public int getTicketTotal() {
+        return ticketTotal;
+    }
+
+    public void setTicketTotal(int ticketTotal) {
+        this.ticketTotal = ticketTotal;
+    }
+
+    public int getTicketSold() {
+        return ticketSold;
+    }
+
+    public void setTicketSold(int ticketSold) {
+        this.ticketSold = ticketSold;
+    }
+
+    public java.math.BigDecimal getRevenue() {
+        return revenue;
+    }
+
+    public void setRevenue(java.math.BigDecimal revenue) {
+        this.revenue = revenue == null ? java.math.BigDecimal.ZERO : revenue;
+    }
+
+    /**
+     * Tỷ lệ vé đã bán (0-100).
+     */
+    public int getSoldPercent() {
+        return ticketTotal <= 0 ? 0 : (int) Math.round(ticketSold * 100.0 / ticketTotal);
+    }
 }

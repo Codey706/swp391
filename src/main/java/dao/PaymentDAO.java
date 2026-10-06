@@ -4,18 +4,19 @@
  */
 package dao;
 
+/**
+ *
+ * @author BT
+ */
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.Payment;
+import model.PaymentResponse;
 import utils.DBContext;
 
-/**
- *
- * @author BT
- */
 public class PaymentDAO {
 
     public boolean createPayment(Payment payment) {
@@ -43,46 +44,167 @@ public class PaymentDAO {
             return false;
         }
     }
+
     public boolean validatePaymentRequest(int orderId, BigDecimal amount) {
 
-    String sql = """
-        SELECT final_amount, status
-        FROM Orders
-        WHERE order_id = ?
-        """;
+        String sql = """
+            SELECT final_amount, status
+            FROM Orders
+            WHERE order_id = ?
+            """;
 
-    try (Connection conn = DBContext.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, orderId);
+            ps.setInt(1, orderId);
 
-        try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
 
-            //Order does not exist
-            if (!rs.next()) {
-                return false;
+                if (!rs.next()) {
+                    return false;
+                }
+
+                BigDecimal finalAmount = rs.getBigDecimal("final_amount");
+                String status = rs.getString("status");
+
+                if (!"Pending".equalsIgnoreCase(status)) {
+                    return false;
+                }
+
+                if (amount == null
+                        || amount.compareTo(BigDecimal.ZERO) <= 0) {
+                    return false;
+                }
+
+                return amount.compareTo(finalAmount) == 0;
             }
 
-            BigDecimal finalAmount = rs.getBigDecimal("final_amount");
-            String status = rs.getString("status");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-            // Order must be Pending
-            if (!"Pending".equalsIgnoreCase(status)) {
-                return false;
-            }
+    public boolean verifyPaymentResult(PaymentResponse response) {
 
-            // Amount must be valid
-            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-                return false;
-            }
+        if (response == null
+                || response.getOrderId() <= 0
+                || response.getAmount() == null
+                || response.getAmount().compareTo(BigDecimal.ZERO) <= 0
+                || response.getTransactionCode() == null
+                || response.getTransactionCode().isBlank()
+                || response.getResponseCode() == null) {
 
-            // Amount must match the Order amount
-            return amount.compareTo(finalAmount) == 0;
+            return false;
         }
 
-    } catch (SQLException e) {
-        e.printStackTrace();
-        return false;
+        String sql = """
+            SELECT p.transaction_code,
+                   p.amount,
+                   p.payment_status,
+                   o.final_amount,
+                   o.status
+            FROM Payments p
+            INNER JOIN Orders o
+                ON p.order_id = o.order_id
+            WHERE p.order_id = ?
+            """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, response.getOrderId());
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (!rs.next()) {
+                    return false;
+                }
+
+                String transactionCode
+                        = rs.getString("transaction_code");
+
+                BigDecimal paymentAmount
+                        = rs.getBigDecimal("amount");
+
+                BigDecimal orderAmount
+                        = rs.getBigDecimal("final_amount");
+
+                String paymentStatus
+                        = rs.getString("payment_status");
+
+                String orderStatus
+                        = rs.getString("status");
+
+                if (!"Pending".equalsIgnoreCase(paymentStatus)) {
+                    return false;
+                }
+
+                if (!"Pending".equalsIgnoreCase(orderStatus)) {
+                    return false;
+                }
+
+                if (paymentAmount == null || orderAmount == null) {
+                    return false;
+                }
+
+                if (response.getAmount()
+                        .compareTo(paymentAmount) != 0) {
+                    return false;
+                }
+
+                if (response.getAmount()
+                        .compareTo(orderAmount) != 0) {
+                    return false;
+                }
+
+                if (transactionCode == null
+                        || !response.getTransactionCode()
+                                .equals(transactionCode)) {
+                    return false;
+                }
+
+                if (!"00".equals(response.getResponseCode())) {
+                    return false;
+                }
+
+                return true;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-}
+
+    public boolean processPaymentResponse(PaymentResponse response) {
+
+        if (response == null
+                || response.getOrderId() <= 0
+                || response.getTransactionCode() == null
+                || response.getTransactionCode().isBlank()) {
+
+            return false;
+        }
+
+        String sql = """
+            UPDATE Payments
+            SET transaction_code = ?,
+                payment_status = ?,
+                paid_at = GETDATE()
+            WHERE order_id = ?
+              AND payment_status = 'Pending'
+            """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, response.getTransactionCode());
+            ps.setString(2, "Success");
+            ps.setInt(3, response.getOrderId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

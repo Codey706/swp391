@@ -32,4 +32,16 @@ public final class Constants {
 
     // View Event List
     public static final int EVENT_PAGE_SIZE = 10;
+
+    // Role Customer (khớp Users.role)
+    public static final String ROLE_CUSTOMER = "Customer";
+
+    // Orders.status
+    public static final String ORDER_PENDING = "Pending";
+    public static final String ORDER_PAID = "Paid";
+    public static final String ORDER_CANCELLED = "Cancelled";
+
+    // View Booking History
+    public static final int BOOKING_PAGE_SIZE = 10;
+    public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
 }
