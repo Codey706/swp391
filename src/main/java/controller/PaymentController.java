@@ -7,6 +7,7 @@ package controller;
 import dao.PaymentDAO;
 import java.math.BigDecimal;
 import model.Payment;
+import model.PaymentResponse;
 
 /**
  *
@@ -40,5 +41,18 @@ public class PaymentController {
         payment.setPaidAt(null);
 
         return paymentDAO.createPayment(payment);
+    }
+
+    public boolean processPaymentResponse(PaymentResponse response) {
+
+        // 1. Verify payment result
+        boolean valid = paymentDAO.verifyPaymentResult(response);
+
+        if (!valid) {
+            return false;
+        }
+
+        // 2. Process valid payment response
+        return paymentDAO.processPaymentResponse(response);
     }
 }
