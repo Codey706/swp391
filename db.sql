@@ -3,9 +3,22 @@
 -- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES)
 -- =========================================================
 
+USE master;
+GO
+
+-- Xóa database cũ nếu đã tồn tại
+IF DB_ID('LightTicketDB') IS NOT NULL
+BEGIN
+    ALTER DATABASE LightTicketDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE LightTicketDB;
+END
+GO
+
+-- Tạo database mới
 CREATE DATABASE LightTicketDB;
 GO
 
+-- Sử dụng database mới
 USE LightTicketDB;
 GO
 
