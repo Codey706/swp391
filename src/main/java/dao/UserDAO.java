@@ -106,9 +106,7 @@ public class UserDAO {
         String sql = "UPDATE Users "
                 + "SET full_name = ?, "
                 + "phone = ?, "
-                + "address = ?, "
-                + "role = ?, "
-                + "status = ?, "
+                + "address = ?, "                
                 + "updated_at = GETDATE() "
                 + "WHERE user_id = ?";
 
@@ -116,10 +114,8 @@ public class UserDAO {
 
             statement.setString(1, user.getFullName());
             statement.setString(2, user.getPhone());
-            statement.setString(3, user.getAddress());
-            statement.setString(4, user.getRole());
-            statement.setString(5, user.getStatus());
-            statement.setInt(6, user.getUserId());
+            statement.setString(3, user.getAddress());          
+            statement.setInt(4, user.getUserId());
 
             return statement.executeUpdate() > 0;
         }

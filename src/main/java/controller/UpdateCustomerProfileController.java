@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Auth;
 import model.User;
 
 @WebServlet(
@@ -27,14 +28,12 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId =
-                (Integer) session.getAttribute("userId");
+        Auth sessionUser = (Auth) session.getAttribute("user");
+        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
 
-        // Chưa đăng nhập
+        //Chưa đăng nhập
         if (userId == null) {
-            response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login"
-);
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
 
@@ -78,37 +77,33 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId =
-                (Integer) session.getAttribute("userId");
+        Auth sessionUser = (Auth) session.getAttribute("user");
+        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
 
         // Chưa đăng nhập
         if (userId == null) {
-           response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login"
-);
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
 
         // ==============================
         // Lấy dữ liệu từ form
         // ==============================
+        String fullName
+                = request.getParameter("fullName");
 
-        String fullName =
-                request.getParameter("fullName");
+        String email
+                = request.getParameter("email");
 
-        String email =
-                request.getParameter("email");
+        String phone
+                = request.getParameter("phone");
 
-        String phone =
-                request.getParameter("phone");
-
-        String address =
-                request.getParameter("address");
+        String address
+                = request.getParameter("address");
 
         // ==============================
         // Validation
         // ==============================
-
         if (fullName == null
                 || fullName.trim().isEmpty()) {
 
@@ -132,7 +127,6 @@ public class UpdateCustomerProfileController extends HttpServlet {
         // ==============================
         // Tạo User object
         // ==============================
-
         User user = new User();
 
         user.setUserId(userId);
@@ -147,24 +141,23 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         user.setPhone(
                 phone == null
-                ? ""
-                : phone.trim()
+                        ? ""
+                        : phone.trim()
         );
 
         user.setAddress(
                 address == null
-                ? ""
-                : address.trim()
+                        ? ""
+                        : address.trim()
         );
 
         // ==============================
         // Update Database
         // ==============================
-
         try {
 
-            boolean updated =
-                    userDao.updateUser(user);
+            boolean updated
+                    = userDao.updateUser(user);
 
             if (updated) {
 

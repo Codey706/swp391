@@ -9,12 +9,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Auth;
 import model.User;
 
 @WebServlet(name = "CustomerProfileController", urlPatterns = {"/CustomerProfileController"})
 public class CustomerProfileController extends HttpServlet {
 
     private UserDAO userDao = new UserDAO();
+
 
     @Override
     protected void doGet(
@@ -24,14 +26,15 @@ public class CustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId = (Integer) session.getAttribute("userId");
+        Auth sessionUser = (Auth) session.getAttribute("user");
+        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
 
-        // Chưa đăng nhập
+        //Chưa đăng nhập
         if (userId == null) {
-            response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login");
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
+       
 
         try {
 

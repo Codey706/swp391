@@ -43,6 +43,9 @@
                         <span class="material-symbols-outlined position-absolute ms-3 text-secondary" style="font-size: 20px; pointer-events: none;">search</span>
                         <input class="form-control nav-search-input w-100" placeholder="Tìm kiếm buổi hòa nhạc, lễ hội, rạp hát..." type="text"/>
                     </div>
+
+                </div>
+                <div class="d-flex align-items-center ms-auto">
                <c:choose>
 
     <c:when test="${empty sessionScope.user}">
