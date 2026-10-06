@@ -245,8 +245,10 @@ GO
 -- 1. Users
 INSERT INTO Users (username, email, password, full_name, phone, address, role, status)
 VALUES 
-('organizer01', 'organizer1@ltm.vn', 'Pass@1234', N'Mây Lang Thang Production', '0901234567', N'Đà Lạt, Lâm Đồng', 'Organizer', 'ACTIVE'),
-('customer01', 'customer1@gmail.com', 'Pass@1234', N'Nguyễn Văn A', '0912345678', N'Cần Thơ', 'Customer', 'ACTIVE');
+('organizer01', 'organizer1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Mây Lang Thang Production', '0901234567', N'Đà Lạt, Lâm Đồng', 'Organizer', 'ACTIVE'),
+('admin01', 'admin1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn C', '0903434567', N'Cần Thơ', 'Admin', 'ACTIVE'),
+('staff01', 'staff1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn B', '0561434567', N'Cần Thơ', 'Staff', 'ACTIVE'),
+('customer01', 'customer1@gmail.com', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn A', '0912345678', N'Cần Thơ', 'Customer', 'ACTIVE');
 
 -- 2. Categories
 INSERT INTO Categories (category_name, description, status)
