@@ -13,6 +13,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class EventDAO {
@@ -338,6 +339,69 @@ public class EventDAO {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * Số sự kiện của organizer theo từng trạng thái (phục vụ thẻ thống kê trang
+     * danh sách).
+     */
+    public Map<String, Integer> countEventsByStatus(int organizerId) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        String sql = "SELECT UPPER(status), COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY UPPER(status)";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, organizerId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    counts.put(resultSet.getString(1), resultSet.getInt(2));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return counts;
+    }
+
+    /**
+     * Tổng vé phát hành / đã bán / doanh thu (đơn Paid) của toàn bộ sự kiện
+     * thuộc organizer.
+     */
+    public Map<String, Number> getOrganizerSalesSummary(int organizerId) {
+        Map<String, Number> summary = new LinkedHashMap<>();
+        summary.put("ticketTotal", 0);
+        summary.put("ticketSold", 0);
+        summary.put("revenue", java.math.BigDecimal.ZERO);
+        String ticketSql = "SELECT ISNULL(SUM(t.quantity), 0), ISNULL(SUM(t.quantity - t.available_quantity), 0) "
+                + "FROM Event_Tickets t JOIN Events e ON e.event_id = t.event_id WHERE e.organizer_id = ?";
+        String revenueSql = "SELECT ISNULL(SUM(od.subtotal), 0) FROM Order_Details od "
+                + "JOIN Event_Tickets t ON t.event_ticket_id = od.event_ticket_id "
+                + "JOIN Events e ON e.event_id = t.event_id "
+                + "JOIN Orders o ON o.order_id = od.order_id "
+                + "WHERE e.organizer_id = ? AND o.status = 'Paid'";
+        try (Connection connection = DBContext.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(ticketSql)) {
+                statement.setInt(1, organizerId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        summary.put("ticketTotal", resultSet.getInt(1));
+                        summary.put("ticketSold", resultSet.getInt(2));
+                    }
+                }
+            }
+            try (PreparedStatement statement = connection.prepareStatement(revenueSql)) {
+                statement.setInt(1, organizerId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        summary.put("revenue", resultSet.getBigDecimal(1));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return summary;
+    }
+
+>>>>>>> Stashed changes
     private String buildListFilter(int organizerId, String keyword, String status, List<Object> params) {
         StringBuilder where = new StringBuilder("WHERE e.organizer_id = ?");
         params.add(organizerId);
@@ -378,7 +442,9 @@ public class EventDAO {
         Timestamp updated = rs.getTimestamp("updated_at");
         event.setStartTime(start == null ? null : start.toLocalDateTime());
         event.setEndTime(end == null ? null : end.toLocalDateTime());
-        event.setStatus(rs.getString("status"));
+        String status = rs.getString("status");
+        // JSP so sánh phân biệt hoa/thường nên luôn chuẩn hóa về chữ HOA (DB mẫu cũ có 'Active')
+        event.setStatus(status == null ? null : status.trim().toUpperCase(Locale.ROOT));
         event.setCancellationReason(rs.getString("cancellation_reason"));
         event.setCreatedAt(created == null ? null : created.toLocalDateTime());
         event.setUpdatedAt(updated == null ? null : updated.toLocalDateTime());
