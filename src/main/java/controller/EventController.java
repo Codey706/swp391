@@ -59,13 +59,11 @@ public class EventController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        Auth organizer = getAuthenticatedOrganizer(request, response);
-//        if (organizer == null) {
-//            return;
-//        }
-        Auth organizer = new Auth();
-        organizer.setUserId(1);
-        organizer.setRole("Organizer");
+        request.setCharacterEncoding("UTF-8");
+        Auth organizer = getAuthenticatedOrganizer(request, response);
+        if (organizer == null) {
+            return;
+        }
 
         switch (request.getServletPath()) {
             case PATH_LIST:
@@ -138,8 +136,7 @@ public class EventController extends HttpServlet {
             saveEventImage(imagePart, event.getEventId());
         }
 
-        request.getSession().setAttribute("successMessage", "Tạo sự kiện thành công (trạng thái: nháp).");
-        response.sendRedirect(request.getContextPath() + "/organizer/event/create");
+        redirectToList(request, response, "successMessage", "Tạo sự kiện thành công (trạng thái: nháp).");
     }
 
     // ---------------------------------------------------------------- View Event List
@@ -232,6 +229,14 @@ public class EventController extends HttpServlet {
         }
 
         if (!errors.isEmpty()) {
+            // Dựng lại các trường chỉ để hiển thị (mã sự kiện, ngày tạo, số liệu vé, trạng thái hiện tại)
+            event.setStatus(existing.getStatus());
+            event.setCancellationReason(existing.getCancellationReason());
+            event.setCreatedAt(existing.getCreatedAt());
+            event.setUpdatedAt(existing.getUpdatedAt());
+            event.setTicketTotal(existing.getTicketTotal());
+            event.setTicketSold(existing.getTicketSold());
+            event.setRevenue(existing.getRevenue());
             request.setAttribute("errors", errors);
             request.setAttribute("event", event);
             loadFormOptions(request);
@@ -453,13 +458,21 @@ public class EventController extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        Auth user = new Auth();
+        // Đã đăng nhập bằng tài khoản Organizer thì dùng đúng tài khoản đó
+        HttpSession session = request.getSession(false);
+        Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
+        if (sessionUser instanceof Auth) {
+            Auth loggedIn = (Auth) sessionUser;
+            if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(loggedIn.getRole())) {
+                return loggedIn;
+            }
+        }
 
-        // Temporary test user
-        user.setUserId(1);
-        user.setRole("Organizer");
-
-        return user;
+        // TODO: bỏ nhánh test này khi tích hợp xong đăng nhập (chuyển sang redirect /Auth?action=login)
+        Auth testUser = new Auth();
+        testUser.setUserId(1); // organizer01 trong db.sql
+        testUser.setRole(Constants.ROLE_ORGANIZER);
+        return testUser;
     }
 
     /**

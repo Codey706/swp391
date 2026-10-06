@@ -13,6 +13,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class EventDAO {
@@ -363,7 +364,7 @@ public class EventDAO {
      */
     public Map<String, Integer> countEventsByStatus(int organizerId) {
         Map<String, Integer> counts = new LinkedHashMap<>();
-        String sql = "SELECT status, COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY status";
+        String sql = "SELECT UPPER(status), COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY UPPER(status)";
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, organizerId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -457,7 +458,9 @@ public class EventDAO {
         Timestamp updated = rs.getTimestamp("updated_at");
         event.setStartTime(start == null ? null : start.toLocalDateTime());
         event.setEndTime(end == null ? null : end.toLocalDateTime());
-        event.setStatus(rs.getString("status"));
+        String status = rs.getString("status");
+        // JSP so sánh phân biệt hoa/thường nên luôn chuẩn hóa về chữ HOA (DB mẫu cũ có 'Active')
+        event.setStatus(status == null ? null : status.trim().toUpperCase(Locale.ROOT));
         event.setCancellationReason(rs.getString("cancellation_reason"));
         event.setCreatedAt(created == null ? null : created.toLocalDateTime());
         event.setUpdatedAt(updated == null ? null : updated.toLocalDateTime());
