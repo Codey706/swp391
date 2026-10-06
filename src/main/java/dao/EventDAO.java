@@ -309,7 +309,6 @@ public class EventDAO {
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
             String cancelledStatus, String rejectedStatus, int excludeEventId) {
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
-
                                        String cancelledStatus, String rejectedStatus, int excludeEventId) {
         try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(CHECK_VENUE_CONFLICT_EXCLUDING)) {
@@ -338,6 +337,7 @@ public class EventDAO {
 
         try (Connection connection = DBContext.getConnection();
              PreparedStatement statement = connection.prepareStatement(HAS_SALES_DATA)) {
+
             for (int i = 1; i <= 4; i++) {
                 statement.setInt(i, eventId);
             }

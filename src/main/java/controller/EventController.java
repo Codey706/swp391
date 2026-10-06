@@ -60,6 +60,12 @@ public class EventController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        request.setCharacterEncoding("UTF-8");
+        Auth organizer = getAuthenticatedOrganizer(request, response);
+        if (organizer == null) {
+            return;
+        }
+
 //        Auth organizer = getAuthenticatedOrganizer(request, response);
 //        if (organizer == null) {
 //            return;
@@ -67,8 +73,6 @@ public class EventController extends HttpServlet {
         Auth organizer = new Auth();
         organizer.setUserId(1);
         organizer.setRole("Organizer");
-
-
 
         User organizer = getAuthenticatedOrganizer(request, response);
         if (organizer == null) {
@@ -455,6 +459,7 @@ public class EventController extends HttpServlet {
      *
      * @return User hợp lệ, hoặc null nếu đã redirect/gửi lỗi.
      */
+
 //    private Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
 //            throws IOException {
 //        HttpSession session = request.getSession(false);
@@ -473,6 +478,19 @@ public class EventController extends HttpServlet {
     private Auth getAuthenticatedOrganizer(
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
+
+        // Đã đăng nhập bằng tài khoản Organizer thì dùng đúng tài khoản đó
+    private User getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+        Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
+        if (sessionUser instanceof Auth) {
+            Auth loggedIn = (Auth) sessionUser;
+            if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(loggedIn.getRole())) {
+                return loggedIn;
+            }
+        }
+        return user;
 
         Auth user = new Auth();
 
