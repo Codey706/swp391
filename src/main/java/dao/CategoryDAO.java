@@ -1,7 +1,7 @@
 package dao;
 
 import model.Category;
-import utils.DBcontext;
+import utils.DBContext;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,7 +22,7 @@ public class CategoryDAO {
                 + "FROM Categories "
                 + "ORDER BY category_id";
 
-        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql); ResultSet resultSet = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql); ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
 
@@ -75,7 +75,7 @@ public class CategoryDAO {
                 + "(category_name, description, status) "
                 + "VALUES (?, ?, ?)";
 
-        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, category.getCategoryName());
             statement.setString(2, category.getDescription());
