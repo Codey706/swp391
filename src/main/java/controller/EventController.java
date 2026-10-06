@@ -2,7 +2,7 @@ package controller;
 
 import dao.EventDAO;
 import model.Event;
-import model.User;
+import model.Auth;
 import utils.Constants;
 import utils.DateTimeUtils;
 import utils.ValidationUtils;
@@ -30,8 +30,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Event Management (Organizer): Create / Update / Delete / View Event List + Validate Event Information.
- * Sự kiện mới luôn ở trạng thái DRAFT; gửi duyệt là task "Submit Event for Approval" (I6).
+ * Event Management (Organizer): Create / Update / Delete / View Event List +
+ * Validate Event Information. Sự kiện mới luôn ở trạng thái DRAFT; gửi duyệt là
+ * task "Submit Event for Approval" (I6).
  */
 @WebServlet(name = "EventController", urlPatterns = {
     "/organizer/event/create", "/organizer/event/list",
@@ -47,8 +48,8 @@ public class EventController extends HttpServlet {
     private static final String PATH_DELETE = "/organizer/event/delete";
     private static final List<String> ALLOWED_IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "webp");
     // Chỉ cho sửa/xóa khi sự kiện chưa được gửi duyệt hoặc đã bị từ chối
-    private static final List<String> MODIFIABLE_STATUSES =
-            Arrays.asList(Constants.EVENT_DRAFT, Constants.EVENT_REJECTED);
+    private static final List<String> MODIFIABLE_STATUSES
+            = Arrays.asList(Constants.EVENT_DRAFT, Constants.EVENT_REJECTED);
     private static final List<String> LIST_STATUSES = Arrays.asList(
             Constants.EVENT_DRAFT, Constants.EVENT_PENDING_APPROVAL, Constants.EVENT_ACTIVE,
             Constants.EVENT_REJECTED, Constants.EVENT_CANCELLED);
@@ -58,19 +59,28 @@ public class EventController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-<<<<<<< Updated upstream
+
+//        Auth organizer = getAuthenticatedOrganizer(request, response);
+//        if (organizer == null) {
+//            return;
+//        }
+        Auth organizer = new Auth();
+        organizer.setUserId(1);
+        organizer.setRole("Organizer");
+
+
+
         User organizer = getAuthenticatedOrganizer(request, response);
         if (organizer == null) {
             return;
         }
-=======
+
         request.setCharacterEncoding("UTF-8");
         Auth organizer = getAuthenticatedOrganizer(request, response);
         if (organizer == null) {
             return;
         }
 
->>>>>>> Stashed changes
         switch (request.getServletPath()) {
             case PATH_LIST:
                 showEventList(request, response, organizer);
@@ -92,7 +102,7 @@ public class EventController extends HttpServlet {
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
-        User organizer = getAuthenticatedOrganizer(request, response);
+        Auth organizer = getAuthenticatedOrganizer(request, response);
         if (organizer == null) {
             return;
         }
@@ -146,8 +156,7 @@ public class EventController extends HttpServlet {
     }
 
     // ---------------------------------------------------------------- View Event List
-
-    private void showEventList(HttpServletRequest request, HttpServletResponse response, User organizer)
+    private void showEventList(HttpServletRequest request, HttpServletResponse response, Auth organizer)
             throws ServletException, IOException {
         String keyword = trimToNull(request.getParameter("keyword"));
         String status = trimToNull(request.getParameter("status"));
@@ -174,13 +183,15 @@ public class EventController extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalEvents", total);
         request.setAttribute("modifiableStatuses", MODIFIABLE_STATUSES);
+        request.setAttribute("statusCounts", eventDAO.countEventsByStatus(organizer.getUserId()));
+        request.setAttribute("salesSummary", eventDAO.getOrganizerSalesSummary(organizer.getUserId()));
+        request.setAttribute("pageSize", Constants.EVENT_PAGE_SIZE);
         moveFlashMessages(request);
         request.getRequestDispatcher(EVENT_LIST_VIEW).forward(request, response);
     }
 
     // ---------------------------------------------------------------- Update Event
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response, User organizer)
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response, Auth organizer)
             throws ServletException, IOException {
         Event event = loadOwnedEvent(request, organizer);
         if (event == null) {
@@ -196,7 +207,7 @@ public class EventController extends HttpServlet {
         request.getRequestDispatcher(EDIT_EVENT_VIEW).forward(request, response);
     }
 
-    private void updateEvent(HttpServletRequest request, HttpServletResponse response, User organizer)
+    private void updateEvent(HttpServletRequest request, HttpServletResponse response, Auth organizer)
             throws ServletException, IOException {
         Event existing = loadOwnedEvent(request, organizer);
         if (existing == null) {
@@ -262,8 +273,7 @@ public class EventController extends HttpServlet {
     }
 
     // ---------------------------------------------------------------- Delete Event
-
-    private void deleteEvent(HttpServletRequest request, HttpServletResponse response, User organizer)
+    private void deleteEvent(HttpServletRequest request, HttpServletResponse response, Auth organizer)
             throws IOException {
         Event event = loadOwnedEvent(request, organizer);
         if (event == null) {
@@ -288,10 +298,11 @@ public class EventController extends HttpServlet {
     }
 
     // ---------------------------------------------------------------- Validate Event Information
-
     /**
      * Kiểm tra toàn bộ thông tin sự kiện ở backend.
-     * @param excludeEventId id sự kiện đang sửa để bỏ qua khi kiểm tra trùng (0 khi tạo mới)
+     *
+     * @param excludeEventId id sự kiện đang sửa để bỏ qua khi kiểm tra trùng (0
+     * khi tạo mới)
      * @return map field -> thông báo lỗi; rỗng nếu hợp lệ.
      */
     private Map<String, String> validateEventInformation(Event event, int excludeEventId) {
@@ -359,7 +370,9 @@ public class EventController extends HttpServlet {
         return errors;
     }
 
-    /** @return thông báo lỗi, hoặc null nếu không có ảnh / ảnh hợp lệ. */
+    /**
+     * @return thông báo lỗi, hoặc null nếu không có ảnh / ảnh hợp lệ.
+     */
     private String validateEventImage(Part imagePart) {
         if (!hasFile(imagePart)) {
             return null;
@@ -377,7 +390,6 @@ public class EventController extends HttpServlet {
     }
 
     // ---------------------------------------------------------------- Helpers
-
     private Event buildEventFromRequest(HttpServletRequest request, int organizerId) {
         Event event = new Event();
         event.setOrganizerId(organizerId); // lấy từ session, không nhận từ browser
@@ -391,7 +403,10 @@ public class EventController extends HttpServlet {
         return event;
     }
 
-    /** Lưu ảnh thành event-{id}-banner.{ext} trong assets/uploads rồi cập nhật Events.event_image. */
+    /**
+     * Lưu ảnh thành event-{id}-banner.{ext} trong assets/uploads rồi cập nhật
+     * Events.event_image.
+     */
     private void saveEventImage(Part imagePart, int eventId) {
         String uploadDir = getServletContext().getRealPath(Constants.UPLOAD_DIR);
         if (uploadDir == null) {
@@ -435,26 +450,44 @@ public class EventController extends HttpServlet {
     }
 
     /**
-     * Yêu cầu đã đăng nhập và có role Organizer.
-     * Giả định: LoginController lưu User vào session với key Constants.SESSION_USER.
+     * Yêu cầu đã đăng nhập và có role Organizer. Giả định: LoginController lưu
+     * User vào session với key Constants.SESSION_USER.
+     *
      * @return User hợp lệ, hoặc null nếu đã redirect/gửi lỗi.
      */
-<<<<<<< Updated upstream
+//    private Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
+//            throws IOException {
+//        HttpSession session = request.getSession(false);
+//        Auth user = session == null ? null : (Auth) session.getAttribute(Constants.SESSION_USER);
+//
+//        if (user == null) {
+//            response.sendRedirect(request.getContextPath() + "/Auth?action=login"); // TODO: đổi theo URL của LoginController
+//            return null;
+//        }
+//        if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(user.getRole())) {
+//            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+//            return null;
+//        }
+//        return user;
+//    }
+    private Auth getAuthenticatedOrganizer(
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        Auth user = new Auth();
+
+        // Temporary test user
+        user.setUserId(1);
+        user.setRole("Organizer");
+
+
     private User getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         HttpSession session = request.getSession(false);
         User user = session == null ? null : (User) session.getAttribute(Constants.SESSION_USER);
 
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/Auth?action=login"); // TODO: đổi theo URL của LoginController
-            return null;
-        }
-        if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(user.getRole())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return null;
-        }
         return user;
-=======
+      
 //    private Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
 //            throws IOException {
 //        HttpSession session = request.getSession(false);
@@ -489,11 +522,13 @@ public class EventController extends HttpServlet {
         testUser.setUserId(1); // organizer01 trong db.sql
         testUser.setRole(Constants.ROLE_ORGANIZER);
         return testUser;
->>>>>>> Stashed changes
     }
 
-    /** Lấy sự kiện theo tham số eventId, chỉ trả về nếu thuộc organizer đang đăng nhập. */
-    private Event loadOwnedEvent(HttpServletRequest request, User organizer) {
+    /**
+     * Lấy sự kiện theo tham số eventId, chỉ trả về nếu thuộc organizer đang
+     * đăng nhập.
+     */
+    private Event loadOwnedEvent(HttpServletRequest request, Auth organizer) {
         int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("eventId"), 0);
         return eventId <= 0 ? null : eventDAO.getEventByIdAndOrganizer(eventId, organizer.getUserId());
     }
@@ -513,7 +548,7 @@ public class EventController extends HttpServlet {
     }
 
     private void redirectToList(HttpServletRequest request, HttpServletResponse response,
-                                String attribute, String message) throws IOException {
+            String attribute, String message) throws IOException {
         request.getSession().setAttribute(attribute, message);
         response.sendRedirect(request.getContextPath() + PATH_LIST);
     }
@@ -531,7 +566,9 @@ public class EventController extends HttpServlet {
         }
     }
 
-    /** Xóa file ảnh trong assets/uploads; chỉ xóa file nằm trong thư mục upload. */
+    /**
+     * Xóa file ảnh trong assets/uploads; chỉ xóa file nằm trong thư mục upload.
+     */
     private void deleteEventImageFile(String imagePath) {
         if (ValidationUtils.isNullOrBlank(imagePath) || !imagePath.startsWith("assets/uploads/")) {
             return;
