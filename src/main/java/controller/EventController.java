@@ -59,26 +59,6 @@ public class EventController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
-        Auth organizer = getAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
-
-//        Auth organizer = getAuthenticatedOrganizer(request, response);
-//        if (organizer == null) {
-//            return;
-//        }
-        Auth organizer = new Auth();
-        organizer.setUserId(1);
-        organizer.setRole("Organizer");
-
-        User organizer = getAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
-
         request.setCharacterEncoding("UTF-8");
         Auth organizer = getAuthenticatedOrganizer(request, response);
         if (organizer == null) {
@@ -459,53 +439,6 @@ public class EventController extends HttpServlet {
      *
      * @return User hợp lệ, hoặc null nếu đã redirect/gửi lỗi.
      */
-
-//    private Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
-//            throws IOException {
-//        HttpSession session = request.getSession(false);
-//        Auth user = session == null ? null : (Auth) session.getAttribute(Constants.SESSION_USER);
-//
-//        if (user == null) {
-//            response.sendRedirect(request.getContextPath() + "/Auth?action=login"); // TODO: đổi theo URL của LoginController
-//            return null;
-//        }
-//        if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(user.getRole())) {
-//            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-//            return null;
-//        }
-//        return user;
-//    }
-    private Auth getAuthenticatedOrganizer(
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-
-        // Đã đăng nhập bằng tài khoản Organizer thì dùng đúng tài khoản đó
-    private User getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        HttpSession session = request.getSession(false);
-        Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
-        if (sessionUser instanceof Auth) {
-            Auth loggedIn = (Auth) sessionUser;
-            if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(loggedIn.getRole())) {
-                return loggedIn;
-            }
-        }
-        return user;
-
-        Auth user = new Auth();
-
-        // Temporary test user
-        user.setUserId(1);
-        user.setRole("Organizer");
-
-
-    private User getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        HttpSession session = request.getSession(false);
-        User user = session == null ? null : (User) session.getAttribute(Constants.SESSION_USER);
-
-        return user;
-      
 //    private Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
 //            throws IOException {
 //        HttpSession session = request.getSession(false);
