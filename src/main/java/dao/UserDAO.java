@@ -133,7 +133,7 @@ public class UserDAO {
                 + "updated_at = GETDATE() "
                 + "WHERE user_id = ?";
 
-        try (Connection connection = DBcontext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, status);
             statement.setInt(2, userId);
