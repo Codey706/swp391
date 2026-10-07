@@ -8,6 +8,9 @@
         <title>User Detail - Light Ticket</title>
 
         <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+        <link rel="stylesheet"
               href="<%= request.getContextPath()%>/css/admin.css?v=2">
     </head>
 
@@ -27,14 +30,23 @@
 
                 <nav class="menu">
 
-                    <a href="#">⌂ &nbsp; Dashboard</a>
+                    <!-- Dashboard -->
+                    <a href="<%= contextPath%>/admin">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
+                    </a>
 
+                    <!-- Users -->
                     <div class="menu-group">
 
                         <a href="<%= contextPath%>/admin/users"
                            class="menu-parent open">
 
-                            <span>♟ &nbsp; Users</span>
+                            <span>
+                                <i class="fa-solid fa-users"></i>
+                                Users
+                            </span>
+
                             <span class="arrow">▼</span>
 
                         </a>
@@ -42,28 +54,53 @@
                         <div class="submenu">
 
                             <a href="<%= contextPath%>/admin/users">
-                                ▪ &nbsp; Users List
+                                User List
                             </a>
 
                             <a href="<%= contextPath%>/admin/user-detail?id=<%= user.getUserId()%>"
                                class="active">
-                                ▪ &nbsp; User Detail
+                                User Detail
                             </a>
 
                         </div>
 
                     </div>
 
-                    <a href="#">▣ &nbsp; Events</a>
-
-                    <a href="<%= contextPath%>/admin/categories">
-                        ▤ &nbsp; Categories
+                    <!-- Events -->
+                    <a href="#">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        Events
                     </a>
 
-                    <a href="#">⌖ &nbsp; Venues</a>
-                    <a href="#">🎟 &nbsp; Vouchers</a>
-                    <a href="#">☆ &nbsp; Reviews</a>
-                    <a href="#">♙ &nbsp; My Profile</a>
+                    <!-- Categories -->
+                    <a href="<%= contextPath%>/admin/categories">
+                        <i class="fa-solid fa-folder"></i>
+                        Categories
+                    </a>
+
+                    <!-- Venues -->
+                    <a href="#">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Venues
+                    </a>
+
+                    <!-- Vouchers -->
+                    <a href="#">
+                        <i class="fa-solid fa-ticket"></i>
+                        Vouchers
+                    </a>
+
+                    <!-- Reviews -->
+                    <a href="#">
+                        <i class="fa-solid fa-star"></i>
+                        Reviews
+                    </a>
+
+                    <!-- My Profile -->
+                    <a href="#">
+                        <i class="fa-solid fa-user"></i>
+                        My Profile
+                    </a>
 
                 </nav>
 
