@@ -44,14 +44,6 @@
                             Users
                         </a>
 
-                        <div class="submenu">
-
-                            <a href="<%= request.getContextPath()%>/admin/users">
-                                Users List
-                            </a>
-
-                        </div>
-
                     </div>
 
                     <!-- Events -->
