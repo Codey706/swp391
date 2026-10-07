@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import model.Booking;
 import model.User;
+import model.Auth;
 import utils.Constants;
 import utils.ValidationUtils;
 
@@ -92,21 +93,8 @@ public class BookingHistoryController extends HttpServlet {
     private User getAuthenticatedCustomer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         HttpSession session = request.getSession(false);
-        User user = session == null ? null : (User) session.getAttribute(Constants.SESSION_USER);
-
-        // TODO-DEV-ONLY: bỏ login để test, XÓA khối này trước khi commit/push
-        if (user == null) {
-            user = new User();
-            user.setUserId(2); // customer01 trong dữ liệu demo
-            user.setUsername("customer01");
-            user.setFullName("Nguyễn Văn A");
-            user.setEmail("customer1@gmail.com");
-            user.setPhone("0912345678");
-            user.setRole(Constants.ROLE_CUSTOMER);
-            request.getSession(true).setAttribute(Constants.SESSION_USER, user);
-        }
-        // END TODO-DEV-ONLY
-
+        // Đăng nhập thật (AuthController) lưu model.Auth vào session; chấp nhận cả model.User để tương thích code cũ
+        User user = toUser(session == null ? null : session.getAttribute(Constants.SESSION_USER));       
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return null;
@@ -116,5 +104,26 @@ public class BookingHistoryController extends HttpServlet {
             return null;
         }
         return user;
+    }
+
+    /** Chuyển đối tượng trong session (Auth hoặc User) về User; kiểu khác/null trả về null. */
+    private User toUser(Object sessionUser) {
+        if (sessionUser instanceof User) {
+            return (User) sessionUser;
+        }
+        if (sessionUser instanceof Auth) {
+            Auth auth = (Auth) sessionUser;
+            User user = new User();
+            user.setUserId(auth.getUserId());
+            user.setUsername(auth.getUsername());
+            user.setFullName(auth.getFullName());
+            user.setEmail(auth.getEmail());
+            user.setPhone(auth.getPhone());
+            user.setAddress(auth.getAddress());
+            user.setRole(auth.getRole());
+            user.setStatus(auth.getStatus());
+            return user;
+        }
+        return null;
     }
 }
