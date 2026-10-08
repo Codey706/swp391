@@ -1,6 +1,8 @@
 package dao;
 
 import model.Event;
+import model.EventTicket;
+import utils.Constants;
 import utils.DBContext; // TODO: giả định DBContext.getConnection() là static, trả về java.sql.Connection
 
 import java.sql.Connection;
@@ -78,6 +80,99 @@ public class EventDAO {
         } catch (SQLException e) {
             e.printStackTrace(); // TODO: thay bằng logger
             return false;
+        }
+    }
+
+    private static final String INSERT_TICKET
+            = "INSERT INTO Event_Tickets (event_id, ticket_name, description, price, quantity, "
+            + "available_quantity, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String GET_VENUE_CAPACITY
+            = "SELECT capacity FROM Venues WHERE venue_id = ?";
+
+    /**
+     * Tạo sự kiện cùng các hạng vé trong MỘT transaction: lỗi ở bất kỳ hạng vé
+     * nào thì sự kiện cũng không được tạo. Danh sách hạng vé có thể rỗng.
+     * Thành công thì gán eventId được sinh ra vào đối tượng event.
+     */
+    public boolean createEventWithTickets(Event event, List<EventTicket> tickets) {
+        try (Connection connection = DBContext.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_EVENT, Statement.RETURN_GENERATED_KEYS)) {
+                    statement.setInt(1, event.getOrganizerId());
+                    statement.setInt(2, event.getCategoryId());
+                    statement.setInt(3, event.getVenueId());
+                    statement.setString(4, event.getEventName());
+                    statement.setString(5, event.getDescription());
+                    if (event.getEventImage() == null) {
+                        statement.setNull(6, Types.VARCHAR);
+                    } else {
+                        statement.setString(6, event.getEventImage());
+                    }
+                    statement.setTimestamp(7, Timestamp.valueOf(event.getStartTime()));
+                    statement.setTimestamp(8, Timestamp.valueOf(event.getEndTime()));
+                    statement.setString(9, event.getStatus());
+                    if (statement.executeUpdate() == 0) {
+                        connection.rollback();
+                        return false;
+                    }
+                    try (ResultSet keys = statement.getGeneratedKeys()) {
+                        if (!keys.next()) {
+                            connection.rollback();
+                            return false;
+                        }
+                        event.setEventId(keys.getInt(1));
+                    }
+                }
+
+                if (tickets != null && !tickets.isEmpty()) {
+                    try (PreparedStatement statement = connection.prepareStatement(INSERT_TICKET)) {
+                        for (EventTicket ticket : tickets) {
+                            statement.setInt(1, event.getEventId());
+                            statement.setString(2, ticket.getTicketName());
+                            if (ticket.getDescription() == null) {
+                                statement.setNull(3, Types.NVARCHAR);
+                            } else {
+                                statement.setString(3, ticket.getDescription());
+                            }
+                            statement.setBigDecimal(4, ticket.getPrice());
+                            statement.setInt(5, ticket.getQuantity());
+                            statement.setInt(6, ticket.getQuantity()); // mới tạo: chưa bán vé nào
+                            statement.setString(7, Constants.TICKET_ACTIVE);
+                            statement.addBatch();
+                        }
+                        statement.executeBatch();
+                    }
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            event.setEventId(0);
+            return false;
+        }
+    }
+
+    /**
+     * Sức chứa của địa điểm; -1 nếu không tìm thấy hoặc lỗi DB.
+     */
+    public int getVenueCapacity(int venueId) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(GET_VENUE_CAPACITY)) {
+            statement.setInt(1, venueId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt(1) : -1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
         }
     }
 

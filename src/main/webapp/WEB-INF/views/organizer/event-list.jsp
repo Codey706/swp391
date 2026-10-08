@@ -34,9 +34,7 @@
             <%-- Tiêu đề trang --%>
             <section class="org-card org-page-head">
                 <div>
-                    <span class="org-badge-pill">Ban Tổ Chức: <c:out value="${orgName}"/></span>
                     <h1 class="org-title">Quản lý sự kiện</h1>
-                    <p class="org-subtitle">Quản lý toàn diện lịch phát hành, giám sát phân bổ tỷ lệ vé, hiệu chỉnh thông số vận hành và đối soát cấu hình sự kiện trực tiếp.</p>
                 </div>
                 <div class="org-head-actions">
                     <button type="button" class="btn-soft" disabled title="Tính năng sắp ra mắt">
@@ -63,7 +61,7 @@
                         <span class="stat-icon"><span class="material-symbols-outlined">stadium</span></span>
                     </div>
                     <div class="stat-value">${allEvents}</div>
-                    <div class="stat-foot"><span>${draftCount} bản nháp</span><span>Toàn thời gian</span></div>
+                    <div class="stat-foot"><span>${draftCount} bản nháp</span></div>
                 </div>
                 <div class="org-card stat-card">
                     <div class="stat-top">
@@ -71,7 +69,7 @@
                         <span class="stat-icon orange"><span class="material-symbols-outlined">sensors</span></span>
                     </div>
                     <div class="stat-value orange"><fmt:formatNumber value="${activeCount}" pattern="00"/></div>
-                    <div class="stat-foot"><span class="good">● Hoạt động mượt mà</span><span>${activeCount} phòng vé mở</span></div>
+                    <div class="stat-foot"><span>${activeCount} phòng vé mở</span></div>
                 </div>
                 <div class="org-card stat-card">
                     <div class="stat-top">
@@ -81,7 +79,7 @@
                     <div class="stat-value"><fmt:formatNumber value="${sumSold}" pattern="#,##0"/> <small>/<fmt:formatNumber value="${sumTotal}" pattern="#,##0"/> vé</small></div>
                     <div style="margin-top:auto">
                         <div class="progress-slim"><span style="width:${sumPct > 100 ? 100 : sumPct}%"></span></div>
-                        <div class="stat-foot mt-2"><span>Tỷ lệ lấp đầy</span><span style="color:var(--primary-dark)"><fmt:formatNumber value="${sumPct}" pattern="0.0"/>%</span></div>
+                        <div class="stat-foot mt-2"><span style="color:var(--primary-dark)"><fmt:formatNumber value="${sumPct}" pattern="0.0"/>%</span></div>
                     </div>
                 </div>
                 <div class="org-card stat-card">
@@ -90,7 +88,7 @@
                         <span class="stat-icon"><span class="material-symbols-outlined">payments</span></span>
                     </div>
                     <div class="stat-value money"><fmt:formatNumber value="${empty salesSummary ? 0 : salesSummary.revenue}" pattern="#,##0"/> đ</div>
-                    <div class="stat-foot"><span class="good">Đơn đã thanh toán</span><span>Đối soát kỳ hạn 15d</span></div>
+                    <div class="stat-foot"><span>Đối soát kỳ hạn 15d</span></div>
                 </div>
             </section>
 
@@ -98,7 +96,6 @@
             <section class="org-card filter-bar">
                 <form method="get" action="${ctx}/organizer/event/list">
                     <div class="lt-search">
-                        <span class="material-symbols-outlined">search</span>
                         <input type="text" name="keyword" class="lt-input" maxlength="200"
                                placeholder="Tìm theo tên sự kiện..." value="<c:out value='${keyword}'/>">
                     </div>
@@ -244,7 +241,6 @@
                 </div>
 
                 <div class="table-foot">
-                    <span>Hiển thị <b>${rangeFrom} – ${rangeTo}</b> của <b>${totalEvents}</b> sự kiện</span>
                     <c:if test="${totalPages > 1}">
                         <c:url var="pageBase" value="/organizer/event/list">
                             <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
