@@ -35,7 +35,9 @@
                     <a class="nav-pill-active text-decoration-none" href="#">Sự kiện</a>
                     <a class="nav-pill-idle" href="#">Địa điểm</a>
                     <a class="nav-pill-idle" href="#">Tin tức</a>
-                    <a class="nav-pill-idle" href="#">Vé của tôi</a>
+                    <c:if test="${not empty sessionScope.user}">
+                        <a class="nav-pill-idle text-decoration-none" href="${pageContext.request.contextPath}/customer/booking-history">Vé của tôi</a>
+                    </c:if>
                 </div>
                 <!-- Search Input bar -->
                 <div class="flex-grow-1 mx-4 d-none d-md-block" style="max-width: 440px;">
@@ -1119,7 +1121,6 @@
                             <li><a class="footer-link" href="#">Tất cả sự kiện</a></li>
                             <li><a class="footer-link" href="#">Địa điểm &amp; Sân khấu</a></li>
                             <li><a class="footer-link" href="#">Cẩm nang giải trí</a></li>
-                            <li><a class="footer-link" href="#">Vé của tôi</a></li>
                         </ul>
                     </div>
                     <!-- Links Column: Hỗ trợ -->
