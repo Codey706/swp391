@@ -41,3 +41,5 @@
         </div>
     </div>
 </footer>
+<%-- Đóng khung layout mở trong _header.jsp --%>
+</div>

@@ -24,18 +24,23 @@
 
         <main class="org-container org-main">
 
-            <section class="org-page-head" style="padding:0 0 1.25rem;margin:0;">
-                <div>
-                    <h1 class="org-title" style="max-width:640px;"><c:out value="${event.eventName}"/></h1>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <c:choose>
-                            <c:when test="${event.status == 'REJECTED'}"><span class="st-pill st-danger">Bị từ chối</span></c:when>
-                            <c:otherwise><span class="st-pill st-draft">Bản nháp (Draft)</span></c:otherwise>
-                        </c:choose>
-                        <span class="ev-code mt-0">Mã: <b>#EV-${fn:substring(startStr, 0, 4)}-<fmt:formatNumber value="${event.eventId}" pattern="000"/></b></span>
+            <section class="org-card ce-toolbar">
+                <div class="ce-toolbar-title">
+                    <a class="ce-back" href="${ctx}/organizer/event/list" aria-label="Quay lại danh sách sự kiện">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
+                    <div>
+                        <h1 style="max-width:640px;"><c:out value="${event.eventName}"/></h1>
+                        <div class="d-flex align-items-center gap-2 flex-wrap mt-1">
+                            <c:choose>
+                                <c:when test="${event.status == 'REJECTED'}"><span class="st-pill st-danger">Bị từ chối</span></c:when>
+                                <c:otherwise><span class="st-pill st-draft">Bản nháp (Draft)</span></c:otherwise>
+                            </c:choose>
+                            <span class="ev-code mt-0">Mã: <b>#EV-${fn:substring(startStr, 0, 4)}-<fmt:formatNumber value="${event.eventId}" pattern="000"/></b></span>
+                        </div>
                     </div>
                 </div>
-                <div class="org-head-actions">
+                <div class="ce-toolbar-actions">
                     <a class="btn-soft" href="${ctx}/organizer/event/list">
                         <span class="material-symbols-outlined">undo</span> Hủy thay đổi
                     </a>
@@ -105,7 +110,6 @@
                                            class="lt-input ${not empty errors.eventName ? 'is-invalid' : ''}"
                                            value="<c:out value='${event.eventName}'/>">
                                     <div class="invalid-feedback"><c:out value="${errors.eventName}"/></div>
-                                    <div class="lt-help">Tên sẽ hiển thị chính thức trên trang sự kiện và trang thanh toán.</div>
                                 </div>
 
                                 <div class="lt-field">
@@ -169,7 +173,7 @@
                     <section class="org-card form-card">
                         <div class="form-card-head">
                             <span class="ico"><span class="material-symbols-outlined">event</span></span>
-                            <div><h2>Lịch trình &amp; Địa điểm</h2><p>Thời điểm diễn ra và địa điểm tổ chức</p></div>
+                            <div><h2>Lịch trình &amp; Địa điểm</h2></div>
                         </div>
                         <div class="form-grid">
                             <div class="lt-field">
@@ -209,7 +213,7 @@
                     <section class="org-card form-card">
                         <div class="form-card-head">
                             <span class="ico"><span class="material-symbols-outlined">confirmation_number</span></span>
-                            <div><h2>Quản lý hạng vé &amp; Giá</h2><p>Tổng quan vé đã phát hành của sự kiện</p></div>
+                            <div><h2>Quản lý hạng vé &amp; Giá</h2></div>
                         </div>
                         <dl class="summary-list mb-4">
                             <dt>Tổng vé phát hành</dt><dd><fmt:formatNumber value="${event.ticketTotal}" pattern="#,##0"/> vé</dd>
@@ -231,7 +235,7 @@
                     <section class="org-card form-card">
                         <div class="form-card-head">
                             <span class="ico"><span class="material-symbols-outlined">tune</span></span>
-                            <div><h2>Cài đặt bán vé &amp; Quy định</h2><p>Quy tắc áp dụng cho sự kiện này</p></div>
+                            <div><h2>Cài đặt bán vé &amp; Quy định</h2></div>
                         </div>
                         <div class="note-box">
                             <span class="ico"><span class="material-symbols-outlined">verified_user</span></span>
