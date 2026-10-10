@@ -44,4 +44,10 @@ public final class Constants {
     // View Booking History
     public static final int BOOKING_PAGE_SIZE = 10;
     public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
+    
+    // Booking: Select Event
+    public static final int BOOKING_EVENT_PAGE_SIZE = 9;
+    public static final int MAX_TICKETS_PER_ORDER = 10;
+    public static final String SESSION_BOOKING_SELECTION = "bookingSelection";
+    public static final String BOOKING_CHECKOUT_URL = "/booking/checkout"; 
 }
