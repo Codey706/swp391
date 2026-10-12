@@ -122,7 +122,7 @@ public class UserDAO {
         String sql = "UPDATE Users "
                 + "SET full_name = ?, phone = ?, address = ?, "
                 + "updated_at = GETDATE() "
-                + "WHERE user_id = ? AND UPPER(role) <> 'ADMIN'";
+                + "WHERE user_id = ?";
 
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 

@@ -582,12 +582,16 @@ tbody tr:hover {
 
 .detail-actions {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-top: 28px;
-    padding-top: 22px;
-    border-top: 1px solid #EDF0F7;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.detail-actions form {
+    display: inline-flex;
+    margin: 0;
 }
 
 .action-left {
@@ -1183,4 +1187,47 @@ tbody tr:hover {
 /* Căn tiêu đề Update Category vào trong một chút */
 .page-heading {
     padding-left: 20px;
+}
+
+
+.delete-button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #dc3545;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.delete-button:hover {
+    background: #b02a37;
+}
+
+.sidebar .brand {
+    color: #FF8A5B;
+    font-weight: 700;
+}
+
+.topbar .admin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #FF8A5B;
+    font-weight: 600;
+}
+
+.admin-avatar {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #FFD2BE;
+}
+
+.topbar .admin:hover {
+    color: #FF7043;
 }

@@ -153,4 +153,14 @@ public class CategoryDAO {
             return statement.executeUpdate() > 0;
         }
     }
+
+    public boolean deleteCategory(int categoryId) throws SQLException {
+        String sql = "DELETE FROM Categories WHERE category_id = ?";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, categoryId);
+            return statement.executeUpdate() > 0;
+        }
+    }
 }

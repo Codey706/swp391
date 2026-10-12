@@ -15,7 +15,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
         <link rel="stylesheet"
-              href="<%= request.getContextPath()%>/css/admin.css?v=2">
+              href="<%= request.getContextPath()%>/css/admin.css?v=3">
 
     </head>
 
@@ -119,9 +119,12 @@
                            type="text"
                            placeholder="⌕  Search...">
 
-                    <div class="admin">
-                        🔔 &nbsp; Admin &nbsp;⌄
-                    </div>
+                    <a class="admin" href="<%= contextPath%>/admin/profile">
+                        <img class="admin-avatar"
+                             src="<%= contextPath%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </a>
 
                 </header>
 

@@ -12,7 +12,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
         <link rel="stylesheet"
-              href="<%= request.getContextPath()%>/css/admin.css?v=2">
+              href="<%= request.getContextPath()%>/css/admin.css?v=3">
     </head>
 
     <body>
@@ -252,12 +252,28 @@
                             </div>
 
                             <!-- Actions -->
+
+
+
                             <div class="detail-actions">
                                 <a class="back-button"
                                    href="<%= contextPath%>/admin/categories">
                                     <i class="fa-solid fa-arrow-left"></i>
                                     Back to Categories
                                 </a>
+
+                                <!-- Delete nằm bên trái Update -->
+                                <form method="post"
+                                      action="<%= contextPath%>/admin/category-delete"
+                                      style="display: inline;">
+                                    <input type="hidden" name="id"
+                                           value="<%= category.getCategoryId()%>">
+
+                                    <button type="submit" class="delete-button">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Delete Category
+                                    </button>
+                                </form>
 
                                 <a class="back-button"
                                    href="<%= contextPath%>/admin/category-edit?id=<%= category.getCategoryId()%>"

@@ -23,7 +23,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
         <link rel="stylesheet"
-              href="<%= contextPath%>/css/admin.css?v=3"
+              href="<%= contextPath%>/css/admin.css?v=3">
     </head>
 
     <body>
@@ -58,6 +58,7 @@
 
                     <!-- Categories -->
                     <div class="menu-group">
+
                         <a href="<%= contextPath%>/admin/categories"
                            class="menu-parent open">
 
@@ -75,9 +76,13 @@
                                 Categories List
                             </a>
 
-                            <a href="<%= contextPath%>/admin/category-detail?id=<%= category.getCategoryId()%>"
-                               class="active">
+                            <a href="<%= contextPath%>/admin/category-detail?id=<%= category.getCategoryId()%>">
                                 Category Detail
+                            </a>
+
+                            <a href="<%= contextPath%>/admin/category-edit?id=<%= category.getCategoryId()%>"
+                               class="active">
+                                Edit Category
                             </a>
 
                         </div>
@@ -114,7 +119,12 @@
             <main class="main">
                 <header class="topbar">
                     <input class="search" type="text" placeholder="⌕ Search...">
-                    <div class="admin">🔔 &nbsp; Admin &nbsp;⌄</div>
+                    <a class="admin" href="<%= contextPath%>/admin/profile">
+                        <img class="admin-avatar"
+                             src="<%= contextPath%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </a>
                 </header>
 
                 <section class="content">
@@ -196,7 +206,7 @@
                                 </button>
 
                                 <a class="cancel-button"
-                                   href="<%= contextPath %>/admin/category-detail?id=<%= category.getCategoryId() %>">
+                                   href="<%= contextPath%>/admin/category-detail?id=<%= category.getCategoryId()%>">
                                     Cancel
                                 </a>
                             </div>
