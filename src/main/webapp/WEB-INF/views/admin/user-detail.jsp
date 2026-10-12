@@ -125,11 +125,6 @@
 
                     <div class="detail-container">
 
-                        <div class="breadcrumb">
-                            Home &nbsp; / &nbsp; User Management
-                            &nbsp; / &nbsp; User Detail
-                        </div>
-
                         <div class="page-heading">
 
                             <div>
