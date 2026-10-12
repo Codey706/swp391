@@ -261,10 +261,11 @@
 
                                         <td>
 
-                                            <button class="view-button"
-                                                    type="button">
+
+                                            <a class="view-button"
+                                               href="<%= contextPath%>/admin/category-detail?id=<%= category.getCategoryId()%>">
                                                 View
-                                            </button>
+                                            </a>
 
                                         </td>
 

@@ -84,4 +84,55 @@ public class CategoryDAO {
             statement.executeUpdate();
         }
     }
+
+    public Category getCategoryById(int categoryId) throws SQLException {
+
+        String sql = "SELECT category_id, category_name, description, "
+                + "status, created_at, updated_at "
+                + "FROM Categories "
+                + "WHERE category_id = ?";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, categoryId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    Category category = new Category();
+
+                    category.setCategoryId(
+                            resultSet.getInt("category_id")
+                    );
+
+                    category.setCategoryName(
+                            resultSet.getString("category_name")
+                    );
+
+                    category.setDescription(
+                            resultSet.getString("description")
+                    );
+
+                    category.setStatus(
+                            resultSet.getString("status")
+                    );
+
+                    Timestamp createdAt = resultSet.getTimestamp("created_at");
+                    Timestamp updatedAt = resultSet.getTimestamp("updated_at");
+
+                    if (createdAt != null) {
+                        category.setCreatedAt(createdAt.toLocalDateTime());
+                    }
+
+                    if (updatedAt != null) {
+                        category.setUpdatedAt(updatedAt.toLocalDateTime());
+                    }
+
+                    return category;
+                }
+            }
+        }
+
+        return null;
+    }
 }
