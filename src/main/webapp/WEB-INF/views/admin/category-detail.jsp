@@ -253,17 +253,18 @@
 
                             <!-- Actions -->
                             <div class="detail-actions">
+                                <a class="back-button"
+                                   href="<%= contextPath%>/admin/categories">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                    Back to Categories
+                                </a>
 
-                                <div class="action-left">
-
-                                    <a class="back-button"
-                                       href="<%= contextPath%>/admin/categories">
-                                        <i class="fa-solid fa-arrow-left"></i>
-                                        Back to Categories
-                                    </a>
-
-                                </div>
-
+                                <a class="back-button"
+                                   href="<%= contextPath%>/admin/category-edit?id=<%= category.getCategoryId()%>"
+                                   style="background: #FF7043; color: white;">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Update Category
+                                </a>
                             </div>
 
                         </div>

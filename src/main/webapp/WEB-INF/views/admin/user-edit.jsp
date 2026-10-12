@@ -129,11 +129,6 @@
 
                     <div class="edit-container">
 
-                        <div class="breadcrumb">
-                            Home &nbsp; / &nbsp; User Management
-                            &nbsp; / &nbsp; Update User
-                        </div>
-
                         <div class="page-heading">
 
                             <div>
