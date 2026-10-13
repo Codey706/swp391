@@ -250,15 +250,6 @@
                         <fmt:formatNumber value="${booking.totalAmount}" pattern="#,##0" var="totalText"/>
                         <fmt:formatNumber value="${booking.discountAmount}" pattern="#,##0" var="discountText"/>
 
-                        <c:set var="detailBtn">
-                            data-bs-toggle="modal" data-bs-target="#orderDetailModal"
-                            data-code="<c:out value='${booking.orderCode}'/>" data-event="<c:out value='${booking.eventName}'/>"
-                            data-time="${eventTimeText}" data-venue="<c:out value='${booking.venueName}'/>"
-                            data-ticket="<c:out value='${booking.ticketName}'/> (x${booking.ticketQuantity})"
-                            data-created="${createdText}" data-status="<c:out value='${booking.status}'/>"
-                            data-total="${totalText} đ" data-discount="${discountText} đ" data-final="${finalText} đ"
-                        </c:set>
-
                         <c:choose>
                         <%-- ===== PAID: thẻ lớn ===== --%>
                         <c:when test="${booking.status == 'Paid'}">
@@ -290,8 +281,8 @@
                                                     <span class="lt-price">${finalText} <u class="fs-6">đ</u></span>
                                                     <c:if test="${booking.discountAmount.signum() > 0}"><span class="lt-xs text-success ms-1">(đã giảm ${discountText} đ)</span></c:if>
                                                 </div>
-                                                <button type="button" class="btn btn-brand rounded-3 fw-bold small d-flex align-items-center gap-2 js-order-detail" ${detailBtn}>
-                                                    <svg class="ico ico-sm"><use href="#i-eye"/></svg>Xem chi tiết đơn hàng (Detail)</button>
+                                                <a href="${ctx}/customer/booking-detail?orderId=${booking.bookingId}" class="btn btn-brand rounded-3 fw-bold small d-flex align-items-center gap-2">
+                                                    <svg class="ico ico-sm"><use href="#i-eye"/></svg>Xem chi tiết đơn hàng (Detail)</a>
                                             </div>
                                         </div>
                                     </div>
@@ -327,8 +318,8 @@
                                     </div>
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-3 border-top border-warning-subtle">
                                         <p class="lt-xs text-warning-emphasis mb-0">⚠️ Vui lòng hoàn tất thanh toán để tránh việc ghế bị tự động hủy và mở bán lại.</p>
-                                        <button type="button" class="btn btn-light border-warning-subtle btn-sm rounded-3 fw-bold js-order-detail" ${detailBtn}>
-                                            <svg class="ico ico-sm me-1"><use href="#i-eye"/></svg>Chi tiết (Detail)</button>
+                                        <a href="${ctx}/customer/booking-detail?orderId=${booking.bookingId}" class="btn btn-light border-warning-subtle btn-sm rounded-3 fw-bold">
+                                            <svg class="ico ico-sm me-1"><use href="#i-eye"/></svg>Chi tiết (Detail)</a>
                                     </div>
                                 </div>
                             </article>
@@ -358,8 +349,8 @@
                                     </div>
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-3 border-top">
                                         <span class="lt-xs fw-semibold text-danger">✕ Đơn hàng đã bị hủy</span>
-                                        <button type="button" class="btn btn-light btn-sm rounded-3 fw-bold js-order-detail" ${detailBtn}>
-                                            <svg class="ico ico-sm me-1"><use href="#i-eye"/></svg>Xem chi tiết (Detail)</button>
+                                        <a href="${ctx}/customer/booking-detail?orderId=${booking.bookingId}" class="btn btn-light btn-sm rounded-3 fw-bold">
+                                            <svg class="ico ico-sm me-1"><use href="#i-eye"/></svg>Xem chi tiết (Detail)</a>
                                     </div>
                                 </div>
                             </article>
@@ -402,48 +393,6 @@
         <span class="fw-bold text-dark text-uppercase">An toàn • Liền mạch • Nhanh chóng</span>
     </div>
 </footer>
-
-<!-- ===== ORDER DETAIL MODAL ===== -->
-<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content lt-modal">
-            <div class="lt-modal-head">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                <div class="lt-xs text-uppercase fw-semibold opacity-75 mb-1">Order Detail View • <span id="detailCode"></span></div>
-                <h3 class="h5 fw-black mb-1" id="detailEvent"></h3>
-                <p class="lt-xs mb-0 opacity-75">Thông tin chi tiết đơn đặt vé trực tuyến trên hệ thống Light Ticket</p>
-            </div>
-            <div class="modal-body p-4">
-                <div class="lt-banner mb-4">
-                    <div><span class="lt-xs text-secondary d-block">Trạng thái hiện tại:</span><strong class="small" id="detailStatus"></strong></div>
-                    <div class="text-end"><span class="lt-xs text-secondary d-block">Ngày đặt:</span><strong class="small font-monospace" id="detailCreated"></strong></div>
-                </div>
-                <h4 class="lt-label">Thông tin vé &amp; Suất diễn</h4>
-                <div class="row g-3 mb-4">
-                    <div class="col-sm-6"><div class="lt-info"><span class="lt-xs text-secondary d-block">Thời gian diễn:</span><strong id="detailTime"></strong></div></div>
-                    <div class="col-sm-6"><div class="lt-info"><span class="lt-xs text-secondary d-block">Hạng vé &amp; Số lượng:</span><strong class="text-brand" id="detailTicket"></strong></div></div>
-                    <div class="col-12"><div class="lt-info"><span class="lt-xs text-secondary d-block">Địa điểm:</span><strong id="detailVenue"></strong></div></div>
-                </div>
-                <h4 class="lt-label">Thông tin khách hàng</h4>
-                <div class="lt-info-list mb-4 small">
-                    <div><span class="text-secondary">Họ và tên:</span><b><c:out value="${user.fullName}"/></b></div>
-                    <div><span class="text-secondary">Email nhận vé:</span><b><c:out value="${user.email}"/></b></div>
-                    <div><span class="text-secondary">Số điện thoại:</span><b><c:out value="${user.phone}"/></b></div>
-                </div>
-                <div class="small border-top pt-3">
-                    <div class="d-flex justify-content-between text-secondary mb-1"><span>Giá gốc vé:</span><b class="text-dark" id="detailTotal"></b></div>
-                    <div class="d-flex justify-content-between text-secondary mb-1"><span>Giảm giá voucher:</span><b class="text-success" id="detailDiscount"></b></div>
-                    <div class="d-flex justify-content-between align-items-center border-top mt-2 pt-3">
-                        <b class="text-dark">Tổng thanh toán thực tế:</b><b class="fs-4 fw-black text-brand" id="detailFinal"></b>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer lt-modal-foot">
-                <button type="button" class="btn btn-outline-secondary rounded-3 fw-bold small" data-bs-dismiss="modal">Đóng cửa sổ</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
 <script src="${ctx}/assets/js/booking.js"></script>

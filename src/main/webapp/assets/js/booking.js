@@ -1,24 +1,6 @@
-// Booking History: modal chi tiết, đếm ngược giữ chỗ, ảnh dự phòng
+// Booking History: đếm ngược giữ chỗ, ảnh dự phòng
 (function () {
     'use strict';
-
-    // Đổ dữ liệu từ data-* của nút "Xem chi tiết" vào modal
-    var STATUS_TEXT = { Paid: 'Đã thanh toán', Pending: 'Chờ thanh toán', Cancelled: 'Đã hủy' };
-    var fields = {
-        detailCode: 'code', detailEvent: 'event', detailTime: 'time', detailVenue: 'venue',
-        detailTicket: 'ticket', detailCreated: 'created', detailTotal: 'total',
-        detailDiscount: 'discount', detailFinal: 'final'
-    };
-
-    document.querySelectorAll('.js-order-detail').forEach(function (button) {
-        button.addEventListener('click', function () {
-            Object.keys(fields).forEach(function (id) {
-                document.getElementById(id).textContent = button.dataset[fields[id]] || '';
-            });
-            var status = button.dataset.status;
-            document.getElementById('detailStatus').textContent = STATUS_TEXT[status] || status;
-        });
-    });
 
     // Ảnh sự kiện lỗi/không tồn tại -> hiện khung dự phòng
     document.querySelectorAll('.js-event-image').forEach(function (img) {
