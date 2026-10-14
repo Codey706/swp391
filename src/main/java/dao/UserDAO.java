@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,6 +168,68 @@ public class UserDAO {
             statement.setString(3, newRole);
 
             return statement.executeUpdate() > 0;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Manage My Organizer Profile
+    // ------------------------------------------------------------------
+    /**
+     * Cập nhật hồ sơ của chính Organizer. Chỉ ghi full_name, email, phone,
+     * address; không bao giờ đụng tới role, status, password. Điều kiện WHERE
+     * chặn cập nhật nếu tài khoản không phải Organizer đang ACTIVE.
+     */
+    public boolean updateOrganizerProfile(User user) throws SQLException {
+        String sql = "UPDATE Users "
+                + "SET full_name = ?, email = ?, phone = ?, address = ?, "
+                + "updated_at = GETDATE() "
+                + "WHERE user_id = ? AND UPPER(role) = 'ORGANIZER' AND UPPER(status) = 'ACTIVE'";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, user.getFullName());
+            statement.setString(2, user.getEmail());
+            statement.setString(3, user.getPhone());
+
+            if (user.getAddress() == null) {
+                statement.setNull(4, Types.NVARCHAR);
+            } else {
+                statement.setString(4, user.getAddress());
+            }
+
+            statement.setInt(5, user.getUserId());
+
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    // Email đã thuộc về tài khoản khác (BR-02), không phân biệt hoa/thường
+    public boolean existsEmailOfOtherUser(String email, int userId) throws SQLException {
+        String sql = "SELECT 1 FROM Users WHERE LOWER(email) = LOWER(?) AND user_id <> ?";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, email);
+            statement.setInt(2, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    // Số điện thoại đã thuộc về tài khoản khác (BR-02)
+    public boolean existsPhoneOfOtherUser(String phone, int userId) throws SQLException {
+        String sql = "SELECT 1 FROM Users WHERE phone = ? AND user_id <> ?";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, phone);
+            statement.setInt(2, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
         }
     }
 }

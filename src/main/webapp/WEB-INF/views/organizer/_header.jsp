@@ -40,6 +40,8 @@
             <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">analytics</span><span>Báo cáo &amp; Thống kê</span></a>
             <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">account_balance_wallet</span><span>Tài chính &amp; Quyết toán</span></a>
             <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">settings</span><span>Cài đặt tổ chức</span></a>
+            <a class="${param.active == 'profile' ? 'is-active' : ''}" href="${ctx}/organizer/profile"
+               ${param.active == 'profile' ? 'aria-current="page"' : ''}><span class="material-symbols-outlined">badge</span><span>Hồ sơ tổ chức</span></a>
         </nav>
     </div>
 
@@ -91,7 +93,7 @@
                 <span class="material-symbols-outlined">notifications</span>
                 <span class="dot"></span>
             </button>
-            <span class="org-top-avatar" title="<c:out value='${orgName}'/>"><span class="material-symbols-outlined">person</span></span>
+            <a class="org-top-avatar" href="${ctx}/organizer/profile" title="Hồ sơ: <c:out value='${orgName}'/>" aria-label="Hồ sơ Organizer"><span class="material-symbols-outlined">person</span></a>
         </div>
     </header>
 
