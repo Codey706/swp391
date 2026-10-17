@@ -44,4 +44,18 @@ public final class Constants {
     // View Booking History
     public static final int BOOKING_PAGE_SIZE = 10;
     public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
+
+    // Book Tickets 
+    public static final int BOOKING_MAX_TICKETS_PER_ORDER = 10;
+    public static final int BOOKING_HOLD_SECONDS = 600;
+    public static final int VOUCHER_CODE_MAX_LENGTH = 50;
+
+    // Event_Seats.status
+    public static final String SEAT_AVAILABLE = "Available";
+    public static final String SEAT_HELD = "Held";
+    public static final String SEAT_SOLD = "Sold";
+
+    // Tickets.ticket_status
+    public static final String TICKET_CHECKED_IN = "CheckedIn";
+
 }
