@@ -834,6 +834,119 @@ tbody tr:hover {
     margin-bottom: 20px;
 }
 
+
+/* =========================
+   Venue List - Search & Filter
+   ========================= */
+
+.venue-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.venue-search-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 220px;
+    padding: 0 13px;
+    border: 1px solid #DDE3EE;
+    border-radius: 9px;
+    background: #FFFFFF;
+    color: #8A94A6;
+}
+
+.venue-search-group input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #202B3C;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.venue-status-group select {
+    min-width: 145px;
+    padding: 12px 13px;
+    border: 1px solid #DDE3EE;
+    border-radius: 9px;
+    background: #FFFFFF;
+    color: #202B3C;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+}
+
+.venue-search-group:focus-within,
+.venue-status-group select:focus {
+    border-color: #FF7043;
+    box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.12);
+}
+
+.venue-filter-button,
+.venue-reset-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 12px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.venue-filter-button {
+    border: none;
+    background: #FF7043;
+    color: #FFFFFF;
+}
+
+.venue-filter-button:hover {
+    background: #E95427;
+}
+
+.venue-reset-button {
+    border: 1px solid #DDE3EE;
+    background: #FFFFFF;
+    color: #596579;
+}
+
+.venue-reset-button:hover {
+    background: #F1F3F8;
+    color: #202B3C;
+}
+
+@media (max-width: 768px) {
+    .venue-filter-form {
+        align-items: stretch;
+    }
+
+    .venue-search-group {
+        flex-basis: 100%;
+    }
+
+    .venue-status-group {
+        flex: 1;
+    }
+
+    .venue-status-group select {
+        width: 100%;
+    }
+}
+
+
 /* =========================
    Admin Dashboard
    ========================= */

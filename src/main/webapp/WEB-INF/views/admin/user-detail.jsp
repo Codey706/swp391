@@ -79,7 +79,7 @@
                     </a>
 
                     <!-- Venues -->
-                    <a href="#">
+                    <a href="<%= request.getContextPath()%>/admin/venues">
                         <i class="fa-solid fa-location-dot"></i>
                         Venues
                     </a>
