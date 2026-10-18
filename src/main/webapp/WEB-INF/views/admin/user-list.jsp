@@ -13,7 +13,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
         <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/css/admin.css">
+              href="${pageContext.request.contextPath}/css/admin.css?v=3">
     </head>
 
     <body>
@@ -108,7 +108,7 @@
                     </a>
 
                     <!-- Venues -->
-                    <a href="#">
+                    <a href="<%= request.getContextPath()%>/admin/venues">
                         <i class="fa-solid fa-location-dot"></i>
                         Venues
                     </a>
@@ -143,7 +143,12 @@
                     <input class="search" type="text"
                            placeholder="⌕  Search...">
 
-                    <div class="admin">🔔 &nbsp; Admin &nbsp;⌄</div>
+                    <a class="admin" href="<%= contextPath%>/admin/profile">
+                        <img class="admin-avatar"
+                             src="<%= contextPath%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </a>
 
                 </header>
 

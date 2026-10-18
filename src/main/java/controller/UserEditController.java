@@ -89,37 +89,41 @@ public class UserEditController extends HttpServlet {
             }
 
             // Không cho chỉnh sửa Role hoặc Status của Admin
-            if ("ADMIN".equalsIgnoreCase(existingUser.getRole())) {
-                response.sendError(
-                        HttpServletResponse.SC_FORBIDDEN,
-                        "Cannot modify an Admin account"
-                );
-                return;
+            // Nếu là Admin thì chỉ cho cập nhật thông tin cá nhân
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(existingUser.getRole());
+
+            if (isAdmin) {
+                role = existingUser.getRole();
+                status = existingUser.getStatus();
             }
 
-            // Kiểm tra Role
-            if (role == null
-                    || (!"ORGANIZER".equalsIgnoreCase(role)
-                    && !"STAFF".equalsIgnoreCase(role)
-                    && !"CUSTOMER".equalsIgnoreCase(role))) {
+            // Kiểm tra Role nếu không phải Admin
+            if (!isAdmin) {
+                if (role == null
+                        || (!"ORGANIZER".equalsIgnoreCase(role)
+                        && !"STAFF".equalsIgnoreCase(role)
+                        && !"CUSTOMER".equalsIgnoreCase(role))) {
 
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Invalid role"
-                );
-                return;
+                    response.sendError(
+                            HttpServletResponse.SC_BAD_REQUEST,
+                            "Invalid role"
+                    );
+                    return;
+                }
             }
 
-            // Kiểm tra Status
-            if (status == null
-                    || (!"ACTIVE".equalsIgnoreCase(status)
-                    && !"INACTIVE".equalsIgnoreCase(status))) {
+            // Kiểm tra Status nếu không phải Admin
+            if (!isAdmin) {
+                if (status == null
+                        || (!"ACTIVE".equalsIgnoreCase(status)
+                        && !"INACTIVE".equalsIgnoreCase(status))) {
 
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Invalid status"
-                );
-                return;
+                    response.sendError(
+                            HttpServletResponse.SC_BAD_REQUEST,
+                            "Invalid status"
+                    );
+                    return;
+                }
             }
 
             // Cập nhật thông tin cá nhân
@@ -139,30 +143,34 @@ public class UserEditController extends HttpServlet {
                 return;
             }
 
-            // Cập nhật Role
-            boolean roleUpdated = userDAO.updateUserRole(
-                    userId, role.toUpperCase()
-            );
-
-            if (!roleUpdated) {
-                response.sendError(
-                        HttpServletResponse.SC_CONFLICT,
-                        "Cannot update user role"
+            /// Cập nhật Role nếu không phải Admin
+if (!isAdmin) {
+                boolean roleUpdated = userDAO.updateUserRole(
+                        userId, role.toUpperCase()
                 );
-                return;
+
+                if (!roleUpdated) {
+                    response.sendError(
+                            HttpServletResponse.SC_CONFLICT,
+                            "Cannot update user role"
+                    );
+                    return;
+                }
             }
 
-            // Cập nhật Status
-            boolean statusUpdated = userDAO.updateUserStatus(
-                    userId, status.toUpperCase()
-            );
-
-            if (!statusUpdated) {
-                response.sendError(
-                        HttpServletResponse.SC_CONFLICT,
-                        "Cannot update user status"
+            // Cập nhật Status nếu không phải Admin
+            if (!isAdmin) {
+                boolean statusUpdated = userDAO.updateUserStatus(
+                        userId, status.toUpperCase()
                 );
-                return;
+
+                if (!statusUpdated) {
+                    response.sendError(
+                            HttpServletResponse.SC_CONFLICT,
+                            "Cannot update user status"
+                    );
+                    return;
+                }
             }
 
             response.sendRedirect(

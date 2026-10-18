@@ -135,4 +135,32 @@ public class CategoryDAO {
 
         return null;
     }
+
+    public boolean updateCategory(Category category) throws SQLException {
+
+        String sql = "UPDATE Categories "
+                + "SET category_name = ?, description = ?, "
+                + "status = ?, updated_at = GETDATE() "
+                + "WHERE category_id = ?";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, category.getCategoryName());
+            statement.setString(2, category.getDescription());
+            statement.setString(3, category.getStatus());
+            statement.setInt(4, category.getCategoryId());
+
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteCategory(int categoryId) throws SQLException {
+        String sql = "DELETE FROM Categories WHERE category_id = ?";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, categoryId);
+            return statement.executeUpdate() > 0;
+        }
+    }
 }
