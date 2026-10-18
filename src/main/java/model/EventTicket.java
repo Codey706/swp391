@@ -2,7 +2,9 @@ package model;
 
 import java.math.BigDecimal;
 
-/** Khớp bảng Event_Tickets: một loại vé của sự kiện. */
+/**
+ * Khớp bảng Event_Tickets (hạng vé của một sự kiện).
+ */
 public class EventTicket {
 
     private int eventTicketId;
@@ -12,6 +14,13 @@ public class EventTicket {
     private BigDecimal price;
     private int quantity;
     private int availableQuantity;
+    private String status;
+
+    // Chỉ dùng để hiển thị lại form khi validate lỗi, không phải cột của bảng
+    private String error;
+
+    public EventTicket() {
+    }
 
     public int getEventTicketId() {
         return eventTicketId;
@@ -69,4 +78,19 @@ public class EventTicket {
         this.availableQuantity = availableQuantity;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
 }
