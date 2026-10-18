@@ -51,6 +51,7 @@ public final class Constants {
 
     // View Booking History
     public static final int BOOKING_PAGE_SIZE = 10;
+    public static final int BOOKING_EVENT_PAGE_SIZE = 10;
     public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
 
     // Book Tickets 
