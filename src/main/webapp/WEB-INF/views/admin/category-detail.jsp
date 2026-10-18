@@ -12,7 +12,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
         <link rel="stylesheet"
-              href="<%= request.getContextPath()%>/css/admin.css?v=2">
+              href="<%= request.getContextPath()%>/css/admin.css?v=3">
     </head>
 
     <body>
@@ -76,7 +76,7 @@
                         </div>
                     </div>
 
-                    <a href="#">
+                    <a href="<%= request.getContextPath()%>/admin/venues">
                         <i class="fa-solid fa-location-dot"></i>
                         Venues
                     </a>
@@ -252,18 +252,35 @@
                             </div>
 
                             <!-- Actions -->
+
+
+
                             <div class="detail-actions">
+                                <a class="back-button"
+                                   href="<%= contextPath%>/admin/categories">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                    Back to Categories
+                                </a>
 
-                                <div class="action-left">
+                                <!-- Delete nằm bên trái Update -->
+                                <form method="post"
+                                      action="<%= contextPath%>/admin/category-delete"
+                                      style="display: inline;">
+                                    <input type="hidden" name="id"
+                                           value="<%= category.getCategoryId()%>">
 
-                                    <a class="back-button"
-                                       href="<%= contextPath%>/admin/categories">
-                                        <i class="fa-solid fa-arrow-left"></i>
-                                        Back to Categories
-                                    </a>
+                                    <button type="submit" class="delete-button">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Delete Category
+                                    </button>
+                                </form>
 
-                                </div>
-
+                                <a class="back-button"
+                                   href="<%= contextPath%>/admin/category-edit?id=<%= category.getCategoryId()%>"
+                                   style="background: #FF7043; color: white;">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Update Category
+                                </a>
                             </div>
 
                         </div>

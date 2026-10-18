@@ -646,7 +646,8 @@ public class AuthController extends HttpServlet {
 
     private void forward(HttpServletRequest request, HttpServletResponse response, String page)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/login/" + page).forward(request, response);
+        String basePath = "/WEB-INF/views/" + ("change-password.jsp".equals(page) ? "common/" : "login/");
+        request.getRequestDispatcher(basePath + page).forward(request, response);
     }
 
     @Override

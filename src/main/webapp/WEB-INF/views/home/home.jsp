@@ -20,6 +20,7 @@
 
         <!-- External CSS -->
         <link href="${pageContext.request.contextPath}/assets/css/home.css" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/assets/css/stitch-custom.css" rel="stylesheet"/>
     </head>
     <body>
         <!-- 1. NAVBAR BOOTSTRAP 5 -->
@@ -35,9 +36,7 @@
                     <a class="nav-pill-active text-decoration-none" href="#">Sự kiện</a>
                     <a class="nav-pill-idle" href="#">Địa điểm</a>
                     <a class="nav-pill-idle" href="#">Tin tức</a>
-                    <c:if test="${not empty sessionScope.user}">
-                        <a class="nav-pill-idle text-decoration-none" href="${pageContext.request.contextPath}/customer/booking-history">Vé của tôi</a>
-                    </c:if>
+                    <a class="nav-pill-idle text-decoration-none" href="${pageContext.request.contextPath}/customer/booking-history">Vé của tôi</a>
                 </div>
                 <!-- Search Input bar -->
                 <div class="flex-grow-1 mx-4 d-none d-md-block" style="max-width: 440px;">
@@ -65,7 +64,7 @@
         <div class="dropdown ms-1">
 
             <a href="#"
-               class="d-flex align-items-center text-decoration-none"
+               class="d-flex align-items-center gap-2 text-decoration-none p-1 rounded-pill"
                id="userDropdown"
                data-bs-toggle="dropdown"
                aria-expanded="false">
@@ -76,18 +75,28 @@
                             height: 36px;
                             object-fit: cover;
                             border-radius: 50%;">
+                <div class="d-none d-lg-flex flex-column text-start me-1" style="line-height:1.2;">
+                    <span class="fw-bold small text-dark">${empty sessionScope.user.fullName ? sessionScope.user.username : sessionScope.user.fullName}</span>
+                    <span class="text-secondary" style="font-size: 11px;">${empty sessionScope.user.role ? 'Khách hàng' : sessionScope.user.role}</span>
+                </div>
+                <span class="material-symbols-outlined text-secondary d-none d-lg-inline" style="font-size: 18px;">expand_more</span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0"
                 aria-labelledby="userDropdown"
-                style="border-radius: 12px; min-width: 200px;">
+                style="border-radius: 12px; min-width: 220px;">
 
-                <!-- Tài khoản của tôi -->
+                <li class="px-3 py-2 bg-light rounded-top d-lg-none border-bottom mb-1">
+                    <p class="fw-bold small text-dark mb-0">${empty sessionScope.user.fullName ? sessionScope.user.username : sessionScope.user.fullName}</p>
+                    <span class="text-secondary" style="font-size: 11px;">${empty sessionScope.user.role ? 'Khách hàng' : sessionScope.user.role}</span>
+                </li>
+
+                <!-- Hồ sơ của tôi -->
                 <li>
                     <a class="dropdown-item d-flex align-items-center gap-2 py-2"
                        href="${pageContext.request.contextPath}/CustomerProfileController">
-                        <span class="material-symbols-outlined">person</span>
-                        Tài khoản của tôi
+                        <span class="material-symbols-outlined text-secondary" style="font-size: 20px;">account_circle</span>
+                        Hồ sơ của tôi
                     </a>
                 </li>
 
@@ -95,7 +104,7 @@
                 <li>
                     <a class="dropdown-item d-flex align-items-center gap-2 py-2"
                        href="${pageContext.request.contextPath}/customer/booking-history">
-                        <span class="material-symbols-outlined">
+                        <span class="material-symbols-outlined text-secondary" style="font-size: 20px;">
                             confirmation_number
                         </span>
                         Vé của tôi
@@ -362,10 +371,10 @@
                                                     <span class="small text-muted d-block">Giá vé từ</span>
                                                     <span class="fs-4 fw-bold text-primary-custom">650.000₫</span>
                                                 </div>
-                                                <button class="btn btn-primary-custom px-4 py-3 rounded-3 d-flex align-items-center gap-2">
+                                                <a class="btn btn-primary-custom px-4 py-3 rounded-3 d-flex align-items-center gap-2" href="${pageContext.request.contextPath}/booking/select-ticket?eventId=1">
                                                     <span>Mua vé ngay</span>
                                                     <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
-                                                </button>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -1121,6 +1130,7 @@
                             <li><a class="footer-link" href="#">Tất cả sự kiện</a></li>
                             <li><a class="footer-link" href="#">Địa điểm &amp; Sân khấu</a></li>
                             <li><a class="footer-link" href="#">Cẩm nang giải trí</a></li>
+                            <li><a class="footer-link" href="${pageContext.request.contextPath}/customer/booking-history">Vé của tôi</a></li>
                         </ul>
                     </div>
                     <!-- Links Column: Hỗ trợ -->

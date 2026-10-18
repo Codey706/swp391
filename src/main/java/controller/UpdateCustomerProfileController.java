@@ -160,6 +160,23 @@ public class UpdateCustomerProfileController extends HttpServlet {
                     = userDao.updateUser(user);
 
             if (updated) {
+                // Đồng bộ thông tin mới vào session để Header cập nhật ngay lập tức
+                Object currentSessionUser = session.getAttribute("user");
+                if (currentSessionUser instanceof Auth) {
+                    Auth auth = (Auth) currentSessionUser;
+                    auth.setFullName(user.getFullName());
+                    auth.setEmail(user.getEmail());
+                    auth.setPhone(user.getPhone());
+                    auth.setAddress(user.getAddress());
+                    session.setAttribute("user", auth);
+                } else if (currentSessionUser instanceof User) {
+                    User u = (User) currentSessionUser;
+                    u.setFullName(user.getFullName());
+                    u.setEmail(user.getEmail());
+                    u.setPhone(user.getPhone());
+                    u.setAddress(user.getAddress());
+                    session.setAttribute("user", u);
+                }
 
                 response.sendRedirect(
                         request.getContextPath()

@@ -10,7 +10,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
         <link rel="stylesheet"
-              href="<%= request.getContextPath()%>/css/admin.css?v=2">
+              href="<%= request.getContextPath()%>/css/admin.css?v=3">
     </head>
 
     <body>
@@ -25,7 +25,10 @@
 
                 <div class="brand">
                     🎟 Light Ticket
+
                 </div>
+
+
 
                 <nav class="menu">
 
@@ -59,7 +62,7 @@
                     </a>
 
                     <!-- Venues -->
-                    <a href="#">
+                    <a href="<%= request.getContextPath()%>/admin/venues">
                         <i class="fa-solid fa-location-dot"></i>
                         Venues
                     </a>
@@ -100,9 +103,16 @@
                            class="search"
                            placeholder="Search...">
 
-                    <div class="admin">
-                        Admin
-                    </div>
+                    <a class="admin"
+                       href="<%= request.getContextPath()%>/admin/profile">
+
+                        <img class="admin-avatar"
+                             src="<%= request.getContextPath()%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+
+                        <span>Admin</span>
+                    </a>
+
 
                 </header>
 
@@ -195,7 +205,7 @@
 
 
                         <!-- Venues -->
-                        <a href="#"
+                        <a href="<%= request.getContextPath()%>/admin/venues"
                            class="dashboard-card">
 
                             <div class="dashboard-icon">
