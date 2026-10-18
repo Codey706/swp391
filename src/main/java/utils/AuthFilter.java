@@ -1,4 +1,4 @@
-package filter;
+package utils;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -12,13 +12,13 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebFilter(urlPatterns = {
-    "/...",
-    "/....",
-    "/.....",
-    "/......",
-    "/change-password",
-    "/booking/*"
+    "/admin", "/admin/*",
+    "/organizer/*",
+    "/customer/*",
+    "/CustomerProfileController",
+    "/UpdateCustomerProfileController"
 })
+
 public class AuthFilter implements Filter {
 
     @Override

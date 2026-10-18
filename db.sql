@@ -340,3 +340,113 @@ VALUES
 (2, 1, 2, 5, N'Sự kiện rất tuyệt vời, âm thanh đỉnh cao!', 'ACTIVE'),
 (2, 2, 1, 4, N'Sân khấu đẹp nhưng ghế ngồi hơi chật.', 'ACTIVE');
 GO
+
+-- =========================================================
+-- 17-19. ORGANIZER PROFILE (UC-20): bảng hồ sơ mở rộng + quy tắc giấy phép kinh doanh + dữ liệu demo
+-- (cùng nội dung với db-organizer-profile.sql dành cho DB đã tồn tại)
+-- =========================================================
+-- 17. ORGANIZER PROFILES: thông tin mở rộng, quan hệ 1-1 với Users
+IF OBJECT_ID('Organizer_Profiles', 'U') IS NULL
+CREATE TABLE Organizer_Profiles (
+    user_id INT NOT NULL PRIMARY KEY FOREIGN KEY REFERENCES Users(user_id),
+    summary NVARCHAR(300) NULL,                 -- mô tả ngắn giới thiệu đơn vị
+    logo_url VARCHAR(500) NULL,                 -- logo 1:1
+    cover_url VARCHAR(500) NULL,                -- ảnh bìa 16:9
+    tax_code VARCHAR(20) NULL,                  -- mã số thuế doanh nghiệp
+    legal_representative NVARCHAR(150) NULL,    -- người đại diện pháp luật & chức vụ
+    website_url VARCHAR(500) NULL,
+    facebook_url VARCHAR(500) NULL,
+    youtube_url VARCHAR(500) NULL,              -- YouTube / TikTok
+    spotify_url VARCHAR(500) NULL,
+    bank_name NVARCHAR(150) NULL,               -- ngân hàng - chi nhánh
+    bank_account_number VARCHAR(30) NULL,
+    bank_account_holder NVARCHAR(150) NULL,
+    -- Các cột do Admin quản lý, Organizer chỉ xem (không có trong form chỉnh sửa)
+    kyc_level TINYINT NOT NULL DEFAULT 0 CHECK (kyc_level BETWEEN 0 AND 2),
+    verification_status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (verification_status IN ('PENDING', 'VERIFIED', 'REJECTED')),
+    partner_tier NVARCHAR(50) NULL,             -- ví dụ: Đối tác Bạch Kim
+    withdrawal_limit DECIMAL(18,2) NULL,        -- NULL = không giới hạn
+    created_at DATETIME2 DEFAULT GETDATE(),
+    updated_at DATETIME2 DEFAULT GETDATE()
+);
+GO
+
+-- Mã số thuế không được trùng giữa các tổ chức (bỏ qua NULL)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Organizer_Profiles_tax_code')
+CREATE UNIQUE INDEX UX_Organizer_Profiles_tax_code
+    ON Organizer_Profiles(tax_code) WHERE tax_code IS NOT NULL;
+GO
+
+-- 18. ORGANIZER CATEGORIES: thể loại sự kiện chuyên trách (dùng lại bảng Categories)
+IF OBJECT_ID('Organizer_Categories', 'U') IS NULL
+CREATE TABLE Organizer_Categories (
+    user_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id),
+    category_id INT NOT NULL FOREIGN KEY REFERENCES Categories(category_id),
+    PRIMARY KEY (user_id, category_id)
+);
+GO
+
+-- 19. ORGANIZER DOCUMENTS: tài liệu pháp lý (Admin duyệt)
+IF OBJECT_ID('Organizer_Documents', 'U') IS NULL
+CREATE TABLE Organizer_Documents (
+    document_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id),
+    doc_type VARCHAR(30) NOT NULL
+        CHECK (doc_type IN ('BUSINESS_LICENSE', 'PERFORMANCE_PERMIT', 'COPYRIGHT_CONTRACT', 'OTHER')),
+    doc_name NVARCHAR(200) NOT NULL,            -- tên file người dùng tải lên
+    file_name VARCHAR(200) NOT NULL,            -- tên file đã lưu trên server (không phải đường dẫn)
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    uploaded_at DATETIME2 DEFAULT GETDATE(),
+    reviewed_at DATETIME2 NULL
+);
+GO
+
+-- QUY TẮC NGHIỆP VỤ: tổ chức chỉ được xác minh (VERIFIED) khi có Giấy phép kinh doanh đã được duyệt.
+-- Trigger chỉ kiểm tra khi verification_status chuyển sang VERIFIED, nên không chặn
+-- Organizer cập nhật hồ sơ (các lệnh cập nhật hồ sơ không đụng tới cột này).
+CREATE OR ALTER TRIGGER TR_Organizer_Profiles_RequireBusinessLicense
+ON Organizer_Profiles
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        LEFT JOIN deleted d ON d.user_id = i.user_id
+        WHERE i.verification_status = 'VERIFIED'
+          AND (d.user_id IS NULL OR d.verification_status <> 'VERIFIED')
+          AND NOT EXISTS (
+                SELECT 1 FROM Organizer_Documents od
+                WHERE od.user_id = i.user_id
+                  AND od.doc_type = 'BUSINESS_LICENSE'
+                  AND od.status = 'APPROVED')
+    )
+    BEGIN
+        RAISERROR (N'Phải có Giấy phép kinh doanh đã được duyệt mới được xác minh tổ chức.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
+
+-- Dữ liệu demo cho organizer01 (bỏ qua nếu đã có). Giấy phép KD phải được duyệt trước khi VERIFIED.
+IF NOT EXISTS (SELECT 1 FROM Organizer_Documents WHERE doc_type = 'BUSINESS_LICENSE'
+               AND user_id = (SELECT user_id FROM Users WHERE username = 'organizer01'))
+INSERT INTO Organizer_Documents (user_id, doc_type, doc_name, file_name, status, reviewed_at)
+SELECT user_id, 'BUSINESS_LICENSE', N'Giấy ĐKKD.pdf', 'demo-business-license.pdf', 'APPROVED', GETDATE()
+FROM Users WHERE username = 'organizer01';
+GO
+
+-- Hồ sơ demo cho organizer01
+IF NOT EXISTS (SELECT 1 FROM Organizer_Profiles WHERE user_id = (SELECT user_id FROM Users WHERE username = 'organizer01'))
+INSERT INTO Organizer_Profiles (user_id, summary, tax_code, legal_representative, website_url,
+                                bank_name, bank_account_number, bank_account_holder,
+                                kyc_level, verification_status)
+SELECT user_id, N'Đơn vị tổ chức các đêm nhạc acoustic và workshop sáng tạo tại Đà Lạt.',
+       '0315894120', N'Nguyễn Minh Anh - Tổng Giám Đốc', 'https://example.com',
+       N'Vietcombank - CN Đà Lạt', '0071000882688', N'CONG TY TNHH MAY LANG THANG PRODUCTION',
+       2, 'VERIFIED'
+FROM Users WHERE username = 'organizer01';
+GO
