@@ -2,6 +2,8 @@ package model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Khớp bảng Orders (một Booking = một đơn đặt vé của Customer). */
 public class Booking {
@@ -23,6 +25,15 @@ public class Booking {
     private String eventImage;
     private String venueName;
     private String ticketName;
+
+     // ===== Chỉ có khi xem chi tiết đơn (UC-07.1) =====
+    private String voucherCode;
+    private String voucherName;
+    private String venueAddress;
+    private LocalDateTime eventEndTime;
+    private List<BookingItem> items = new ArrayList<>();
+    private List<String> seatLabels = new ArrayList<>();
+    private Payment payment;
 
     public Booking() {
     }
@@ -146,4 +157,62 @@ public class Booking {
     public void setTicketName(String ticketName) {
         this.ticketName = ticketName;
     }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public String getVoucherName() {
+        return voucherName;
+    }
+
+    public void setVoucherName(String voucherName) {
+        this.voucherName = voucherName;
+    }
+
+    public String getVenueAddress() {
+        return venueAddress;
+    }
+
+    public void setVenueAddress(String venueAddress) {
+        this.venueAddress = venueAddress;
+    }
+
+    public LocalDateTime getEventEndTime() {
+        return eventEndTime;
+    }
+
+    public void setEventEndTime(LocalDateTime eventEndTime) {
+        this.eventEndTime = eventEndTime;
+    }
+
+    public List<BookingItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<BookingItem> items) {
+        this.items = items;
+    }
+
+    public List<String> getSeatLabels() {
+        return seatLabels;
+    }
+
+    public void setSeatLabels(List<String> seatLabels) {
+        this.seatLabels = seatLabels;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
+
+   
 }

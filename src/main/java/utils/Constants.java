@@ -53,33 +53,17 @@ public final class Constants {
     public static final int BOOKING_PAGE_SIZE = 10;
     public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
 
-    // Booking: Select Event
-    public static final int BOOKING_EVENT_PAGE_SIZE = 9;
-    public static final int MAX_TICKETS_PER_ORDER = 10;
-    public static final String SESSION_BOOKING_SELECTION = "bookingSelection";
-    public static final String BOOKING_CHECKOUT_URL = "/booking/checkout";
+    // Book Tickets 
+    public static final int BOOKING_MAX_TICKETS_PER_ORDER = 10;
+    public static final int BOOKING_HOLD_SECONDS = 600;
+    public static final int VOUCHER_CODE_MAX_LENGTH = 50;
 
-    // Manage My Organizer Profile (khớp Users: full_name NVARCHAR(100), email VARCHAR(255), address NVARCHAR(255))
-    public static final String SESSION_ORGANIZER_PROFILE_CSRF = "organizerProfileCsrf";
-    public static final String SESSION_ORGANIZER_PROFILE_SUCCESS = "organizerProfileSuccess";
-    public static final int PROFILE_FULL_NAME_MIN_LENGTH = 2;
-    public static final int PROFILE_FULL_NAME_MAX_LENGTH = 100;
-    public static final int PROFILE_EMAIL_MAX_LENGTH = 255;
-    public static final int PROFILE_ADDRESS_MAX_LENGTH = 255;
+    // Event_Seats.status
+    public static final String SEAT_AVAILABLE = "Available";
+    public static final String SEAT_HELD = "Held";
+    public static final String SEAT_SOLD = "Sold";
 
-    // Hồ sơ mở rộng của Organizer (khớp Organizer_Profiles)
-    public static final int PROFILE_SUMMARY_MAX_LENGTH = 300;
-    public static final int PROFILE_LEGAL_REP_MIN_LENGTH = 2;
-    public static final int PROFILE_LEGAL_REP_MAX_LENGTH = 150;
-    public static final int PROFILE_URL_MAX_LENGTH = 500;
-    public static final int PROFILE_BANK_NAME_MAX_LENGTH = 150;
-    public static final int PROFILE_BANK_HOLDER_MAX_LENGTH = 150;
-    public static final int PROFILE_DOC_NAME_MAX_LENGTH = 200;
-    public static final long PROFILE_IMAGE_MAX_SIZE = 5L * 1024 * 1024;
-    public static final long PROFILE_DOCUMENT_MAX_SIZE = 5L * 1024 * 1024;
-    public static final String PROFILE_VERIFIED = "VERIFIED";
-    public static final String DOC_PENDING = "PENDING";
-    public static final String DOC_APPROVED = "APPROVED";
-    // Tài liệu pháp lý lưu ngoài thư mục web (không public): ${user.home}/ltm-uploads/organizer-docs
-    public static final String PRIVATE_DOC_DIR_NAME = "ltm-uploads/organizer-docs";
+    // Tickets.ticket_status
+    public static final String TICKET_CHECKED_IN = "CheckedIn";
+
 }

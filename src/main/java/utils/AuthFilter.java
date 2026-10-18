@@ -16,7 +16,8 @@ import java.io.IOException;
     "/....",
     "/.....",
     "/......",
-    "/change-password"
+    "/change-password",
+    "/booking/*"
 })
 public class AuthFilter implements Filter {
 
