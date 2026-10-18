@@ -67,6 +67,12 @@ public final class Constants {
     public static final int PROFILE_EMAIL_MAX_LENGTH = 255;
     public static final int PROFILE_ADDRESS_MAX_LENGTH = 255;
 
+    // Manage My Staff Profile (Users: full_name NVARCHAR(100), email VARCHAR(255), address NVARCHAR(255))
+    public static final String ROLE_STAFF = "Staff";
+    public static final String SESSION_STAFF_PROFILE_CSRF = "staffProfileCsrf";
+    public static final String SESSION_STAFF_PROFILE_SUCCESS = "staffProfileSuccess";
+    public static final String EVENT_STAFF_ACTIVE = "ACTIVE";
+
     // Hồ sơ mở rộng của Organizer (khớp Organizer_Profiles)
     public static final int PROFILE_SUMMARY_MAX_LENGTH = 300;
     public static final int PROFILE_LEGAL_REP_MIN_LENGTH = 2;
