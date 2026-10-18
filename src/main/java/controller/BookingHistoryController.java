@@ -15,6 +15,7 @@ import java.util.Set;
 import model.Auth;
 import model.Booking;
 import model.User;
+import model.Auth;
 import utils.Constants;
 import utils.ValidationUtils;
 
@@ -171,5 +172,26 @@ public class BookingHistoryController extends HttpServlet {
         response.sendRedirect(
                 request.getContextPath() + "/Auth?action=login"
         );
+    }
+
+    /** Chuyển đối tượng trong session (Auth hoặc User) về User; kiểu khác/null trả về null. */
+    private User toUser(Object sessionUser) {
+        if (sessionUser instanceof User) {
+            return (User) sessionUser;
+        }
+        if (sessionUser instanceof Auth) {
+            Auth auth = (Auth) sessionUser;
+            User user = new User();
+            user.setUserId(auth.getUserId());
+            user.setUsername(auth.getUsername());
+            user.setFullName(auth.getFullName());
+            user.setEmail(auth.getEmail());
+            user.setPhone(auth.getPhone());
+            user.setAddress(auth.getAddress());
+            user.setRole(auth.getRole());
+            user.setStatus(auth.getStatus());
+            return user;
+        }
+        return null;
     }
 }

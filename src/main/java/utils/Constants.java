@@ -30,6 +30,14 @@ public final class Constants {
     public static final long EVENT_IMAGE_MAX_SIZE = 5L * 1024 * 1024;
     public static final String UPLOAD_DIR = "/assets/uploads";
 
+    // Hạng vé (Event_Tickets) khi tạo sự kiện: ticket_name NVARCHAR(100), description NVARCHAR(500)
+    public static final String TICKET_ACTIVE = "ACTIVE";
+    public static final int TICKET_MAX_TYPES = 10;
+    public static final int TICKET_NAME_MAX_LENGTH = 100;
+    public static final int TICKET_DESCRIPTION_MAX_LENGTH = 500;
+    public static final long TICKET_MAX_PRICE = 100_000_000L;
+    public static final int TICKET_MAX_QUANTITY = 1_000_000;
+
     // View Event List
     public static final int EVENT_PAGE_SIZE = 10;
 

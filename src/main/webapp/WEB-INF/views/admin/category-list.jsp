@@ -9,7 +9,10 @@
         <title>Category Management - Light Ticket</title>
 
         <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/css/admin.css">
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/css/admin.css?v=3">
     </head>
 
     <body>
@@ -47,55 +50,77 @@
 
                 <nav class="menu">
 
-                    <a href="<%= request.getContextPath()%>/admin">
-                        📊 Dashboard
+                    <!-- Dashboard -->
+                    <a href="<%= contextPath%>/admin">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
                     </a>
 
-                    <!-- Users Menu -->
+                    <!-- Users -->
                     <div class="menu-group">
 
-                        <a href="<%= contextPath%>/admin/users"
-                           class="menu-parent">
-                            <span>♟ &nbsp; Users</span>
-                            <span class="arrow">▼</span>
+                        <a href="<%= contextPath%>/admin/users">
+                            <i class="fa-solid fa-users"></i>
+                            Users
                         </a>
-
-                        <div class="submenu">
-
-                            <a href="<%= contextPath%>/admin/users">
-                                ▪ &nbsp; Users List
-                            </a>
-
-                        </div>
 
                     </div>
 
-                    <a href="#">▣ &nbsp; Events</a>
+                    <!-- Events -->
+                    <a href="#">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        Events
+                    </a>
 
                     <!-- Categories -->
                     <div class="menu-group">
 
                         <a href="<%= contextPath%>/admin/categories"
                            class="menu-parent open">
-                            <span>▤ &nbsp; Categories</span>
+
+                            <span>
+                                <i class="fa-solid fa-folder"></i>
+                                Categories
+                            </span>
+
                             <span class="arrow">▼</span>
+
                         </a>
 
                         <div class="submenu">
 
                             <a href="<%= contextPath%>/admin/categories"
                                class="active">
-                                ▪ &nbsp; Categories List
+                                Categories List
                             </a>
 
                         </div>
 
                     </div>
 
-                    <a href="#">⌖ &nbsp; Venues</a>
-                    <a href="#">🎟 &nbsp; Vouchers</a>
-                    <a href="#">☆ &nbsp; Reviews</a>
-                    <a href="#">♙ &nbsp; My Profile</a>
+                    <!-- Venues -->
+                    <a href="<%= request.getContextPath()%>/admin/venues">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Venues
+                    </a>
+
+                    <!-- Vouchers -->
+                    <a href="#">
+                        <i class="fa-solid fa-ticket"></i>
+                        Vouchers
+                    </a>
+
+                    <!-- Reviews -->
+                    <a href="#">
+                        <i class="fa-solid fa-star"></i>
+                        Reviews
+                    </a>
+
+                    <!-- My Profile -->
+                    <a href="#">
+                        <i class="fa-solid fa-user"></i>
+                        My Profile
+                    </a>
 
                 </nav>
 
@@ -109,7 +134,12 @@
                     <input class="search" type="text"
                            placeholder="⌕  Search...">
 
-                    <div class="admin">🔔 &nbsp; Admin &nbsp;⌄</div>
+                    <a class="admin" href="<%= contextPath%>/admin/profile">
+                        <img class="admin-avatar"
+                             src="<%= contextPath%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </a>
 
                 </header>
 
@@ -236,10 +266,11 @@
 
                                         <td>
 
-                                            <button class="view-button"
-                                                    type="button">
+
+                                            <a class="view-button"
+                                               href="<%= contextPath%>/admin/category-detail?id=<%= category.getCategoryId()%>">
                                                 View
-                                            </button>
+                                            </a>
 
                                         </td>
 

@@ -10,7 +10,10 @@
         <title>User Management - Light Ticket</title>
 
         <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/css/admin.css">
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+        <link rel="stylesheet"
+              href="${pageContext.request.contextPath}/css/admin.css?v=3">
     </head>
 
     <body>
@@ -60,38 +63,73 @@
 
                 <nav class="menu">
 
+                    <!-- Dashboard -->
                     <a href="<%= request.getContextPath()%>/admin">
-                        📊 Dashboard
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
                     </a>
 
-                    <!-- Users Menu -->
+                    <!-- Users -->
                     <div class="menu-group">
 
                         <a href="<%= contextPath%>/admin/users"
                            class="menu-parent open">
-                            <span>♟ &nbsp; Users</span>
+
+                            <span>
+                                <i class="fa-solid fa-users"></i>
+                                Users
+                            </span>
+
                             <span class="arrow">▼</span>
+
                         </a>
 
                         <div class="submenu">
 
                             <a href="<%= contextPath%>/admin/users"
                                class="active">
-                                ▪ &nbsp; Users List
+                                User List
                             </a>
 
                         </div>
 
                     </div>
 
-                    <a href="#">▣ &nbsp; Events</a>
-                    <a href="<%= contextPath%>/admin/categories">
-                        ▤ &nbsp; Categories
+                    <!-- Events -->
+                    <a href="#">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        Events
                     </a>
-                    <a href="#">⌖ &nbsp; Venues</a>
-                    <a href="#">🎟 &nbsp; Vouchers</a>
-                    <a href="#">☆ &nbsp; Reviews</a>
-                    <a href="#">♙ &nbsp; My Profile</a>
+
+                    <!-- Categories -->
+                    <a href="<%= request.getContextPath()%>/admin/categories">
+                        <i class="fa-solid fa-folder"></i>
+                        Categories
+                    </a>
+
+                    <!-- Venues -->
+                    <a href="<%= request.getContextPath()%>/admin/venues">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Venues
+                    </a>
+
+                    <!-- Vouchers -->
+                    <a href="#">
+                        <i class="fa-solid fa-ticket"></i>
+                        Vouchers
+                    </a>
+
+                    <!-- Reviews -->
+                    <a href="#">
+                        <i class="fa-solid fa-star"></i>
+                        Reviews
+                    </a>
+
+                    <!-- My Profile -->
+                    <a href="#">
+                        <i class="fa-solid fa-user"></i>
+                        My Profile
+                    </a>
 
                 </nav>
 
@@ -105,7 +143,12 @@
                     <input class="search" type="text"
                            placeholder="⌕  Search...">
 
-                    <div class="admin">🔔 &nbsp; Admin &nbsp;⌄</div>
+                    <a class="admin" href="<%= contextPath%>/admin/profile">
+                        <img class="admin-avatar"
+                             src="<%= contextPath%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </a>
 
                 </header>
 
@@ -162,12 +205,6 @@
                                 <h2>Users List</h2>
                                 <p>Danh sách tất cả người dùng trong hệ thống</p>
                             </div>
-
-                            <button class="add-button"
-                                    type="button"
-                                    onclick="window.location.href = '<%= contextPath%>/admin/user-create'">
-                                + &nbsp; Add New User
-                            </button>
                         </div>
 
                         <div class="table-wrapper">

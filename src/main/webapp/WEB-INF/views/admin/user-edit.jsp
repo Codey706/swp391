@@ -12,7 +12,10 @@
         <title>Update User - Light Ticket</title>
 
         <link rel="stylesheet"
-              href="<%= request.getContextPath()%>/css/admin.css?v=2">
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+        <link rel="stylesheet"
+              href="<%= request.getContextPath()%>/css/admin.css?v=3">
 
     </head>
 
@@ -28,73 +31,84 @@
             <!-- Sidebar -->
             <aside class="sidebar">
 
-                <div class="brand">
-                    🎟 Light Ticket
-                </div>
+                <div class="brand">🎟 Light Ticket</div>
 
                 <nav class="menu">
 
-                    <a href="#">
-                        ⌂ &nbsp; Dashboard
+                    <!-- Dashboard -->
+                    <a href="<%= contextPath%>/admin">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
                     </a>
 
+                    <!-- Users -->
                     <div class="menu-group">
 
                         <a href="<%= contextPath%>/admin/users"
                            class="menu-parent open">
 
                             <span>
-                                ♟ &nbsp; Users
+                                <i class="fa-solid fa-users"></i>
+                                Users
                             </span>
 
-                            <span class="arrow">
-                                ▼
-                            </span>
-
+                            <span class="arrow">▼</span>
                         </a>
 
                         <div class="submenu">
 
                             <a href="<%= contextPath%>/admin/users">
-                                ▪ &nbsp; Users List
+                                User List
                             </a>
 
                             <a href="<%= contextPath%>/admin/user-detail?id=<%= user.getUserId()%>"
                                class="active">
-                                ▪ &nbsp; User Detail
+                                User Detail
                             </a>
 
                         </div>
-
                     </div>
 
+                    <!-- Events -->
                     <a href="#">
-                        ▣ &nbsp; Events
+                        <i class="fa-solid fa-calendar-days"></i>
+                        Events
                     </a>
 
+                    <!-- Categories -->
                     <a href="<%= contextPath%>/admin/categories">
-                        ▤ &nbsp; Categories
+                        <i class="fa-solid fa-folder"></i>
+                        Categories
                     </a>
 
-                    <a href="#">
-                        ⌖ &nbsp; Venues
+                    <!-- Venues -->
+                    <a href="<%= request.getContextPath()%>/admin/venues">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Venues
                     </a>
 
+                    <!-- Vouchers -->
                     <a href="#">
-                        🎟 &nbsp; Vouchers
+                        <i class="fa-solid fa-ticket"></i>
+                        Vouchers
                     </a>
 
+                    <!-- Reviews -->
                     <a href="#">
-                        ☆ &nbsp; Reviews
+                        <i class="fa-solid fa-star"></i>
+                        Reviews
                     </a>
 
+                    <!-- My Profile -->
                     <a href="#">
-                        ♙ &nbsp; My Profile
+                        <i class="fa-solid fa-user"></i>
+                        My Profile
                     </a>
 
                 </nav>
-
             </aside>
+
+
 
             <main class="main">
 
@@ -105,20 +119,18 @@
                            type="text"
                            placeholder="⌕  Search...">
 
-                    <div class="admin">
-                        🔔 &nbsp; Admin &nbsp;⌄
-                    </div>
+                    <a class="admin" href="<%= contextPath%>/admin/profile">
+                        <img class="admin-avatar"
+                             src="<%= contextPath%>/assets/icons/user_icon.png"
+                             alt="Admin Avatar">
+                        <span>Admin</span>
+                    </a>
 
                 </header>
 
                 <section class="content">
 
                     <div class="edit-container">
-
-                        <div class="breadcrumb">
-                            Home &nbsp; / &nbsp; User Management
-                            &nbsp; / &nbsp; Update User
-                        </div>
 
                         <div class="page-heading">
 
@@ -232,14 +244,18 @@
 
                                     <!-- Role -->
                                     <div class="edit-form-group">
+                                        <label class="edit-form-label">Role</label>
 
-                                        <label class="edit-form-label">
-                                            Role
-                                        </label>
+                                        <% if ("ADMIN".equalsIgnoreCase(user.getRole())) { %>
 
-                                        <select class="edit-form-select"
-                                                name="role">
+                                        <input class="edit-form-input readonly"
+                                               type="text"
+                                               value="Admin"
+                                               readonly>
 
+                                        <% } else {%>
+
+                                        <select class="edit-form-select" name="role">
                                             <option value="CUSTOMER"
                                                     <%= "CUSTOMER".equalsIgnoreCase(user.getRole())
                                                             ? "selected" : ""%>>
@@ -257,15 +273,9 @@
                                                             ? "selected" : ""%>>
                                                 Staff
                                             </option>
-
-                                            <option value="ADMIN"
-                                                    <%= "ADMIN".equalsIgnoreCase(user.getRole())
-                                                            ? "selected" : ""%>>
-                                                Admin
-                                            </option>
-
                                         </select>
 
+                                        <% }%>
                                     </div>
 
                                     <!-- Status -->
