@@ -105,7 +105,7 @@
                     </a>
 
                     <!-- Vouchers -->
-                    <a href="#">
+                    <a href="<%= contextPath%>/admin/vouchers">
                         <i class="fa-solid fa-ticket"></i>
                         Vouchers
                     </a>
