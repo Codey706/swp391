@@ -117,7 +117,7 @@
                     </a>
 
                     <!-- My Profile -->
-                    <a href="#">
+                    <a href="${pageContext.request.contextPath}/admin/profile">
                         <i class="fa-solid fa-user"></i>
                         My Profile
                     </a>
