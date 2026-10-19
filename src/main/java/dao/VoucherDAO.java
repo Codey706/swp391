@@ -107,4 +107,44 @@ public class VoucherDAO {
 
         return vouchers;
     }
+
+    public void createVoucher(Voucher voucher) throws SQLException {
+
+        String sql = "INSERT INTO Vouchers "
+                + "(voucher_code, voucher_name, discount_type, "
+                + "discount_value, min_order_amount, max_discount_amount, "
+                + "start_time, end_time, usage_limit, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, voucher.getVoucherCode());
+            statement.setString(2, voucher.getVoucherName());
+            statement.setString(3, voucher.getDiscountType());
+            statement.setBigDecimal(4, voucher.getDiscountValue());
+            statement.setBigDecimal(5, voucher.getMinOrderAmount());
+
+            if (voucher.getMaxDiscountAmount() != null) {
+                statement.setBigDecimal(6, voucher.getMaxDiscountAmount());
+            } else {
+                statement.setNull(6, java.sql.Types.DECIMAL);
+            }
+
+            statement.setTimestamp(
+                    7,
+                    Timestamp.valueOf(voucher.getStartTime())
+            );
+
+            statement.setTimestamp(
+                    8,
+                    Timestamp.valueOf(voucher.getEndTime())
+            );
+
+            statement.setInt(9, voucher.getUsageLimit());
+            statement.setString(10, voucher.getStatus());
+
+            statement.executeUpdate();
+        }
+    }
+
 }
