@@ -68,7 +68,7 @@
                     </a>
 
                     <!-- Vouchers -->
-                    <a href="#">
+                    <a href="<%= request.getContextPath()%>/admin/vouchers">
                         <i class="fa-solid fa-ticket"></i>
                         Vouchers
                     </a>
@@ -226,7 +226,7 @@
 
 
                         <!-- Vouchers -->
-                        <a href="#"
+                        <a href="<%= request.getContextPath()%>/admin/vouchers"
                            class="dashboard-card">
 
                             <div class="dashboard-icon">

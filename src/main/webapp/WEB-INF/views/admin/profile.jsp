@@ -36,7 +36,7 @@
                     <a href="<%=cp%>/admin/venues">
                         <i class="fa-solid fa-location-dot"></i> Venues
                     </a>
-                    <a href="#">
+                    <a href="<%=cp%>/admin/vouchers">
                         <i class="fa-solid fa-ticket"></i> Vouchers
                     </a>
                     <a href="#">
