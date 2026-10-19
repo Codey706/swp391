@@ -190,7 +190,7 @@
 
                             <button class="add-button"
                                     type="button"
-                                    onclick="alert('Add Voucher feature is coming soon.')">
+                                    onclick="window.location.href = '<%= contextPath%>/admin/vouchers?action=create'">
                                 + &nbsp; Add New Voucher
                             </button>
 
