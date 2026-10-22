@@ -1,4 +1,4 @@
-package controller;
+package controller.Staff;
 
 import dao.StaffProfileDAO;
 import dao.UserDAO;
