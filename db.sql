@@ -1,6 +1,6 @@
 ﻿-- =========================================================
 -- SYSTEM: Light Ticket Management (LTM)
--- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES)
+-- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES + SEAT MAP + ORGANIZER PROFILE)
 -- =========================================================
 
 USE master;
@@ -239,6 +239,50 @@ CREATE TABLE Reviews (
 GO
 
 -- =========================================================
+-- SEAT MAP THEO TỪNG SỰ KIỆN (Organizer thiết kế sơ đồ kiểu Ticketbox)
+-- (gộp từ seatmap.sql; các lệnh đều có kiểm tra tồn tại nên an toàn khi chạy lại)
+-- Phải đặt sau khi đã tạo Events, Event_Tickets, Event_Seats và trước phần INSERT demo.
+-- =========================================================
+
+-- 16a. Khu vực của sơ đồ: sân khấu / khu ngồi (hàng x ghế) / khu đứng
+IF OBJECT_ID('Event_Zones', 'U') IS NULL
+BEGIN
+    CREATE TABLE Event_Zones (
+        zone_id INT IDENTITY(1,1) PRIMARY KEY,
+        event_id INT NOT NULL FOREIGN KEY REFERENCES Events(event_id),
+        event_ticket_id INT NULL FOREIGN KEY REFERENCES Event_Tickets(event_ticket_id), -- hạng vé (giá) của khu; NULL với sân khấu
+        zone_name NVARCHAR(100) NOT NULL,
+        zone_type VARCHAR(20) NOT NULL,            -- SEATED, STANDING, STAGE
+        color VARCHAR(7) NOT NULL DEFAULT '#FF7043',
+        pos_x INT NOT NULL,
+        pos_y INT NOT NULL,
+        width INT NOT NULL,
+        height INT NOT NULL,
+        row_count INT NOT NULL DEFAULT 0,          -- chỉ khu ngồi
+        seats_per_row INT NOT NULL DEFAULT 0,      -- chỉ khu ngồi
+        capacity INT NOT NULL DEFAULT 0,           -- số chỗ bán được (khu ngồi = số ghế thực tế)
+        blocked_seats NVARCHAR(MAX) NULL,          -- ghế bỏ trống/lối đi, dạng "r:c,r:c" (chỉ số từ 0)
+        sort_order INT NOT NULL DEFAULT 0,
+        CONSTRAINT UQ_Event_Zones_Name UNIQUE (event_id, zone_name)
+    );
+END
+GO
+
+-- 16b. Event_Seats thuộc về một khu
+IF COL_LENGTH('Event_Seats', 'zone_id') IS NULL
+    ALTER TABLE Event_Seats ADD zone_id INT NULL;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Event_Seats_Zone')
+    ALTER TABLE Event_Seats
+        ADD CONSTRAINT FK_Event_Seats_Zone FOREIGN KEY (zone_id) REFERENCES Event_Zones(zone_id);
+GO
+
+-- 16c. Ghế do Organizer tự vẽ không có ghế gốc trong bảng Seats (mẫu theo địa điểm)
+ALTER TABLE Event_Seats ALTER COLUMN source_seat_id INT NULL;
+GO
+
+-- =========================================================
 -- INSERT DEMO DATA (2 RECORDS PER TABLE)
 -- =========================================================
 
@@ -352,6 +396,8 @@ CREATE TABLE Organizer_Profiles (
     summary NVARCHAR(300) NULL,                 -- mô tả ngắn giới thiệu đơn vị
     logo_url VARCHAR(500) NULL,                 -- logo 1:1
     cover_url VARCHAR(500) NULL,                -- ảnh bìa 16:9
+    cover_scale INT NOT NULL DEFAULT 100 CHECK (cover_scale BETWEEN 50 AND 200),  -- % kích thước hiển thị ảnh bìa (không đổi tệp gốc)
+    logo_scale INT NOT NULL DEFAULT 100 CHECK (logo_scale BETWEEN 50 AND 200),    -- % kích thước hiển thị logo
     tax_code VARCHAR(20) NULL,                  -- mã số thuế doanh nghiệp
     legal_representative NVARCHAR(150) NULL,    -- người đại diện pháp luật & chức vụ
     website_url VARCHAR(500) NULL,
@@ -370,6 +416,18 @@ CREATE TABLE Organizer_Profiles (
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
+GO
+
+-- Nâng cấp DB đã có sẵn bảng Organizer_Profiles (chưa có cột kích thước hiển thị ảnh); bỏ qua nếu đã có
+IF COL_LENGTH('Organizer_Profiles', 'cover_scale') IS NULL
+    ALTER TABLE Organizer_Profiles ADD cover_scale INT NOT NULL
+        CONSTRAINT DF_Organizer_Profiles_cover_scale DEFAULT 100
+        CONSTRAINT CK_Organizer_Profiles_cover_scale CHECK (cover_scale BETWEEN 50 AND 200);
+GO
+IF COL_LENGTH('Organizer_Profiles', 'logo_scale') IS NULL
+    ALTER TABLE Organizer_Profiles ADD logo_scale INT NOT NULL
+        CONSTRAINT DF_Organizer_Profiles_logo_scale DEFAULT 100
+        CONSTRAINT CK_Organizer_Profiles_logo_scale CHECK (logo_scale BETWEEN 50 AND 200);
 GO
 
 -- Mã số thuế không được trùng giữa các tổ chức (bỏ qua NULL)
