@@ -2,6 +2,7 @@ package dao;
 
 import model.Event;
 import model.EventTicket;
+import model.EventZone;
 import utils.Constants;
 import utils.DBContext; // TODO: giả định DBContext.getConnection() là static, trả về java.sql.Connection
 
@@ -161,6 +162,99 @@ public class EventDAO {
     }
 
     /**
+     * Tạo sự kiện kèm hạng vé + sơ đồ ghế (khu, ghế) trong cùng một
+     * transaction: lỗi ở đâu thì rollback hết, không để sự kiện tạo dở dang.
+     * Thành công thì gán eventId vào đối tượng event.
+     */
+    public boolean createEventWithSeatMap(Event event, List<EventZone> zones, List<SeatMapDAO.TicketChange> tickets) {
+        try (Connection connection = DBContext.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_EVENT, Statement.RETURN_GENERATED_KEYS)) {
+                    statement.setInt(1, event.getOrganizerId());
+                    statement.setInt(2, event.getCategoryId());
+                    statement.setInt(3, event.getVenueId());
+                    statement.setString(4, event.getEventName());
+                    statement.setString(5, event.getDescription());
+                    if (event.getEventImage() == null) {
+                        statement.setNull(6, Types.VARCHAR);
+                    } else {
+                        statement.setString(6, event.getEventImage());
+                    }
+                    statement.setTimestamp(7, Timestamp.valueOf(event.getStartTime()));
+                    statement.setTimestamp(8, Timestamp.valueOf(event.getEndTime()));
+                    statement.setString(9, event.getStatus());
+                    if (statement.executeUpdate() == 0) {
+                        connection.rollback();
+                        return false;
+                    }
+                    try (ResultSet keys = statement.getGeneratedKeys()) {
+                        if (!keys.next()) {
+                            connection.rollback();
+                            return false;
+                        }
+                        event.setEventId(keys.getInt(1));
+                    }
+                }
+                new SeatMapDAO().writeLayout(connection, event.getEventId(), zones, tickets);
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            event.setEventId(0);
+            return false;
+        }
+    }
+
+    /**
+     * Sức chứa của tất cả địa điểm đang hoạt động (venue_id -> capacity), để
+     * form tạo sự kiện kiểm tra sơ đồ ghế theo địa điểm đang chọn.
+     */
+    public Map<Integer, Integer> getVenueCapacities() {
+        Map<Integer, Integer> result = new LinkedHashMap<>();
+        String sql = "SELECT venue_id, capacity FROM Venues WHERE status = 'ACTIVE'";
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                result.put(rs.getInt(1), rs.getInt(2));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * Gửi sự kiện cho Admin duyệt: chỉ chuyển DRAFT/REJECTED của chính
+     * organizer sang PENDING_APPROVAL.
+     *
+     * @return true nếu đã chuyển trạng thái
+     */
+    public boolean submitForApproval(int eventId, int organizerId) {
+        String sql = "UPDATE Events SET status = ?, updated_at = GETDATE() "
+                + "WHERE event_id = ? AND organizer_id = ? AND status IN (?, ?)";
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, Constants.EVENT_PENDING_APPROVAL);
+            statement.setInt(2, eventId);
+            statement.setInt(3, organizerId);
+            statement.setString(4, Constants.EVENT_DRAFT);
+            statement.setString(5, Constants.EVENT_REJECTED);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Sức chứa của địa điểm; -1 nếu không tìm thấy hoặc lỗi DB.
      */
     public int getVenueCapacity(int venueId) {
@@ -271,8 +365,10 @@ public class EventDAO {
 
     private static final String[] DELETE_EVENT_STATEMENTS = {
         "DELETE FROM Event_Staff WHERE event_id = ?",
-        "DELETE FROM Event_Tickets WHERE event_id = ?",
+        // Ghế -> khu -> hạng vé: Event_Seats tham chiếu Event_Zones, Event_Zones tham chiếu Event_Tickets
         "DELETE FROM Event_Seats WHERE event_id = ?",
+        "DELETE FROM Event_Zones WHERE event_id = ?",
+        "DELETE FROM Event_Tickets WHERE event_id = ?",
         "DELETE FROM Events WHERE event_id = ? AND organizer_id = ?" // câu cuối có thêm organizer_id
     };
 

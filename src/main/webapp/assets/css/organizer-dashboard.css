@@ -1,0 +1,282 @@
+/* Light Ticket - Organizer: trang tổng quan (dùng token màu / bo góc của home.css + organizer.css) */
+
+/* ---------- Khung (card) dùng chung ---------- */
+.dash-card {
+    height: 100%;
+    background: var(--card-bg);
+    border: 1px solid rgba(233, 238, 250, 0.9);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 2px 12px rgba(22, 28, 36, 0.03);
+    padding: 1.25rem 1.5rem;
+}
+.dash-card.is-flush {
+    padding: 0;
+    overflow: hidden;
+}
+.dash-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+.dash-card.is-flush .dash-card-head {
+    margin: 0;
+    padding: 1.25rem 1.5rem 0.9rem;
+}
+.dash-card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+.dash-card-sub {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+.dash-link {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-orange);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.dash-link:hover {
+    color: var(--primary-hover);
+}
+
+/* ---------- Banner chào mừng ---------- */
+.dash-welcome {
+    background: linear-gradient(100deg, var(--primary-light) 0%, #fff 75%);
+}
+.dash-welcome-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: #fff;
+    color: var(--primary-orange);
+    box-shadow: 0 4px 14px rgba(255, 112, 67, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ---------- Thẻ thống kê ---------- */
+.dash-stat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.1rem 1.25rem;
+    background: var(--card-bg);
+    border: 1px solid rgba(233, 238, 250, 0.9);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 2px 12px rgba(22, 28, 36, 0.03);
+    color: inherit;
+    text-decoration: none;
+}
+.dash-stat.is-link {
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.dash-stat.is-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-fixed);
+    box-shadow: 0 8px 20px rgba(255, 112, 67, 0.12);
+    color: inherit;
+}
+.dash-stat-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.dash-stat-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 0.2rem;
+}
+.dash-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--primary-light);
+    color: var(--primary-orange);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.dash-stat-value {
+    margin: 0.65rem 0 0.5rem;
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--text-main);
+}
+.dash-stat-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+.dash-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+    padding: 0.15rem 0.5rem 0.15rem 0.3rem;
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+.dash-trend .material-symbols-outlined {
+    font-size: 16px;
+}
+.dash-trend.up {
+    background: #e8f7ee;
+    color: #1e8e4e;
+}
+.dash-trend.down {
+    background: #fdecec;
+    color: #d93025;
+}
+
+/* ---------- Biểu đồ doanh thu ---------- */
+.dash-range {
+    background: var(--soft-blue);
+    border-radius: 9999px;
+    padding: 3px;
+    display: inline-flex;
+    gap: 2px;
+}
+.dash-range .btn {
+    border: 0;
+    border-radius: 9999px !important;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+}
+.dash-range .btn:hover {
+    color: var(--primary-hover);
+}
+.dash-range .btn.active {
+    background: var(--primary-orange);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(255, 112, 67, 0.3);
+}
+.dash-chart-box {
+    position: relative;
+    height: 280px;
+}
+
+/* ---------- Tình hình bán vé ---------- */
+.dash-donut {
+    --pct: 0;
+    width: 168px;
+    height: 168px;
+    margin: 0.25rem auto 1.25rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(var(--primary-orange) calc(var(--pct) * 1%), #eef1f8 0);
+}
+.dash-donut-inner {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    box-shadow: inset 0 0 0 1px #f1f4fb;
+}
+.dash-donut-pct {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+.dash-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+}
+.dash-legend li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-top: 1px solid #eef1f8;
+}
+.dash-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.6rem;
+}
+
+/* ---------- Hoạt động gần đây (timeline) ---------- */
+.dash-tl-item {
+    position: relative;
+    display: flex;
+    gap: 0.9rem;
+    padding-bottom: 1.15rem;
+}
+.dash-tl-item:last-child {
+    padding-bottom: 0;
+}
+.dash-tl-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 17px;
+    top: 40px;
+    bottom: 4px;
+    width: 2px;
+    background: #eef1f8;
+}
+.dash-activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--primary-light);
+    color: var(--primary-orange);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.dash-activity-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+.dash-tl-text {
+    font-size: 0.84rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-main);
+}
+.dash-tl-time {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+/* ---------- Bảng ---------- */
+.dash-card .lt-table tbody tr:hover {
+    background: #fffaf8;
+}
+.dash-code {
+    font-weight: 800;
+    color: var(--primary-hover);
+}

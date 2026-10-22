@@ -322,7 +322,7 @@ public abstract class EventController extends HttpServlet {
         }
     }
 
-    private String validateTicket(EventTicket ticket) {
+    protected String validateTicket(EventTicket ticket) {
         if (ValidationUtils.isNullOrBlank(ticket.getTicketName())) {
             return "Vui lòng nhập tên hạng vé.";
         }
@@ -404,21 +404,22 @@ public abstract class EventController extends HttpServlet {
      * Lưu ảnh thành event-{id}-banner.{ext} trong assets/uploads rồi cập nhật
      * Events.event_image.
      */
-    protected void saveEventImage(Part imagePart, int eventId) {
+    protected boolean saveEventImage(Part imagePart, int eventId) {
         String uploadDir = getServletContext().getRealPath(Constants.UPLOAD_DIR);
         if (uploadDir == null) {
-            return; // ứng dụng chạy từ WAR chưa giải nén, không ghi được vào thư mục web
+            return false; // ứng dụng chạy từ WAR chưa giải nén, không ghi được vào thư mục web
         }
         File directory = new File(uploadDir);
         if (!directory.exists() && !directory.mkdirs()) {
-            return;
+            return false;
         }
         String fileName = "event-" + eventId + "-banner." + getExtension(imagePart.getSubmittedFileName());
         try {
             imagePart.write(new File(directory, fileName).getAbsolutePath());
-            eventDAO.updateEventImage(eventId, "assets/uploads/" + fileName);
+            return eventDAO.updateEventImage(eventId, "assets/uploads/" + fileName);
         } catch (IOException e) {
             e.printStackTrace(); // sự kiện đã tạo xong, chỉ thiếu ảnh
+            return false;
         }
     }
 

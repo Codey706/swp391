@@ -301,7 +301,7 @@ public class AuthController extends HttpServlet {
             } else if ("Staff".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/staff");
             } else if ("Organizer".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/organizer/event/create");
+                response.sendRedirect(request.getContextPath() + "/organizer/event/list");
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }

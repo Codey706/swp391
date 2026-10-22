@@ -37,9 +37,6 @@
                     <h1 class="org-title">Quản lý sự kiện</h1>
                 </div>
                 <div class="org-head-actions">
-                    <button type="button" class="btn-soft" disabled title="Tính năng sắp ra mắt">
-                        <span class="material-symbols-outlined">table_view</span> Xuất file Excel báo cáo
-                    </button>
                     <a class="btn-cta" href="${ctx}/organizer/event/create">
                         <span class="material-symbols-outlined">add_circle</span> Tạo sự kiện mới
                     </a>
@@ -54,41 +51,127 @@
             </c:if>
 
             <%-- Thẻ thống kê --%>
-            <section class="stat-grid">
-                <div class="org-card stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Tổng số sự kiện</span>
-                        <span class="stat-icon"><span class="material-symbols-outlined">stadium</span></span>
+
+            <%-- Thẻ thống kê: Bootstrap 5 --%>
+            <section class="row g-3 mb-4">
+
+                <%-- Tổng số sự kiện --%>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small fw-semibold text-secondary text-uppercase">
+                                    Tổng số sự kiện
+                                </span>
+                                <span class="d-flex align-items-center justify-content-center rounded-4 p-2 bg-primary bg-opacity-10 text-danger">
+                                    <span class="material-symbols-outlined">stadium</span>
+                                </span>
+                            </div>
+
+                            <div class="fs-2 fw-bold lh-1 text-dark mb-3">
+                                <fmt:formatNumber value="${allEvents}" pattern="#,##0"/>
+                            </div>
+
+                            <div class="border-top pt-2 d-flex justify-content-between align-items-center">
+                                <small class="text-secondary">Bản nháp</small>
+                                <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary">
+                                    <fmt:formatNumber value="${draftCount}" pattern="#,##0"/>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-value">${allEvents}</div>
-                    <div class="stat-foot"><span>${draftCount} bản nháp</span></div>
                 </div>
-                <div class="org-card stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Đang mở bán</span>
-                        <span class="stat-icon orange"><span class="material-symbols-outlined">sensors</span></span>
+
+                <%-- Đang mở bán --%>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small fw-semibold text-secondary text-uppercase">
+                                    Đang mở bán
+                                </span>
+                                <span class="d-flex align-items-center justify-content-center rounded-4 p-2 bg-danger bg-opacity-10 text-danger">
+                                    <span class="material-symbols-outlined">sensors</span>
+                                </span>
+                            </div>
+
+                            <div class="fs-2 fw-bold lh-1 text-danger mb-3">
+                                <fmt:formatNumber value="${activeCount}" pattern="#,##0"/>
+                            </div>
+
+                            <div class="border-top pt-2 d-flex justify-content-between align-items-center">
+                                <small class="text-secondary">Phòng vé mở</small>
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success">
+                                    Đang bán
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-value orange"><fmt:formatNumber value="${activeCount}" pattern="00"/></div>
-                    <div class="stat-foot"><span>${activeCount} phòng vé mở</span></div>
                 </div>
-                <div class="org-card stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Tổng vé đã xuất</span>
-                        <span class="stat-icon orange"><span class="material-symbols-outlined">confirmation_number</span></span>
-                    </div>
-                    <div class="stat-value"><fmt:formatNumber value="${sumSold}" pattern="#,##0"/> <small>/<fmt:formatNumber value="${sumTotal}" pattern="#,##0"/> vé</small></div>
-                    <div style="margin-top:auto">
-                        <div class="progress-slim"><span style="width:${sumPct > 100 ? 100 : sumPct}%"></span></div>
-                        <div class="stat-foot mt-2"><span style="color:var(--primary-dark)"><fmt:formatNumber value="${sumPct}" pattern="0.0"/>%</span></div>
+
+                <%-- Tổng vé đã xuất --%>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small fw-semibold text-secondary text-uppercase">
+                                    Tổng vé đã xuất
+                                </span>
+                                <span class="d-flex align-items-center justify-content-center rounded-4 p-2 bg-danger bg-opacity-10 text-danger">
+                                    <span class="material-symbols-outlined">confirmation_number</span>
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-baseline gap-1 mb-3">
+                                <span class="fs-2 fw-bold lh-1 text-dark">
+                                    <fmt:formatNumber value="${sumSold}" pattern="#,##0"/>
+                                </span>
+                                <small class="text-secondary">
+                                    / <fmt:formatNumber value="${sumTotal}" pattern="#,##0"/> vé
+                                </small>
+                            </div>
+
+                            <div class="progress rounded-pill mb-2" style="height:5px;">
+                                <div class="progress-bar bg-danger"
+                                     role="progressbar"
+                                     style="width:${sumPct > 100 ? 100 : (sumPct < 0 ? 0 : sumPct)}%;"
+                                     aria-valuenow="${sumPct}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+
+                            <small class="fw-semibold text-danger">
+                                <fmt:formatNumber value="${sumPct}" pattern="0.0"/>%
+                            </small>
+                        </div>
                     </div>
                 </div>
-                <div class="org-card stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Tổng doanh thu</span>
-                        <span class="stat-icon"><span class="material-symbols-outlined">payments</span></span>
+
+                <%-- Tổng doanh thu --%>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small fw-semibold text-secondary text-uppercase">
+                                    Tổng doanh thu
+                                </span>
+                                <span class="d-flex align-items-center justify-content-center rounded-4 p-2 bg-primary bg-opacity-10 text-danger">
+                                    <span class="material-symbols-outlined">payments</span>
+                                </span>
+                            </div>
+
+                            <div class="fs-3 fw-bold lh-sm text-danger mb-3">
+                                <fmt:formatNumber
+                                    value="${empty salesSummary ? 0 : salesSummary.revenue}"
+                                    pattern="#,##0"/> đ
+                            </div>
+
+                            <div class="border-top pt-2">
+                                <small class="text-secondary">Đối soát kỳ hạn 15d</small>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-value money"><fmt:formatNumber value="${empty salesSummary ? 0 : salesSummary.revenue}" pattern="#,##0"/> đ</div>
-                    <div class="stat-foot"><span>Đối soát kỳ hạn 15d</span></div>
                 </div>
             </section>
 
@@ -183,8 +266,14 @@
                                     <td>
                                         <div class="tk-progress">
                                             <div class="tk-progress-top">
-                                                <span><fmt:formatNumber value="${e.ticketSold}" pattern="#,##0"/> / <fmt:formatNumber value="${e.ticketTotal}" pattern="#,##0"/> vé</span>
-                                                <span class="pct">${e.soldPercent}%</span>
+                                                <span>
+                                                    <fmt:formatNumber value="${e.ticketSold}" pattern="#,##0"/>
+                                                    /
+                                                    <fmt:formatNumber value="${e.ticketTotal}" pattern="#,##0"/> vé
+                                                </span>
+                                                <span class="pct">
+                                                    <fmt:formatNumber value="${e.soldPercent}" pattern="#,##0.##"/>%
+                                                </span>
                                             </div>
                                             <div class="progress-slim ${soldOut ? 'full' : ''}"><span style="width:${e.soldPercent > 100 ? 100 : e.soldPercent}%"></span></div>
                                         </div>
@@ -201,11 +290,21 @@
                                     </td>
                                     <td>
                                         <div class="row-actions">
+                                            <a class="icon-action" title="Sơ đồ ghế" href="${ctx}/organizer/event/seatmap?eventId=${e.eventId}">
+                                                <span class="material-symbols-outlined">event_seat</span>
+                                            </a>
                                             <c:choose>
                                                 <c:when test="${modifiable}">
                                                     <a class="icon-action" title="Chỉnh sửa" href="${ctx}/organizer/event/update?eventId=${e.eventId}">
                                                         <span class="material-symbols-outlined">edit</span>
                                                     </a>
+                                                    <form method="post" class="js-confirm-submit m-0" action="${ctx}/organizer/event/submit"
+                                                          data-event-name="<c:out value='${e.eventName}'/>">
+                                                        <input type="hidden" name="eventId" value="${e.eventId}">
+                                                        <button type="submit" class="icon-action" title="Gửi Admin duyệt">
+                                                            <span class="material-symbols-outlined">send</span>
+                                                        </button>
+                                                    </form>
                                                     <form method="post" class="js-confirm-delete m-0" action="${ctx}/organizer/event/delete"
                                                           data-event-name="<c:out value='${e.eventName}'/>">
                                                         <input type="hidden" name="eventId" value="${e.eventId}">

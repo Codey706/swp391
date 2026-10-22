@@ -10,6 +10,8 @@
     <head>
         <title>Tạo sự kiện mới - Light Ticket Organizer Portal</title>
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
+        <link rel="stylesheet" href="${ctx}/assets/css/seatmap.css">
+        <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
     </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
@@ -27,10 +29,10 @@
                         <span class="material-symbols-outlined">arrow_back</span>
                     </a>
                     <h1>Tạo sự kiện mới</h1>
-                    <span class="ce-pill">Sự kiện sẽ được lưu ở trạng thái Nháp</span>
+                    <span class="ce-pill">Lưu nháp hoặc gửi Admin duyệt ở bước cuối</span>
                 </div>
                 <div class="ce-toolbar-actions">
-                    <button type="submit" form="create-event-form" class="btn-soft">
+                    <button type="submit" form="create-event-form" name="submitAction" value="draft" class="btn-soft">
                         <span class="material-symbols-outlined">save</span> Lưu bản nháp
                     </button>
                     <button type="button" class="btn-soft btn-preview" id="scrollPreviewBtn">
@@ -61,11 +63,11 @@
                 </button>
                 <button type="button" class="step-item" data-step-target="3">
                     <span class="step-num">3</span>
-                    <span class="step-text"><small>Bước 3</small><span>Hạng vé &amp; Giá bán</span></span>
+                    <span class="step-text"><small>Bước 3</small><span>Hạng vé &amp; Sơ đồ ghế</span></span>
                 </button>
                 <button type="button" class="step-item" data-step-target="4">
                     <span class="step-num">4</span>
-                    <span class="step-text"><small>Bước 4</small><span>Quy định &amp; Xuất bản</span></span>
+                    <span class="step-text"><small>Bước 4</small><span>Xác nhận &amp; Hoàn tất</span></span>
                 </button>
             </div>
 
@@ -127,14 +129,14 @@
                                 <div class="lt-field full">
                                     <div class="label-row">
                                         <label for="eventImage" class="lt-label">Ảnh poster bìa ngang (Tỷ lệ 16:9, tối ưu 1920x1080px)</label>
-                                        <span class="tag opt">Không bắt buộc</span>
+                                        <span class="tag opt">Bắt buộc khi gửi duyệt</span>
                                     </div>
                                     <label class="drop-zone" id="dropZone" for="eventImage">
                                         <img alt="Xem trước poster" id="posterPreview">
                                         <span class="dz-overlay">
                                             <span class="material-symbols-outlined">cloud_upload</span>
                                             <strong>Kéo thả ảnh hoặc nhấn để chọn poster bìa</strong>
-                                            <span>Định dạng JPG, PNG, WEBP tối đa 5MB</span>
+                                            <span>Định dạng JPG, PNG, WEBP tối đa 5MB · chỉnh khung 16:9 sau khi chọn</span>
                                         </span>
                                         <span class="dz-meta" id="posterMeta"></span>
                                         <input type="file" id="eventImage" name="eventImage" accept=".jpg,.jpeg,.png,.webp">
@@ -208,47 +210,78 @@
                             <div class="form-card-head">
                                 <span class="ico"><span class="material-symbols-outlined">confirmation_number</span></span>
                                 <div>
-                                    <h2>3. Hạng vé &amp; Giá bán</h2>
-                                </div>
-                            </div>
-                            <div class="note-box blue">
-                                <span class="ico"><span class="material-symbols-outlined">lightbulb</span></span>
-                                <div>
-                                    <h3>Cấu hình hạng vé sau khi tạo sự kiện</h3>
-                                    <p>Sau khi lưu, sự kiện nằm trong mục “Sự kiện của tôi” ở trạng thái Nháp. Bạn có thể bổ sung hạng vé, giá bán và số lượng phát hành rồi mới gửi duyệt.</p>
+                                    <h2>3. Hạng vé &amp; Sơ đồ ghế</h2>
+                                    <p>Chọn cách bán vé cho sự kiện, có thể bổ sung sau khi lưu nháp</p>
                                 </div>
                             </div>
 
-                            <%-- UI tĩnh theo Stitch: CHƯA được backend hỗ trợ. Không có input/name nào => không gửi dữ liệu. --%>
-                            <div class="tk-block" aria-disabled="true">
-                                <div class="tk-head">
-                                    <h3><span class="material-symbols-outlined">confirmation_number</span> Thiết lập các hạng vé (Ticket Classes)</h3>
-                                    <span class="soon-pill">Coming Soon</span>
+                            <c:if test="${not empty errors.tickets}">
+                                <div class="lt-alert error"><span class="material-symbols-outlined">error</span><span><c:out value="${errors.tickets}"/></span></div>
+                            </c:if>
+                            <c:if test="${not empty seatErrors}">
+                                <div class="lt-alert error">
+                                    <span class="material-symbols-outlined">error</span>
+                                    <ul class="sm-server-errors">
+                                        <c:forEach var="msg" items="${seatErrors}"><li><c:out value="${msg}"/></li></c:forEach>
+                                    </ul>
                                 </div>
-                                <p class="tk-note">Tính năng chưa được hỗ trợ trong biểu mẫu này. Phần dưới đây chỉ là giao diện minh họa, không lưu và không gửi dữ liệu.</p>
-                                <div class="tk-list" aria-hidden="true">
-                                    <div class="tk-row">
-                                        <div class="l">
-                                            <span class="tk-badge">VIP</span>
-                                            <span class="t"><strong>Hạng vé VIP</strong><span>Mô tả quyền lợi hạng vé</span></span>
-                                        </div>
-                                        <div class="r"><b>0 đ</b>Số lượng: 0 vé</div>
+                            </c:if>
+                            <div class="lt-alert error" id="seatStepAlert" hidden>
+                                <span class="material-symbols-outlined">error</span><span id="seatStepAlertText"></span>
+                            </div>
+
+                            <div class="sale-modes" role="radiogroup" aria-label="Hình thức bán vé">
+                                <label class="mode-card" data-mode-card>
+                                    <input type="radio" name="ticketMode" value="GENERAL" ${ticketMode != 'SEATED' ? 'checked' : ''}>
+                                    <span class="material-symbols-outlined">confirmation_number</span>
+                                    <span><strong>Vé theo số lượng</strong>
+                                        <small>Không chọn chỗ ngồi. Khán giả mua theo hạng vé, phù hợp sự kiện đứng hoặc tự do.</small></span>
+                                </label>
+                                <label class="mode-card" data-mode-card>
+                                    <input type="radio" name="ticketMode" value="SEATED" ${ticketMode == 'SEATED' ? 'checked' : ''}>
+                                    <span class="material-symbols-outlined">event_seat</span>
+                                    <span><strong>Vé theo sơ đồ ghế</strong>
+                                        <small>Vẽ sơ đồ sân khấu, khu ngồi, khu đứng; mỗi khu một hạng vé và giá, giống Ticketbox.</small></span>
+                                </label>
+                            </div>
+
+                            <%-- ---- Cách 1: hạng vé theo số lượng (module ltTickets trong event.js) ---- --%>
+                            <div id="modeGeneral">
+                                <div class="tk-block" id="ticketBlock" data-max-types="10">
+                                    <div class="tk-head">
+                                        <h3><span class="material-symbols-outlined">confirmation_number</span> Thiết lập các hạng vé (Ticket Classes)</h3>
                                     </div>
-                                    <div class="tk-row">
-                                        <div class="l">
-                                            <span class="tk-badge">STD</span>
-                                            <span class="t"><strong>Hạng vé Tiêu chuẩn</strong><span>Mô tả quyền lợi hạng vé</span></span>
-                                        </div>
-                                        <div class="r"><b>0 đ</b>Số lượng: 0 vé</div>
+                                    <p class="tk-note">Không bắt buộc khi lưu nháp. Cần ít nhất một hạng vé khi gửi Admin duyệt. Tổng số vé không vượt quá sức chứa của địa điểm.</p>
+                                    <div class="lt-alert error" id="ticketAlert" style="display:none">
+                                        <span class="material-symbols-outlined">error</span><span id="ticketAlertText"></span>
                                     </div>
-                                </div>
-                                <div class="tk-actions">
-                                    <button type="button" class="btn-soft" disabled>
-                                        <span class="material-symbols-outlined" style="font-size:18px">add_circle</span> Thêm hạng vé mới
-                                    </button>
-                                    <span class="tk-summary">Tổng sức chứa dự kiến: <b>—</b> &nbsp;·&nbsp; Doanh thu kỳ vọng: <b>—</b></span>
+                                    <div class="tk-list" id="ticketList">
+                                        <c:forEach var="t" items="${tickets}">
+                                            <c:set var="row" value="${t}" scope="request"/>
+                                            <jsp:include page="/WEB-INF/views/organizer/_ticket-row.jsp"/>
+                                        </c:forEach>
+                                    </div>
+                                    <div class="tk-empty" id="ticketEmpty">Chưa có hạng vé nào. Nhấn “Thêm hạng vé mới” để bắt đầu.</div>
+                                    <div class="tk-actions">
+                                        <button type="button" class="btn-soft" id="addTicketBtn">
+                                            <span class="material-symbols-outlined" style="font-size:18px">add_circle</span> Thêm hạng vé mới
+                                        </button>
+                                        <span class="tk-summary">Tổng số vé: <b id="tkTotalQty">0</b> &nbsp;·&nbsp; Doanh thu kỳ vọng: <b id="tkTotalRevenue">0 đ</b></span>
+                                    </div>
+                                    <span id="ticketSummary" hidden></span>
+                                    <template id="ticketRowTemplate">
+                                        <c:remove var="row" scope="request"/>
+                                        <jsp:include page="/WEB-INF/views/organizer/_ticket-row.jsp"/>
+                                    </template>
                                 </div>
                             </div>
+
+                            <%-- ---- Cách 2: sơ đồ ghế (seatmap.js) ---- --%>
+                            <div id="modeSeated" hidden>
+                                <c:set var="embedded" value="true" scope="request"/>
+                                <jsp:include page="/WEB-INF/views/organizer/_seatmap-designer.jsp"/>
+                            </div>
+                            <input type="hidden" name="layoutJson" id="layoutJson" value="">
                         </section>
 
                         <%-- ============ BƯỚC 4 ============ --%>
@@ -256,8 +289,8 @@
                             <div class="form-card-head">
                                 <span class="ico"><span class="material-symbols-outlined">rocket_launch</span></span>
                                 <div>
-                                    <h2>4. Quy định &amp; Xuất bản</h2>
-                                    <p>Kiểm tra lại thông tin trước khi tạo sự kiện</p>
+                                    <h2>4. Xác nhận &amp; Hoàn tất</h2>
+                                    <p>Kiểm tra lại thông tin rồi chọn lưu nháp hoặc gửi Admin duyệt</p>
                                 </div>
                             </div>
                             <dl class="summary-list mb-4">
@@ -267,12 +300,27 @@
                                 <dt>Bắt đầu</dt><dd data-summary="startTime">—</dd>
                                 <dt>Kết thúc</dt><dd data-summary="endTime">—</dd>
                                 <dt>Poster</dt><dd data-summary="eventImage">Chưa chọn ảnh</dd>
+                                <dt>Hạng vé</dt><dd id="sumTickets">—</dd>
                             </dl>
+                            <div class="publish-choice" role="radiogroup" aria-label="Cách hoàn tất">
+                                <label class="mode-card">
+                                    <input type="radio" name="publishChoice" value="draft" ${publishChoice != 'submit' ? 'checked' : ''}>
+                                    <span class="material-symbols-outlined">draft</span>
+                                    <span><strong>Lưu bản nháp</strong>
+                                        <small>Chưa hiển thị với khán giả và chưa gửi Admin. Bạn có thể chỉnh sửa rồi gửi duyệt sau.</small></span>
+                                </label>
+                                <label class="mode-card">
+                                    <input type="radio" name="publishChoice" value="submit" ${publishChoice == 'submit' ? 'checked' : ''}>
+                                    <span class="material-symbols-outlined">send</span>
+                                    <span><strong>Gửi Admin duyệt</strong>
+                                        <small>Sự kiện chuyển sang “Chờ duyệt”; trong lúc chờ bạn không sửa hoặc xóa được. Cần có ảnh poster và ít nhất một hạng vé.</small></span>
+                                </label>
+                            </div>
                             <div class="note-box">
                                 <span class="ico"><span class="material-symbols-outlined">verified_user</span></span>
                                 <div>
-                                    <h3>Sự kiện được lưu ở trạng thái Nháp</h3>
-                                    <p>Sự kiện chưa hiển thị với khán giả. Bạn có thể chỉnh sửa hoặc xóa khi còn ở trạng thái Nháp, và gửi duyệt khi đã sẵn sàng.</p>
+                                    <h3>Sự kiện chỉ được công khai sau khi Admin duyệt</h3>
+                                    <p>Dù chọn cách nào, sự kiện mới chưa bán vé ngay. Sau khi được duyệt, sự kiện sẽ chuyển sang “Đang mở bán”.</p>
                                 </div>
                             </div>
                         </section>
@@ -286,7 +334,7 @@
                                 </button>
                             </div>
                             <div class="group">
-                                <button type="submit" class="btn-soft">Lưu tạm bản thảo</button>
+                                <button type="submit" name="submitAction" value="draft" class="btn-soft">Lưu tạm bản thảo</button>
                                 <button type="button" class="btn-cta" data-step-nav="next" id="nextBtn">
                                     <span id="nextLabel">Tiếp tục sang bước tiếp theo</span>
                                     <span class="material-symbols-outlined">arrow_forward</span>
@@ -326,7 +374,7 @@
                                     </div>
                                 </div>
                                 <div class="pv-price">
-                                    <div class="p"><small>Giá vé</small><strong>Cấu hình sau khi tạo</strong></div>
+                                    <div class="p"><small id="pvPriceLabel">Giá vé</small><strong id="pvPrice">Chưa cấu hình</strong></div>
                                     <span class="pv-buy" aria-hidden="true">Mua vé <span class="material-symbols-outlined">arrow_forward</span></span>
                                 </div>
                             </div>
@@ -362,11 +410,11 @@
                             </div>
                             <div class="ck-item" data-ck="image">
                                 <span class="l"><span class="material-symbols-outlined ck-ico">image</span><span>Ảnh poster</span></span>
-                                <span class="ck-status">Không bắt buộc</span>
+                                <span class="ck-status">Cần khi gửi duyệt</span>
                             </div>
                             <div class="ck-item is-info" data-ck="tickets">
                                 <span class="l"><span class="material-symbols-outlined ck-ico">pending</span><span>Hạng vé &amp; giá</span></span>
-                                <span class="ck-status">Cấu hình sau khi tạo</span>
+                                <span class="ck-status">Không bắt buộc</span>
                             </div>
                         </div>
                         <div class="ck-help">
@@ -380,6 +428,9 @@
 
         <jsp:include page="/WEB-INF/views/organizer/_footer.jsp"/>
         <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
+        <script type="application/json" id="smData"><c:out value="${seatMapJson}" escapeXml="false"/></script>
+        <script src="${ctx}/assets/js/image-cropper.js"></script>
         <script src="${ctx}/assets/js/event.js"></script>
+        <script src="${ctx}/assets/js/seatmap.js"></script>
     </body>
 </html>

@@ -1,0 +1,141 @@
+/* =====================================================================
+   Light Ticket - Seat map designer (Organizer)
+   Dùng token màu của home.css / organizer.css
+   ===================================================================== */
+.sm-workspace {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr) 300px;
+    gap: 16px;
+    align-items: start;
+}
+.sm-side { display: flex; flex-direction: column; gap: 16px; }
+.sm-panel { padding: 16px; }
+.sm-panel h2 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 15px; font-weight: 800; margin: 0 0 12px; color: var(--text-main, #0f172a);
+}
+.sm-panel h2 .material-symbols-outlined { font-size: 20px; color: var(--primary-orange, #ff7043); }
+.sm-panel h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #64748b; margin: 16px 0 8px; }
+.sm-hint { font-size: 12.5px; color: #64748b; margin: 0 0 10px; }
+.sm-full { width: 100%; justify-content: center; margin-top: 8px; }
+.sm-server-errors { margin: 6px 0 0; padding-left: 18px; font-weight: 500; }
+
+/* ---------------- Công cụ ---------------- */
+.sm-tools { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.sm-tool {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer;
+    border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; font-weight: 600; color: #334155;
+    transition: all .15s;
+}
+.sm-tool:hover:not(:disabled) { border-color: var(--primary-orange, #ff7043); color: var(--primary-orange, #ff7043); background: #fff8f5; }
+.sm-tool:disabled { opacity: .45; cursor: not-allowed; }
+.sm-presets { display: flex; flex-direction: column; gap: 8px; }
+.sm-presets .btn-soft { justify-content: center; }
+
+/* ---------------- Hạng vé ---------------- */
+.sm-ticket-list { display: flex; flex-direction: column; gap: 10px; }
+.sm-ticket {
+    border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; background: #fff;
+    border-left-width: 5px;
+}
+.sm-ticket-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.sm-ticket-row:last-child { margin-bottom: 0; }
+.sm-ticket input { min-width: 0; padding: 7px 10px; font-size: 13.5px; }
+.sm-ticket .sm-price { flex: 1; }
+.sm-ticket .sm-vnd { font-size: 12px; color: #64748b; font-weight: 600; }
+.sm-ticket-meta { font-size: 12px; color: #64748b; display: flex; justify-content: space-between; align-items: center; }
+.sm-ticket-meta .sm-new { color: var(--primary-orange, #ff7043); font-weight: 700; }
+.sm-mini-del {
+    border: 0; background: transparent; color: #b3261e; cursor: pointer; display: inline-flex;
+    padding: 2px; border-radius: 6px;
+}
+.sm-mini-del:hover { background: #fde4e1; }
+.sm-mini-del .material-symbols-outlined { font-size: 18px; }
+.sm-ticket.is-bad input { border-color: #c0201a; }
+
+/* ---------------- Tổng quan ---------------- */
+.sm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.sm-stats span { display: block; font-size: 20px; font-weight: 800; color: #0f172a; }
+.sm-stats small { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+.sm-capbar { height: 6px; border-radius: 3px; background: #e2e8f0; margin-top: 12px; overflow: hidden; }
+.sm-capbar > div { height: 100%; width: 0; background: #27ae60; transition: width .2s, background .2s; }
+.sm-capbar > div.is-over { background: #c0201a; }
+.sm-issues { margin-top: 12px; background: #fff8e6; border: 1px solid #f5d98b; border-radius: 10px; padding: 10px 12px; font-size: 12.5px; color: #8a5a00; }
+.sm-issues b { display: flex; align-items: center; gap: 6px; }
+.sm-issues .material-symbols-outlined { font-size: 18px; }
+.sm-issues ul { margin: 6px 0 0; padding-left: 18px; }
+.sm-issues li { margin-bottom: 2px; }
+
+/* ---------------- Khung vẽ ---------------- */
+.sm-stage-card { padding: 12px; min-width: 0; }
+.sm-canvas-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.sm-canvas-title { font-weight: 800; font-size: 15px; }
+.sm-zoom { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #475569; }
+.sm-icon-btn {
+    width: 30px; height: 30px; border: 1px solid #cbd5e1; background: #fff; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #475569;
+}
+.sm-icon-btn:hover { background: #f1f5f9; }
+.sm-icon-btn .material-symbols-outlined { font-size: 18px; }
+.sm-canvas-wrap {
+    overflow: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: #fafbfd;
+    max-height: 72vh;
+}
+#smSvg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; }
+.sm-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 12.5px; font-weight: 600; color: #334155; }
+.sm-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.sm-canvas-hint { margin: 8px 0 0; }
+
+/* SVG */
+.sm-zone { cursor: move; }
+.sm-readonly .sm-zone { cursor: pointer; }
+.sm-zone .sm-bg { transition: stroke-width .1s; }
+.sm-zone.is-selected .sm-bg { stroke-width: 3; }
+.sm-zone.is-bad .sm-bg { stroke: #c0201a !important; stroke-dasharray: 6 4; }
+.sm-zone text { pointer-events: none; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+.sm-seat { stroke-width: 1; }
+.sm-seat.is-blocked { fill: #fff !important; stroke: #cbd5e1 !important; stroke-dasharray: 2 2; opacity: .8; }
+.sm-block-mode .sm-seat { cursor: crosshair; }
+.sm-resize { fill: #fff; stroke: #0f172a; stroke-width: 2; cursor: nwse-resize; }
+
+/* ---------------- Thuộc tính ---------------- */
+.sm-field { margin-bottom: 12px; }
+.sm-field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #64748b; margin-bottom: 5px; }
+.sm-field .req { color: #c0201a; }
+.sm-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sm-check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #334155; margin: 2px 0 6px; cursor: pointer; }
+.sm-check input { margin-top: 3px; }
+.sm-type-pill { margin-left: auto; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #eff4ff; color: #44506b; }
+.sm-info { font-size: 12.5px; color: #475569; background: #f8fafc; border-radius: 10px; padding: 10px 12px; margin: 10px 0; line-height: 1.6; }
+.sm-actions { display: flex; gap: 8px; }
+.sm-actions .btn-soft { flex: 1; justify-content: center; }
+.sm-danger { color: #b3261e; }
+.sm-danger:hover { background: #fde4e1; }
+[hidden] { display: none !important; }
+
+@media (max-width: 1180px) {
+    .sm-workspace { grid-template-columns: 1fr; }
+    .sm-stage-card { order: -1; }
+}
+
+/* ---------------- Chọn hình thức bán vé / cách hoàn tất (form tạo sự kiện) ---------------- */
+.sale-modes, .publish-choice {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 0 0 16px;
+}
+.mode-card {
+    display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; cursor: pointer;
+    border: 2px solid #e2e8f0; border-radius: 14px; background: #fff; transition: border-color .15s, background .15s;
+}
+.mode-card input { margin-top: 4px; accent-color: #ff7043; flex: none; }
+.mode-card > .material-symbols-outlined { color: #ff7043; flex: none; }
+.mode-card strong { display: block; color: #0f172a; }
+.mode-card small { display: block; color: #64748b; font-size: 12.5px; margin-top: 2px; line-height: 1.45; }
+.mode-card:hover { border-color: #ffb199; }
+.mode-card:has(input:checked) { border-color: #ff7043; background: #fff8f5; }
+.mode-card:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(255, 112, 67, .3); }
+
+/* ---------------- Trình thiết kế nhúng trong bước 3 (cột hẹp): xếp dọc ---------------- */
+.sm-workspace.sm-embedded { grid-template-columns: minmax(0, 1fr); margin-top: 4px; }
+.sm-workspace.sm-embedded .sm-side { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; align-items: start; }
+.sm-workspace.sm-embedded .sm-stage-card { order: 0; }
+.sm-workspace.sm-embedded .sm-panel { box-shadow: none; border: 1px solid #e2e8f0; }

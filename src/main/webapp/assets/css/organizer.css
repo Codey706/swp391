@@ -3131,3 +3131,48 @@ body.org-body.org-sidebar-lock {
         font-size: 0.8rem;
     }
 }
+
+/* ================= Dropdown tài khoản Organizer ================= */
+
+/* Dropdown rộng hơn, tránh tên tổ chức bị xuống dòng */
+#orgAccountDropdown + .dropdown-menu {
+    width: 276px;
+    min-width: 276px;
+    padding: 0.4rem 0;
+    border: 1px solid var(--st-surface-container) !important;
+    border-radius: 12px;
+    box-shadow: var(--st-shadow-md);
+}
+
+/* Tên tổ chức hiển thị đầy đủ trên một dòng */
+#orgAccountDropdown + .dropdown-menu > li:first-child p {
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+/* Icon Hồ sơ và Trang chủ cùng màu nút Tạo sự kiện */
+#orgAccountDropdown + .dropdown-menu .org-dropdown-icon {
+    color: var(--st-primary-container) !important;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+/* Căn icon và chữ đồng đều */
+#orgAccountDropdown + .dropdown-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+}
+
+/* Hover nhẹ theo tone cam của Light Ticket */
+#orgAccountDropdown + .dropdown-menu .dropdown-item:not(.text-danger):hover {
+    background: var(--st-primary-soft);
+    color: var(--st-primary);
+}
+
+/* Icon Đăng xuất vẫn giữ màu đỏ */
+#orgAccountDropdown + .dropdown-menu .text-danger {
+    color: var(--st-error) !important;
+}
+

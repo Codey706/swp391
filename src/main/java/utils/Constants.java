@@ -67,6 +67,16 @@ public final class Constants {
     public static final int PROFILE_EMAIL_MAX_LENGTH = 255;
     public static final int PROFILE_ADDRESS_MAX_LENGTH = 255;
 
+    // Seat map designer (Organizer)
+    public static final String SESSION_SEATMAP_CSRF = "seatMapCsrf";
+    public static final int SEATMAP_CANVAS_WIDTH = 1200;
+    public static final int SEATMAP_CANVAS_HEIGHT = 800;
+    public static final int SEATMAP_MAX_ZONES = 40;
+    public static final int SEATMAP_MAX_ROWS = 26;            // A..Z
+    public static final int SEATMAP_MAX_SEATS_PER_ROW = 40;
+    public static final int SEATMAP_MIN_ZONE_SIZE = 40;
+    public static final int SEATMAP_ZONE_NAME_MAX_LENGTH = 100;
+
     // Manage My Staff Profile (Users: full_name NVARCHAR(100), email VARCHAR(255), address NVARCHAR(255))
     public static final String ROLE_STAFF = "Staff";
     public static final String SESSION_STAFF_PROFILE_CSRF = "staffProfileCsrf";
@@ -78,6 +88,12 @@ public final class Constants {
     public static final int PROFILE_LEGAL_REP_MIN_LENGTH = 2;
     public static final int PROFILE_LEGAL_REP_MAX_LENGTH = 150;
     public static final int PROFILE_URL_MAX_LENGTH = 500;
+    // Kích thước hiển thị (%) của ảnh bìa / logo trong khung; 100 = mặc định. Khớp data-min/data-max trong profile.jsp
+    public static final int PROFILE_SCALE_DEFAULT = 100;
+    public static final int PROFILE_COVER_SCALE_MIN = 100;
+    public static final int PROFILE_COVER_SCALE_MAX = 200;
+    public static final int PROFILE_LOGO_SCALE_MIN = 50;
+    public static final int PROFILE_LOGO_SCALE_MAX = 200;
     public static final int PROFILE_BANK_NAME_MAX_LENGTH = 150;
     public static final int PROFILE_BANK_HOLDER_MAX_LENGTH = 150;
     public static final int PROFILE_DOC_NAME_MAX_LENGTH = 200;
@@ -102,5 +118,11 @@ public final class Constants {
 
     // Tickets.ticket_status
     public static final String TICKET_CHECKED_IN = "CheckedIn";
+
+    // Organizer dashboard
+    public static final int DASHBOARD_RECENT_EVENTS = 5;
+    public static final int DASHBOARD_RECENT_ORDERS = 5;
+    public static final int DASHBOARD_CHART_DAYS = 90;   // biểu đồ doanh thu: 7/30/90 ngày
+    public static final int DASHBOARD_PERIOD_DAYS = 30;  // kỳ so sánh cho thẻ thống kê
 
 }
