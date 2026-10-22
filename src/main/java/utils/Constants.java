@@ -128,4 +128,9 @@ public final class Constants {
     public static final int DASHBOARD_CHART_DAYS = 90;   // biểu đồ doanh thu: 7/30/90 ngày
     public static final int DASHBOARD_PERIOD_DAYS = 30;  // kỳ so sánh cho thẻ thống kê
 
+    // Staff - Seat Status (chỉ xem)
+    public static final String BUSINESS_ZONE_ID = "Asia/Ho_Chi_Minh";   // múi giờ nghiệp vụ để xác định "hôm nay"
+    public static final int STAFF_SEAT_MAX_EVENTS = 20;                  // số sự kiện tối đa trong ô chọn sự kiện
+    public static final double STANDING_NEAR_FULL_RATIO = 0.8;           // khu đứng "Gần đầy" khi số người đã vào >= 80% sức chứa
+
 }
