@@ -1,12 +1,12 @@
 /* Light Ticket - Organizer Portal: Hồ sơ Nhà tổ chức
    Validation phía client (backend vẫn validate lại), xem trước trực tiếp,
-   hủy chỉnh sửa, mở/đóng modal, toast, đổi tài khoản ngân hàng. */
+   hủy chỉnh sửa, chỉnh kích thước hiển thị ảnh, mở/đóng modal, toast, đổi tài khoản ngân hàng. */
 (function () {
     'use strict';
 
     // Khớp với Constants / ValidationUtils ở backend
     var LIMITS = {fullName: [2, 100], email: 255, address: 255, summary: 300, legalRepresentative: [2, 150],
-        url: 500, bankName: 150, bankAccountHolder: 150};
+        bankName: 150, bankAccountHolder: 150};
     var EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     var PHONE_PATTERN = /^0\d{9,10}$/;
     var TAX_PATTERN = /^\d{10}(-?\d{3})?$/;
@@ -14,8 +14,6 @@
     var MAX_FILE = 5 * 1024 * 1024;
     var IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
     var DOC_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
-    var URL_FIELDS = {websiteUrl: 'Website', facebookUrl: 'Fanpage Facebook',
-        youtubeUrl: 'Kênh YouTube / TikTok', spotifyUrl: 'Trang Spotify'};
 
     function byId(id) {
         return document.getElementById(id);
@@ -39,15 +37,6 @@
             }
             if (feedback) {
                 feedback.textContent = message || '';
-            }
-        }
-
-        function isHttpUrl(value) {
-            try {
-                var url = new URL(value);
-                return (url.protocol === 'http:' || url.protocol === 'https:') && !/\s/.test(value);
-            } catch (e) {
-                return false;
             }
         }
 
@@ -121,12 +110,6 @@
                 } else if (!TAX_PATTERN.test(tax)) {
                     message = 'Mã số thuế gồm 10 chữ số (hoặc 13 chữ số cho chi nhánh).';
                 }
-            } else if (URL_FIELDS[name]) {
-                if (value && value.length > LIMITS.url) {
-                    message = URL_FIELDS[name] + ' tối đa ' + LIMITS.url + ' ký tự.';
-                } else if (value && !isHttpUrl(value)) {
-                    message = URL_FIELDS[name] + ' phải là liên kết hợp lệ bắt đầu bằng http:// hoặc https://.';
-                }
             }
             setError(name, message);
             return message === '';
@@ -179,12 +162,12 @@
             return message === '';
         }
 
-        var textFields = ['fullName', 'email', 'phone', 'address', 'summary', 'legalRepresentative', 'taxCode']
-                .concat(Object.keys(URL_FIELDS));
+        var textFields = ['fullName', 'email', 'phone', 'address', 'summary', 'legalRepresentative', 'taxCode'];
         var bankFields = ['bankName', 'bankAccountNumber', 'bankAccountHolder'];
+        var scaleFields = ['coverScale', 'logoScale'];
 
         var initialValues = {};
-        textFields.concat(bankFields).forEach(function (name) {
+        textFields.concat(bankFields, scaleFields).forEach(function (name) {
             if (field(name)) {
                 initialValues[name] = field(name).value;
             }
@@ -331,6 +314,41 @@
         }
         bindImagePreview('cover', [{img: 'opCoverImg', empty: 'opCoverEmpty'}, {img: 'opPvCover', empty: 'opPvCoverEmpty'}]);
         bindImagePreview('logo', [{img: 'opLogoImg', empty: 'opLogoEmpty'}, {img: 'opPvLogo', empty: 'opPvLogoEmpty'}]);
+
+        // Kích thước hiển thị ảnh bìa / logo: cập nhật ngay ở form, thẻ xem trước và modal (chỉ là CSS scale,
+        // không đụng tới tệp ảnh gốc). Giá trị được gửi kèm form qua input range (coverScale / logoScale).
+        form.querySelectorAll('.op-scale').forEach(function (box) {
+            var kind = box.getAttribute('data-scale-kind');
+            var min = parseInt(box.getAttribute('data-min'), 10);
+            var max = parseInt(box.getAttribute('data-max'), 10);
+            var step = parseInt(box.getAttribute('data-step'), 10) || 5;
+            var range = box.querySelector('.op-scale-range');
+            var output = box.querySelector('.op-scale-value');
+
+            function apply(value) {
+                value = Math.min(max, Math.max(min, Math.round(value / step) * step));
+                range.value = value;
+                if (output) {
+                    output.textContent = value + '%';
+                }
+                document.querySelectorAll('[data-op-scale="' + kind + '"]').forEach(function (img) {
+                    img.style.setProperty('--op-scale', value / 100);
+                });
+            }
+            range.addEventListener('input', function () {
+                apply(parseInt(range.value, 10));
+            });
+            box.querySelector('[data-scale-dec]').addEventListener('click', function () {
+                apply(parseInt(range.value, 10) - step);
+            });
+            box.querySelector('[data-scale-inc]').addEventListener('click', function () {
+                apply(parseInt(range.value, 10) + step);
+            });
+            box.querySelector('[data-scale-reset]').addEventListener('click', function () {
+                apply(100);
+            });
+            apply(parseInt(range.value, 10) || 100);
+        });
 
         // Đổi tài khoản ngân hàng: mở các ô nhập
         function showBankFields() {

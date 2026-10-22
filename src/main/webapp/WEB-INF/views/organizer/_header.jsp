@@ -33,13 +33,11 @@
         </a>
 
         <nav class="org-sb-nav">
-            <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">dashboard</span><span>Tổng quan</span></a>
+            <a class="${param.active == 'dashboard' ? 'is-active' : ''}" href="${ctx}/organizer/dashboard"
+               ${param.active == 'dashboard' ? 'aria-current="page"' : ''}><span class="material-symbols-outlined">dashboard</span><span>Tổng quan</span></a>
             <a class="${param.active == 'events' ? 'is-active' : ''}" href="${ctx}/organizer/event/list"
                ${param.active == 'events' ? 'aria-current="page"' : ''}><span class="material-symbols-outlined">calendar_month</span><span>Sự kiện của tôi</span></a>
             <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">receipt_long</span><span>Vé bán ra &amp; Đơn hàng</span></a>
-            <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">analytics</span><span>Báo cáo &amp; Thống kê</span></a>
-            <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">account_balance_wallet</span><span>Tài chính &amp; Quyết toán</span></a>
-            <a href="#" data-soon title="Sắp ra mắt"><span class="material-symbols-outlined">settings</span><span>Cài đặt tổ chức</span></a>
             <a class="${param.active == 'profile' ? 'is-active' : ''}" href="${ctx}/organizer/profile"
                ${param.active == 'profile' ? 'aria-current="page"' : ''}><span class="material-symbols-outlined">badge</span><span>Hồ sơ tổ chức</span></a>
         </nav>
@@ -93,8 +91,69 @@
                 <span class="material-symbols-outlined">notifications</span>
                 <span class="dot"></span>
             </button>
-            <a class="org-top-avatar" href="${ctx}/organizer/profile" title="Hồ sơ: <c:out value='${orgName}'/>" aria-label="Hồ sơ Organizer"><span class="material-symbols-outlined">person</span></a>
-        </div>
+
+            <div class="dropdown ms-1">
+                <button
+                    class="org-top-avatar border-0"
+                    type="button"
+                    id="orgAccountDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Tài khoản">
+                    <c:out value="${orgInitial}"/>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0"
+                    aria-labelledby="orgAccountDropdown"
+                    style="border-radius: 12px; min-width: 220px;">
+
+                    <!-- Thông tin tài khoản -->
+                    <li class="px-3 py-2 bg-light rounded-top border-bottom mb-1">
+                        <p class="fw-bold small text-dark mb-0">
+                            <c:out value="${orgName}"/>
+                        </p>
+                        <span class="text-secondary" style="font-size: 11px;">
+                            Organizer
+                        </span>
+                    </li>
+
+                    <!-- Hồ sơ của tôi -->
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                           href="${ctx}/organizer/profile">
+                            <span class="material-symbols-outlined org-dropdown-icon"
+                                  style="font-size: 20px;">account_circle</span>
+                            Hồ sơ của tôi
+                        </a>
+                    </li>
+
+                    <!-- Về trang chủ -->
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                           href="${ctx}/home">
+                            <span class="material-symbols-outlined org-dropdown-icon"
+                                  style="font-size: 20px;">home</span>
+                            Về trang chủ
+                        </a>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <!-- Đăng xuất -->
+                    <li>
+                        <form action="${ctx}/logout" method="post" class="m-0">
+                            <button type="submit"
+                                    class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger border-0 bg-transparent w-100">
+                                <span class="material-symbols-outlined"
+                                      style="font-size: 20px;">logout</span>
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
     </header>
 
     <div class="org-subbar">
@@ -119,4 +178,4 @@
             </div>
         </div>
     </div>
-<%-- org-shell được đóng trong _footer.jsp --%>
+    <%-- org-shell được đóng trong _footer.jsp --%>

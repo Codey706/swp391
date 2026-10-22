@@ -10,7 +10,6 @@ import model.OrganizerDocument;
 import model.OrganizerProfile;
 import model.User;
 import utils.Constants;
-import utils.DateTimeUtils;
 import utils.ValidationUtils;
 
 import jakarta.servlet.ServletException;
@@ -25,8 +24,6 @@ import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -352,21 +349,27 @@ public class OrganizerProfileController extends HttpServlet {
         // MST đã được xác minh thì không cho đổi
         p.setTaxCode(saved.isVerified() ? saved.getTaxCode()
                 : emptyToNull(trimToEmpty(request.getParameter("taxCode")).replaceAll("\\s", "")));
-        p.setWebsiteUrl(emptyToNull(request.getParameter("websiteUrl")));
-        p.setFacebookUrl(emptyToNull(request.getParameter("facebookUrl")));
-        p.setYoutubeUrl(emptyToNull(request.getParameter("youtubeUrl")));
-        p.setSpotifyUrl(emptyToNull(request.getParameter("spotifyUrl")));
         p.setBankName(emptyToNull(request.getParameter("bankName")));
         p.setBankAccountNumber(emptyToNull(trimToEmpty(request.getParameter("bankAccountNumber")).replaceAll("[\\s.\\-]", "")));
         p.setBankAccountHolder(emptyToNull(request.getParameter("bankAccountHolder")));
         // Giữ nguyên các cột do Admin quản lý và ảnh hiện có (để hiển thị lại khi lỗi)
         p.setLogoUrl(saved.getLogoUrl());
         p.setCoverUrl(saved.getCoverUrl());
+        // Kích thước hiển thị: thiếu/sai giá trị thì giữ giá trị đã lưu; ngoài khoảng cho phép thì kẹp về biên
+        p.setCoverScale(readScale(request.getParameter("coverScale"), saved.getCoverScale(),
+                Constants.PROFILE_COVER_SCALE_MIN, Constants.PROFILE_COVER_SCALE_MAX));
+        p.setLogoScale(readScale(request.getParameter("logoScale"), saved.getLogoScale(),
+                Constants.PROFILE_LOGO_SCALE_MIN, Constants.PROFILE_LOGO_SCALE_MAX));
         p.setKycLevel(saved.getKycLevel());
         p.setVerificationStatus(saved.getVerificationStatus());
         p.setPartnerTier(saved.getPartnerTier());
         p.setWithdrawalLimit(saved.getWithdrawalLimit());
         return p;
+    }
+
+    private static int readScale(String raw, int fallback, int min, int max) {
+        int value = ValidationUtils.parseIntOrDefault(raw, fallback);
+        return Math.max(min, Math.min(max, value));
     }
 
     private Set<Integer> readCategoryIds(HttpServletRequest request) {
@@ -466,12 +469,6 @@ public class OrganizerProfileController extends HttpServlet {
             }
         }
 
-        // Liên kết mạng xã hội (không bắt buộc)
-        validateUrl(errors, "websiteUrl", p.getWebsiteUrl(), "Website");
-        validateUrl(errors, "facebookUrl", p.getFacebookUrl(), "Fanpage Facebook");
-        validateUrl(errors, "youtubeUrl", p.getYoutubeUrl(), "Kênh YouTube / TikTok");
-        validateUrl(errors, "spotifyUrl", p.getSpotifyUrl(), "Trang Spotify");
-
         // Tài khoản ngân hàng: không bắt buộc, nhưng đã nhập thì phải đủ 3 trường
         boolean anyBank = p.getBankName() != null || p.getBankAccountNumber() != null || p.getBankAccountHolder() != null;
         if (anyBank) {
@@ -523,28 +520,6 @@ public class OrganizerProfileController extends HttpServlet {
         }
 
         return errors;
-    }
-
-    private void validateUrl(Map<String, String> errors, String field, String value, String label) {
-        if (value == null) {
-            return;
-        }
-        if (value.length() > Constants.PROFILE_URL_MAX_LENGTH) {
-            errors.put(field, label + " tối đa " + Constants.PROFILE_URL_MAX_LENGTH + " ký tự.");
-        } else if (!isHttpUrl(value)) {
-            errors.put(field, label + " phải là liên kết hợp lệ bắt đầu bằng http:// hoặc https://.");
-        }
-    }
-
-    private static boolean isHttpUrl(String value) {
-        try {
-            URI uri = new URI(value);
-            String scheme = uri.getScheme();
-            return scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
-                    && uri.getHost() != null && !value.contains(" ");
-        } catch (URISyntaxException e) {
-            return false;
-        }
     }
 
     private String validateUpload(Part part, List<String> extensions, String contentTypePrefix,
@@ -607,7 +582,6 @@ public class OrganizerProfileController extends HttpServlet {
             request.setAttribute("ratingAvg", rating[0]);
             request.setAttribute("ratingCount", (int) rating[1]);
             request.setAttribute("csrfToken", getOrCreateCsrfToken(request));
-            request.setAttribute("memberSince", formatDate(organizer));
             applyChecklist(request, organizer, saved, savedCategoryIds, documents);
             loadEventStatistics(request, organizer.getUserId());
         } catch (SQLException e) {
@@ -628,12 +602,6 @@ public class OrganizerProfileController extends HttpServlet {
         return active;
     }
 
-    // Ngày tạo tài khoản dạng dd/MM/yyyy ("" nếu chưa có dữ liệu)
-    private String formatDate(User organizer) {
-        String dateTime = DateTimeUtils.formatDateTime(organizer.getCreatedAt());
-        return dateTime.length() >= 10 ? dateTime.substring(0, 10) : dateTime;
-    }
-
     private int countApprovedRequiredDocTypes(List<OrganizerDocument> documents) {
         Set<String> approved = new LinkedHashSet<>();
         for (OrganizerDocument document : documents) {
@@ -646,9 +614,8 @@ public class OrganizerProfileController extends HttpServlet {
     }
 
     /**
-     * Độ hoàn thiện hồ sơ theo 5 nhóm của thiết kế Stitch, mỗi nhóm 20%: thương
-     * hiệu + thể loại, logo + ảnh bìa, MST + người đại diện + tài liệu, tài
-     * khoản ngân hàng, kênh truyền thông.
+     * Độ hoàn thiện hồ sơ theo 4 nhóm, mỗi nhóm 25%: thương hiệu + thể loại,
+     * logo + ảnh bìa, MST + người đại diện + tài liệu, tài khoản ngân hàng.
      */
     private void applyChecklist(HttpServletRequest request, User organizer, OrganizerProfile saved,
             Set<Integer> savedCategoryIds, List<OrganizerDocument> documents) {
@@ -660,16 +627,14 @@ public class OrganizerProfileController extends HttpServlet {
                 && !ValidationUtils.isNullOrBlank(saved.getLegalRepresentative())
                 && ("APPROVED".equals(licenseState) || "PENDING".equals(licenseState));
         boolean bank = saved.isBankComplete();
-        boolean social = saved.isSocialFilled();
-        int done = (brand ? 1 : 0) + (media ? 1 : 0) + (legal ? 1 : 0) + (bank ? 1 : 0) + (social ? 1 : 0);
+        int done = (brand ? 1 : 0) + (media ? 1 : 0) + (legal ? 1 : 0) + (bank ? 1 : 0);
 
         request.setAttribute("ckBrand", brand);
         request.setAttribute("ckMedia", media);
         request.setAttribute("ckLegal", legal);
         request.setAttribute("licenseState", licenseState);
         request.setAttribute("ckBank", bank);
-        request.setAttribute("ckSocial", social);
-        request.setAttribute("profileCompletion", done * 20);
+        request.setAttribute("profileCompletion", done * 25);
     }
 
     /**

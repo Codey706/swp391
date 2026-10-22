@@ -13,6 +13,8 @@ public class OrganizerProfile {
     private String summary;
     private String logoUrl;
     private String coverUrl;
+    private int coverScale = 100;   // % kích thước hiển thị ảnh bìa (không đổi tệp gốc)
+    private int logoScale = 100;    // % kích thước hiển thị logo
     private String taxCode;
     private String legalRepresentative;
     private String websiteUrl;
@@ -36,10 +38,6 @@ public class OrganizerProfile {
 
     public boolean isBankComplete() {
         return notBlank(bankName) && notBlank(bankAccountNumber) && notBlank(bankAccountHolder);
-    }
-
-    public boolean isSocialFilled() {
-        return notBlank(websiteUrl) || notBlank(facebookUrl) || notBlank(youtubeUrl) || notBlank(spotifyUrl);
     }
 
     /**
@@ -86,6 +84,22 @@ public class OrganizerProfile {
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
+    }
+
+    public int getCoverScale() {
+        return coverScale;
+    }
+
+    public void setCoverScale(int coverScale) {
+        this.coverScale = coverScale;
+    }
+
+    public int getLogoScale() {
+        return logoScale;
+    }
+
+    public void setLogoScale(int logoScale) {
+        this.logoScale = logoScale;
     }
 
     public String getTaxCode() {

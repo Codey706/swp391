@@ -1,16 +1,9 @@
 /* =====================================================================
    Light Ticket - Organizer Portal: Hồ sơ Nhà tổ chức (thiết kế Stitch)
    Dùng token --st-* của organizer.css. Chỉ ảnh hưởng trang có body.op-body.
-   Font chính của trang: Arial.
+   Font: dùng chung Plus Jakarta Sans (home.css) như Organizer Event List.
    ===================================================================== */
 
-body.op-body,
-body.op-body input,
-body.op-body select,
-body.op-body textarea,
-body.op-body button {
-    font-family: Arial, Helvetica, sans-serif;
-}
 body.op-body .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
 }
@@ -18,11 +11,20 @@ body.op-body [hidden] {
     display: none !important;
 }
 
+/* Đồng bộ khung trang với Organizer Event List */
+body.org-body.op-body {
+    background-color: var(--bg-page);
+    padding-top: 0;
+}
+
 .op-body .op-main {
     display: flex;
     flex-direction: column;
-    gap: var(--st-space-lg);
-    padding-top: var(--st-space-xl);
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 1320px;
+    margin: 0 auto;
 }
 
 /* ------------------------------------------------------------ Nút */
@@ -125,78 +127,6 @@ body.op-body [hidden] {
     display: flex;
     flex-wrap: wrap;
     gap: var(--st-space-sm);
-}
-
-/* ------------------------------------------------------------ 4 huy hiệu trạng thái */
-.op-status {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--st-space-sm);
-    padding: var(--st-space-md);
-    background: var(--st-surface-lowest);
-    border-radius: var(--st-radius-xl);
-    box-shadow: var(--st-shadow-sm);
-}
-.op-status-item {
-    display: flex;
-    align-items: center;
-    gap: var(--st-space-md);
-    padding: var(--st-space-sm);
-    border-radius: var(--st-radius);
-    min-width: 0;
-}
-.op-status-item.is-active {
-    background: var(--st-primary-soft);
-}
-.op-status-ico {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--st-surface-container);
-    color: var(--st-secondary);
-}
-.op-status-ico.is-primary {
-    background: var(--st-primary-container);
-    color: #fff;
-}
-.op-status-ico.is-ok {
-    background: #6ffbbe;
-    color: #002113;
-}
-.op-status-ico .material-symbols-outlined {
-    font-size: 20px;
-}
-.op-status-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-.op-status-text small {
-    font-size: 0.69rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--st-secondary);
-}
-.op-status-text small.is-primary {
-    color: var(--st-primary);
-}
-.op-status-text strong {
-    font-size: 1rem;
-    color: var(--st-on-surface);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.op-status-text strong.is-ok {
-    color: var(--st-tertiary);
-}
-.op-status-text strong.is-muted {
-    color: var(--st-secondary);
 }
 
 /* ------------------------------------------------------------ Bố cục 2 cột */
@@ -591,6 +521,84 @@ textarea.op-input {
     font-size: 0.69rem;
     font-weight: 700;
     pointer-events: none;
+}
+
+/* Kích thước hiển thị ảnh bìa / logo: chỉ phóng/thu khi hiển thị (object-fit giữ tỷ lệ, tệp gốc không đổi) */
+.op-media-box img,
+.op-card-cover img,
+.op-card-logo img,
+.op-modal-cover img,
+.op-modal-logo img {
+    transform: scale(var(--op-scale, 1));
+    transform-origin: center;
+    transition: transform 0.15s ease;
+}
+.op-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--st-outline-variant);
+    border-radius: var(--st-radius);
+    background: var(--st-surface-lowest);
+}
+.op-scale-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--st-on-surface);
+}
+.op-scale-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+.op-scale-range {
+    flex: 1 1 90px;
+    min-width: 80px;
+    accent-color: var(--st-primary-container);
+    cursor: pointer;
+}
+.op-scale-btn {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--st-outline-variant);
+    border-radius: 50%;
+    background: var(--st-surface-lowest);
+    color: var(--st-on-surface);
+    cursor: pointer;
+}
+.op-scale-btn:hover {
+    border-color: var(--st-primary-container);
+    color: var(--st-primary);
+}
+.op-scale-btn .material-symbols-outlined {
+    font-size: 16px;
+}
+.op-scale-value {
+    min-width: 3.2rem;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--st-primary);
+}
+.op-scale-reset {
+    padding: 0.15rem 0.5rem;
+    border: 0;
+    border-radius: var(--st-radius);
+    background: var(--st-surface-container);
+    color: var(--st-secondary);
+    font-size: 0.69rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.op-scale-reset:hover {
+    color: var(--st-primary);
 }
 
 /* Thông báo quy tắc giấy phép kinh doanh */
@@ -1224,15 +1232,7 @@ textarea.op-input {
         scrollbar-width: thin;
     }
 }
-@media (max-width: 991.98px) {
-    .op-status {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
 @media (max-width: 575.98px) {
-    .op-status {
-        grid-template-columns: minmax(0, 1fr);
-    }
     .op-section {
         padding: var(--st-space-md);
     }
@@ -1243,4 +1243,100 @@ textarea.op-input {
     .op-toolbar-actions .op-btn {
         flex: 1 1 100%;
     }
+}
+
+/* =========================================================
+   Đồng bộ Profile với Organizer Event List
+   Giữ nguyên _head.jsp, _header.jsp và cấu trúc form.
+   ========================================================= */
+
+/* Khung nội dung */
+body.org-body.op-body .org-container {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Tiêu đề trang: đồng bộ org-card / org-page-head */
+.op-toolbar {
+    background: var(--st-surface-lowest);
+    border-radius: var(--st-radius-xl);
+    box-shadow: var(--st-shadow-sm);
+    padding: 1.25rem 1.5rem;
+    border: none;
+}
+
+.op-toolbar-title h1 {
+    font-size: 1.5rem;
+    line-height: 1.8rem;
+    font-weight: 700;
+    letter-spacing: normal;
+}
+
+.op-toolbar-title p {
+    margin-top: 0.35rem;
+    line-height: 1.5;
+}
+
+/* Form và các thẻ nội dung */
+.op-section,
+.op-panel {
+    background: var(--st-surface-lowest);
+    border-radius: var(--st-radius-xl);
+    box-shadow: var(--st-shadow-sm);
+    border: none;
+}
+
+/* Màu nút chính đồng bộ nút CTA của Event List */
+.op-btn-primary {
+    background: var(--st-primary-container);
+    color: #fff;
+    box-shadow: none;
+}
+
+.op-btn-primary:hover {
+    background: var(--st-primary);
+    color: #fff;
+}
+
+/* Input đồng nhất với giao diện Organizer */
+.op-input {
+    border: 1px solid var(--st-outline-variant);
+    box-shadow: none;
+}
+
+.op-input:focus {
+    outline: none;
+    background: var(--st-surface-lowest);
+    border-color: var(--st-primary-container);
+    box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.10);
+}
+
+/* Giữ màu chữ và trạng thái dễ đọc */
+.op-toolbar-title h1,
+.op-section-title h2,
+.op-panel-head strong {
+    color: var(--st-on-surface);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    body.org-body.op-body .org-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .op-toolbar {
+        padding: 1rem;
+    }
+
+    .op-toolbar-title h1 {
+        font-size: 1.25rem;
+    }
+}
+
+body.org-body.op-body {
+    color: var(--st-on-surface);
 }

@@ -12,6 +12,18 @@
     });
 })();
 
+// ---------------------------------------------------------------- Xác nhận trước khi gửi duyệt (trang danh sách)
+(function () {
+    document.querySelectorAll('.js-confirm-submit').forEach(function (submitForm) {
+        submitForm.addEventListener('submit', function (e) {
+            var name = submitForm.getAttribute('data-event-name');
+            if (!window.confirm('Gửi sự kiện "' + name + '" cho Admin duyệt? Trong lúc chờ duyệt bạn sẽ không sửa hoặc xóa được sự kiện.')) {
+                e.preventDefault();
+            }
+        });
+    });
+})();
+
 // ---------------------------------------------------------------- Form tạo / sửa sự kiện
 (function () {
     var form = document.getElementById('create-event-form') || document.getElementById('edit-event-form');
@@ -23,12 +35,32 @@
     var ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
     var MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
+    // Đặt khi bấm gửi duyệt: bắt buộc có ảnh poster và ít nhất một hạng vé (lưu nháp thì không)
+    var requireForSubmit = false;
+
     var panes = Array.prototype.slice.call(form.querySelectorAll('[data-step-pane]'));
     var stepButtons = Array.prototype.slice.call(document.querySelectorAll('#stepper [data-step-target]'));
     var totalSteps = panes.length;
     var currentStep = 1;
 
     // ------------------------------------------------ chuyển bước / tab
+    // Bước cuối của trang tạo: nhãn nút theo lựa chọn lưu nháp / gửi duyệt
+    function publishChoice() {
+        var checked = form.querySelector('input[name="publishChoice"]:checked');
+        return checked ? checked.value : 'draft';
+    }
+    function finishLabel() {
+        return publishChoice() === 'submit' ? 'Tạo & gửi Admin duyệt' : 'Hoàn tất & lưu bản nháp';
+    }
+    form.addEventListener('change', function (e) {
+        if (e.target && e.target.name === 'publishChoice' && currentStep === totalSteps) {
+            var label = document.getElementById('nextLabel');
+            if (label) {
+                label.textContent = finishLabel();
+            }
+        }
+    });
+
     function showStep(step) {
         step = Math.min(Math.max(1, step), totalSteps);
         currentStep = step;
@@ -52,7 +84,7 @@
         }
         if (nextBtn && nextLabel) {
             var last = step === totalSteps;
-            nextLabel.textContent = last ? 'Hoàn tất & tạo sự kiện' : 'Tiếp tục sang bước tiếp theo';
+            nextLabel.textContent = last ? finishLabel() : 'Tiếp tục sang bước tiếp theo';
             nextBtn.setAttribute('data-step-nav', last ? 'submit' : 'next');
         }
         if (step === totalSteps) {
@@ -114,8 +146,11 @@
             {id: 'categoryId', step: 1, ok: document.getElementById('categoryId').value !== '',
                 msg: 'Vui lòng chọn danh mục sự kiện.'},
             {id: 'eventImage', step: 1,
-                ok: !file || (ALLOWED_EXTENSIONS.indexOf(extension) >= 0 && file.size <= MAX_IMAGE_SIZE),
-                msg: 'Ảnh phải là JPG, PNG hoặc WEBP và không quá 5MB.'},
+                ok: (!requireForSubmit || !!file)
+                    && (!file || (ALLOWED_EXTENSIONS.indexOf(extension) >= 0 && file.size <= MAX_IMAGE_SIZE)),
+                msg: requireForSubmit && !file
+                    ? 'Cần có ảnh poster để gửi duyệt (hoặc chọn Lưu nháp).'
+                    : 'Ảnh phải là JPG, PNG hoặc WEBP và không quá 5MB.'},
             {id: 'description', step: 1, ok: description.length >= 20 && description.length <= 5000,
                 msg: 'Mô tả phải từ 20 đến 5000 ký tự.'},
             {id: 'startTime', step: 2, ok: start !== null && start > new Date(),
@@ -153,8 +188,16 @@
         }
         // Bước 3 của trang tạo: hạng vé (module bên dưới)
         var ticketsOk = true;
-        if (isCreate && step === 3 && window.ltTickets) {
-            ticketsOk = window.ltTickets.validate();
+        if (isCreate && step === 3) {
+            if (window.ltSeatMode && window.ltSeatMode.active()) {
+                ticketsOk = window.ltSeatMode.validate(); // bán vé theo sơ đồ ghế
+            } else if (window.ltTickets) {
+                ticketsOk = window.ltTickets.validate(); // bán vé theo số lượng
+            }
+            if (ticketsOk && requireForSubmit && ticketCount() === 0) {
+                showTicketRequirement('Cần có ít nhất một hạng vé để gửi duyệt (hoặc chọn Lưu nháp).');
+                ticketsOk = false;
+            }
         }
         return firstInvalid === null && ticketsOk;
     }
@@ -199,19 +242,51 @@
     form.addEventListener('input', revalidateField);
     form.addEventListener('change', revalidateField);
 
+    // Có đang gửi duyệt không: nút bấm có name=submitAction, nếu không thì theo lựa chọn ở bước cuối
+    function isSubmitting(e) {
+        if (e && e.submitter && e.submitter.name === 'submitAction') {
+            return e.submitter.value === 'submit';
+        }
+        return publishChoice() === 'submit';
+    }
+
+    function showTicketRequirement(msg) {
+        var seatAlert = document.getElementById('seatStepAlert');
+        var seatText = document.getElementById('seatStepAlertText');
+        var generalAlert = document.getElementById('ticketAlert');
+        var generalText = document.getElementById('ticketAlertText');
+        if (window.ltSeatMode && window.ltSeatMode.active() && seatAlert && seatText) {
+            seatText.textContent = msg;
+            seatAlert.hidden = false;
+        } else if (generalAlert && generalText) {
+            generalText.textContent = msg;
+            generalAlert.style.display = '';
+        }
+    }
+
+    function ticketCount() {
+        if (window.ltSeatMode && window.ltSeatMode.active()) {
+            return window.ltSeatMode.count();
+        }
+        return window.ltTickets && window.ltTickets.count ? window.ltTickets.count() : 0;
+    }
+
     // Gửi form: kiểm tra toàn bộ các bước, nhảy tới bước đầu tiên có lỗi
     form.addEventListener('submit', function (e) {
         var firstInvalidStep = 0;
+        requireForSubmit = isCreate && isSubmitting(e); // gửi duyệt đòi hỏi nhiều hơn lưu nháp
         for (var step = 1; step <= totalSteps; step++) {
             if (!validateStep(step) && firstInvalidStep === 0) {
                 firstInvalidStep = step;
             }
         }
+
         if (firstInvalidStep > 0) {
             e.preventDefault();
             showStep(firstInvalidStep);
             validateStep(firstInvalidStep);
         }
+        requireForSubmit = false; // lần kiểm tra theo từng bước sau đó không đòi hỏi gửi duyệt
     });
 
     // ------------------------------------------------ đếm ký tự mô tả
@@ -811,7 +886,14 @@
         refreshSummary();
     });
 
-    window.ltTickets = {validate: validate};
+    window.ltTickets = {
+        validate: validate,
+        count: function () {
+            return rows().filter(function (row) {
+                return !isBlankRow(row);
+            }).length;
+        }
+    };
     refreshRows();
     refreshSummary();
 })();

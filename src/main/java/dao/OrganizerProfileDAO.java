@@ -27,7 +27,7 @@ import java.util.Set;
 public class OrganizerProfileDAO {
 
     private static final String SELECT_PROFILE
-            = "SELECT user_id, summary, logo_url, cover_url, tax_code, legal_representative, "
+            = "SELECT user_id, summary, logo_url, cover_url, cover_scale, logo_scale, tax_code, legal_representative, "
             + "website_url, facebook_url, youtube_url, spotify_url, bank_name, bank_account_number, "
             + "bank_account_holder, kyc_level, verification_status, partner_tier, withdrawal_limit "
             + "FROM Organizer_Profiles WHERE user_id = ?";
@@ -36,18 +36,19 @@ public class OrganizerProfileDAO {
             = "UPDATE Users SET full_name = ?, email = ?, phone = ?, address = ?, updated_at = GETDATE() "
             + "WHERE user_id = ? AND UPPER(role) = 'ORGANIZER' AND UPPER(status) = 'ACTIVE'";
 
-    // Ảnh không đổi (tham số NULL) thì giữ ảnh cũ; MST đã VERIFIED thì không cho đổi
+    // Ảnh không đổi (tham số NULL) thì giữ ảnh cũ; MST đã VERIFIED thì không cho đổi.
+    // Các cột website/facebook/youtube/spotify không còn nhập trên form: nhánh UPDATE không đụng tới
+    // để giữ nguyên dữ liệu đã lưu (nhánh INSERT để NULL).
     private static final String MERGE_PROFILE
             = "MERGE Organizer_Profiles AS t USING (SELECT ? AS user_id) AS s ON t.user_id = s.user_id "
             + "WHEN MATCHED THEN UPDATE SET summary = ?, legal_representative = ?, "
             + "tax_code = CASE WHEN t.verification_status = 'VERIFIED' THEN t.tax_code ELSE ? END, "
             + "logo_url = COALESCE(?, t.logo_url), cover_url = COALESCE(?, t.cover_url), "
-            + "website_url = ?, facebook_url = ?, youtube_url = ?, spotify_url = ?, "
+            + "cover_scale = ?, logo_scale = ?, "
             + "bank_name = ?, bank_account_number = ?, bank_account_holder = ?, updated_at = GETDATE() "
             + "WHEN NOT MATCHED THEN INSERT (user_id, summary, legal_representative, tax_code, logo_url, "
-            + "cover_url, website_url, facebook_url, youtube_url, spotify_url, bank_name, "
-            + "bank_account_number, bank_account_holder) "
-            + "VALUES (s.user_id, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+            + "cover_url, cover_scale, logo_scale, bank_name, bank_account_number, bank_account_holder) "
+            + "VALUES (s.user_id, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     /**
      * @return hồ sơ mở rộng; đối tượng rỗng (userId đã gán) nếu chưa có dòng
@@ -63,6 +64,8 @@ public class OrganizerProfileDAO {
                     profile.setSummary(rs.getString("summary"));
                     profile.setLogoUrl(rs.getString("logo_url"));
                     profile.setCoverUrl(rs.getString("cover_url"));
+                    profile.setCoverScale(rs.getInt("cover_scale"));
+                    profile.setLogoScale(rs.getInt("logo_scale"));
                     profile.setTaxCode(rs.getString("tax_code"));
                     profile.setLegalRepresentative(rs.getString("legal_representative"));
                     profile.setWebsiteUrl(rs.getString("website_url"));
@@ -132,17 +135,15 @@ public class OrganizerProfileDAO {
 
                 try (PreparedStatement statement = connection.prepareStatement(MERGE_PROFILE)) {
                     statement.setInt(1, core.getUserId());
-                    int base = 1; // 12 giá trị cho nhánh UPDATE, rồi 12 giá trị cho nhánh INSERT
+                    int base = 1; // 10 giá trị cho nhánh UPDATE, rồi 10 giá trị cho nhánh INSERT
                     for (int pass = 0; pass < 2; pass++) {
                         setNullable(statement, ++base, p.getSummary());
                         setNullable(statement, ++base, p.getLegalRepresentative());
                         setNullable(statement, ++base, p.getTaxCode());
                         setNullable(statement, ++base, p.getLogoUrl());
                         setNullable(statement, ++base, p.getCoverUrl());
-                        setNullable(statement, ++base, p.getWebsiteUrl());
-                        setNullable(statement, ++base, p.getFacebookUrl());
-                        setNullable(statement, ++base, p.getYoutubeUrl());
-                        setNullable(statement, ++base, p.getSpotifyUrl());
+                        statement.setInt(++base, p.getCoverScale());
+                        statement.setInt(++base, p.getLogoScale());
                         setNullable(statement, ++base, p.getBankName());
                         setNullable(statement, ++base, p.getBankAccountNumber());
                         setNullable(statement, ++base, p.getBankAccountHolder());

@@ -14,6 +14,7 @@
     <head>
         <title>Cập nhật sự kiện - Light Ticket Organizer Portal</title>
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
+        <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
     </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
@@ -41,6 +42,9 @@
                     </div>
                 </div>
                 <div class="ce-toolbar-actions">
+                    <a class="btn-soft" href="${ctx}/organizer/event/seatmap?eventId=${event.eventId}">
+                        <span class="material-symbols-outlined">event_seat</span> Sơ đồ ghế
+                    </a>
                     <a class="btn-soft" href="${ctx}/organizer/event/list">
                         <span class="material-symbols-outlined">undo</span> Hủy thay đổi
                     </a>
@@ -282,6 +286,7 @@
 
         <jsp:include page="/WEB-INF/views/organizer/_footer.jsp"/>
         <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
+        <script src="${ctx}/assets/js/image-cropper.js"></script>
         <script src="${ctx}/assets/js/event.js"></script>
     </body>
 </html>

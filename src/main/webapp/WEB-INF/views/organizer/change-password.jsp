@@ -71,18 +71,18 @@
                     </div>
                 </div>
 
-                <% if (request.getAttribute("error") != null) { %>
+                <c:if test="${not empty error}">
                 <div class="alert alert-danger py-2 px-3 mb-4 small d-flex align-items-center gap-2">
                     <i class="bi bi-exclamation-triangle-fill"></i>
-                    <span><%= request.getAttribute("error") %></span>
+                    <span><c:out value="${error}"/></span>
                 </div>
-                <% } %>
-                <% if (request.getAttribute("success") != null) { %>
+                </c:if>
+                <c:if test="${not empty success}">
                 <div class="alert alert-success py-2 px-3 mb-4 small d-flex align-items-center gap-2">
                     <i class="bi bi-check-circle-fill"></i>
-                    <span><%= request.getAttribute("success") %></span>
+                    <span><c:out value="${success}"/></span>
                 </div>
-                <% } %>
+                </c:if>
 
                 <form method="post" action="${pageContext.request.contextPath}/Auth">
                     <input type="hidden" name="action" value="changePassword"/>
