@@ -82,6 +82,10 @@ public final class Constants {
     public static final String SESSION_STAFF_PROFILE_CSRF = "staffProfileCsrf";
     public static final String SESSION_STAFF_PROFILE_SUCCESS = "staffProfileSuccess";
     public static final String EVENT_STAFF_ACTIVE = "ACTIVE";
+    public static final int STAFF_EVENT_PAGE_SIZE = 5;
+    public static final String TICKET_CANCELLED = "Cancelled";
+    public static final int STAFF_CUSTOMER_PAGE_SIZE = 8;
+    public static final int STAFF_CUSTOMER_TICKET_LIMIT = 50;
 
     // Hồ sơ mở rộng của Organizer (khớp Organizer_Profiles)
     public static final int PROFILE_SUMMARY_MAX_LENGTH = 300;
@@ -104,7 +108,6 @@ public final class Constants {
     public static final String DOC_APPROVED = "APPROVED";
     // Tài liệu pháp lý lưu ngoài thư mục web (không public): ${user.home}/ltm-uploads/organizer-docs
     public static final String PRIVATE_DOC_DIR_NAME = "ltm-uploads/organizer-docs";
-
 
     // Book Tickets 
     public static final int BOOKING_MAX_TICKETS_PER_ORDER = 10;

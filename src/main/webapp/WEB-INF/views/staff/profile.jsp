@@ -56,10 +56,6 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                 <div>
                     <h1 class="h3 fw-bold mb-1" style="color: #0f172a;">Hồ sơ nhân viên</h1>
-                    <p class="text-muted small mb-0">
-                        <c:if test="${not empty memberSince}">Thành viên từ <c:out value="${memberSince}"/> • </c:if>
-                        Quản lý thông tin cá nhân của bạn
-                    </p>
                 </div>
                 <div class="d-flex gap-2">
                     <a href="${ctx}/staff/change-password" class="btn-staff-outline">
