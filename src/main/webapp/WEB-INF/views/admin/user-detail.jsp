@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="model.User" %>
+<%@ page import="utils.DateTimeUtils" %>
 
 <!DOCTYPE html>
 <html>
@@ -19,6 +20,8 @@
         <%
             User user = (User) request.getAttribute("user");
             String contextPath = request.getContextPath();
+            String errorMessage = (String) request.getAttribute("errorMessage");
+            String successMessage = (String) request.getAttribute("successMessage");
         %>
 
         <div class="layout">
@@ -55,6 +58,10 @@
 
                             <a href="<%= contextPath%>/admin/users">
                                 User List
+                            </a>
+
+                            <a href="<%= contextPath%>/admin/user-create">
+                                Create User
                             </a>
 
                             <a href="<%= contextPath%>/admin/user-detail?id=<%= user.getUserId()%>"
@@ -111,9 +118,12 @@
                 <!-- Topbar -->
                 <header class="topbar">
 
-                    <input class="search"
-                           type="text"
-                           placeholder="⌕  Search...">
+                    <form method="get" action="<%= contextPath%>/admin/users" style="margin: 0;">
+                        <input class="search"
+                               type="text"
+                               name="keyword"
+                               placeholder="⌕  Search...">
+                    </form>
 
                     <a class="admin" href="<%= contextPath%>/admin/profile">
                         <img class="admin-avatar"
@@ -140,6 +150,18 @@
 
                         </div>
 
+                        <% if (errorMessage != null) { %>
+                            <div class="profile-alert error">
+                                <i class="fa-solid fa-circle-exclamation"></i> <%= errorMessage %>
+                            </div>
+                        <% } %>
+
+                        <% if (successMessage != null) { %>
+                            <div class="profile-alert success">
+                                <i class="fa-solid fa-circle-check"></i> <%= successMessage %>
+                            </div>
+                        <% } %>
+
                         <div class="detail-card">
 
                             <!-- Profile -->
@@ -157,21 +179,21 @@
                                 <div class="profile-info">
 
                                     <h2>
-                                        <%= user.getFullName()%>
+                                        <%= user.getFullName() != null ? user.getFullName() : ""%>
                                     </h2>
 
                                     <p>
-                                        @<%= user.getUsername()%>
+                                        @<%= user.getUsername() != null ? user.getUsername() : ""%>
                                     </p>
 
-                                    <span class="role <%= user.getRole().toLowerCase()%>">
-                                        <%= user.getRole()%>
+                                    <span class="role <%= user.getRole() != null ? user.getRole().toLowerCase() : ""%>">
+                                        <%= user.getRole() != null ? user.getRole() : ""%>
                                     </span>
 
                                     &nbsp;
 
-                                    <span class="status <%= user.getStatus().toLowerCase()%>">
-                                        <%= user.getStatus()%>
+                                    <span class="status <%= user.getStatus() != null ? user.getStatus().toLowerCase() : ""%>">
+                                        <%= user.getStatus() != null ? user.getStatus() : ""%>
                                     </span>
 
                                 </div>
@@ -204,7 +226,7 @@
                                     </span>
 
                                     <div class="detail-value">
-                                        <%= user.getUsername()%>
+                                        <%= user.getUsername() != null ? user.getUsername() : ""%>
                                     </div>
 
                                 </div>
@@ -216,7 +238,7 @@
                                     </span>
 
                                     <div class="detail-value">
-                                        <%= user.getFullName()%>
+                                        <%= user.getFullName() != null ? user.getFullName() : ""%>
                                     </div>
 
                                 </div>
@@ -228,7 +250,7 @@
                                     </span>
 
                                     <div class="detail-value">
-                                        <%= user.getEmail()%>
+                                        <%= user.getEmail() != null ? user.getEmail() : ""%>
                                     </div>
 
                                 </div>
@@ -240,7 +262,7 @@
                                     </span>
 
                                     <div class="detail-value">
-                                        <%= user.getPhone() != null
+                                        <%= user.getPhone() != null && !user.getPhone().isEmpty()
                                                 ? user.getPhone()
                                                 : "Not provided"%>
                                     </div>
@@ -254,7 +276,7 @@
                                     </span>
 
                                     <div class="detail-value">
-                                        <%= user.getAddress() != null
+                                        <%= user.getAddress() != null && !user.getAddress().isEmpty()
                                                 ? user.getAddress()
                                                 : "Not provided"%>
                                     </div>
@@ -277,7 +299,7 @@
                                     </span>
 
                                     <div class="detail-value">
-                                        <%= user.getRole()%>
+                                        <%= user.getRole() != null ? user.getRole() : ""%>
                                     </div>
 
                                 </div>
@@ -289,33 +311,39 @@
                                         Account Status
                                     </span>
 
-                                    <form class="status-form"
-                                          method="post"
-                                          action="<%= contextPath%>/admin/user-detail">
+                                    <% if ("ADMIN".equalsIgnoreCase(user.getRole())) { %>
+                                        <div class="detail-value">
+                                            <span class="status active">Active (Protected)</span>
+                                        </div>
+                                    <% } else { %>
+                                        <form class="status-form"
+                                              method="post"
+                                              action="<%= contextPath%>/admin/user-detail">
 
-                                        <input type="hidden"
-                                               name="id"
-                                               value="<%= user.getUserId()%>">
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="<%= user.getUserId()%>">
 
-                                        <select class="status-select"
-                                                name="status"
-                                                onchange="this.form.submit()">
+                                            <select class="status-select"
+                                                    name="status"
+                                                    onchange="this.form.submit()">
 
-                                            <option value="ACTIVE"
-                                                    <%= "ACTIVE".equalsIgnoreCase(user.getStatus())
-                                                            ? "selected" : ""%>>
-                                                Active
-                                            </option>
+                                                <option value="ACTIVE"
+                                                        <%= "ACTIVE".equalsIgnoreCase(user.getStatus())
+                                                                ? "selected" : ""%>>
+                                                    Active
+                                                </option>
 
-                                            <option value="INACTIVE"
-                                                    <%= "INACTIVE".equalsIgnoreCase(user.getStatus())
-                                                            ? "selected" : ""%>>
-                                                Inactive
-                                            </option>
+                                                <option value="INACTIVE"
+                                                        <%= "INACTIVE".equalsIgnoreCase(user.getStatus())
+                                                                ? "selected" : ""%>>
+                                                    Inactive
+                                                </option>
 
-                                        </select>
+                                            </select>
 
-                                    </form>
+                                        </form>
+                                    <% } %>
 
                                 </div>
 
@@ -327,7 +355,7 @@
 
                                     <div class="detail-value">
                                         <%= user.getCreatedAt() != null
-                                                ? user.getCreatedAt()
+                                                ? DateTimeUtils.formatDateTime(user.getCreatedAt())
                                                 : "Not available"%>
                                     </div>
 
@@ -341,7 +369,7 @@
 
                                     <div class="detail-value">
                                         <%= user.getUpdatedAt() != null
-                                                ? user.getUpdatedAt()
+                                                ? DateTimeUtils.formatDateTime(user.getUpdatedAt())
                                                 : "Not available"%>
                                     </div>
 
@@ -358,6 +386,22 @@
                                        href="<%= contextPath%>/admin/users">
                                         ← Back to User List
                                     </a>
+
+                                    <% if (!"ADMIN".equalsIgnoreCase(user.getRole())) { %>
+                                        <form method="post"
+                                              action="<%= contextPath%>/admin/user-delete"
+                                              style="display: inline; margin-left: 10px;"
+                                              onsubmit="return confirm('Are you sure you want to delete user &quot;<%= user.getUsername()%>&quot;?');">
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="<%= user.getUserId()%>">
+
+                                            <button type="submit" class="delete-button">
+                                                <i class="fa-solid fa-trash"></i>
+                                                Delete User
+                                            </button>
+                                        </form>
+                                    <% } %>
 
                                 </div>
 

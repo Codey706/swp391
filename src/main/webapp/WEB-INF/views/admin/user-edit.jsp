@@ -24,6 +24,7 @@
         <%
             User user = (User) request.getAttribute("user");
             String contextPath = request.getContextPath();
+            String errorMessage = (String) request.getAttribute("errorMessage");
         %>
 
         <div class="layout">
@@ -59,6 +60,10 @@
 
                             <a href="<%= contextPath%>/admin/users">
                                 User List
+                            </a>
+
+                            <a href="<%= contextPath%>/admin/user-create">
+                                Create User
                             </a>
 
                             <a href="<%= contextPath%>/admin/user-detail?id=<%= user.getUserId()%>"
@@ -108,16 +113,17 @@
                 </nav>
             </aside>
 
-
-
             <main class="main">
 
                 <!-- Topbar -->
                 <header class="topbar">
 
-                    <input class="search"
-                           type="text"
-                           placeholder="⌕  Search...">
+                    <form method="get" action="<%= contextPath%>/admin/users" style="margin: 0;">
+                        <input class="search"
+                               type="text"
+                               name="keyword"
+                               placeholder="⌕  Search...">
+                    </form>
 
                     <a class="admin" href="<%= contextPath%>/admin/profile">
                         <img class="admin-avatar"
@@ -148,6 +154,12 @@
 
                         </div>
 
+                        <% if (errorMessage != null) { %>
+                            <div class="profile-alert error">
+                                <i class="fa-solid fa-circle-exclamation"></i> <%= errorMessage %>
+                            </div>
+                        <% } %>
+
                         <div class="edit-card">
 
                             <h3 class="section-title">
@@ -172,7 +184,7 @@
 
                                         <input class="edit-form-input readonly"
                                                type="text"
-                                               value="<%= user.getUsername()%>"
+                                               value="<%= user.getUsername() != null ? user.getUsername() : ""%>"
                                                readonly>
 
                                     </div>
@@ -285,6 +297,15 @@
                                             Account Status
                                         </label>
 
+                                        <% if ("ADMIN".equalsIgnoreCase(user.getRole())) { %>
+
+                                        <input class="edit-form-input readonly"
+                                               type="text"
+                                               value="Active"
+                                               readonly>
+
+                                        <% } else {%>
+
                                         <select class="edit-form-select"
                                                 name="status">
 
@@ -301,6 +322,8 @@
                                             </option>
 
                                         </select>
+
+                                        <% }%>
 
                                     </div>
 

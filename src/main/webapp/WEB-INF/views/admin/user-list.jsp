@@ -1,6 +1,6 @@
-
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="model.User" %>
 
 <!DOCTYPE html>
@@ -20,17 +20,25 @@
 
         <%
             List<User> users = (List<User>) request.getAttribute("users");
+            Map<String, Integer> stats = (Map<String, Integer>) request.getAttribute("stats");
 
-            int totalUsers = users != null ? users.size() : 0;
+            int totalUsers = 0;
             int activeUsers = 0;
             int inactiveUsers = 0;
             int organizers = 0;
             int staffs = 0;
             int customers = 0;
 
-            if (users != null) {
+            if (stats != null) {
+                totalUsers = stats.getOrDefault("total", 0);
+                activeUsers = stats.getOrDefault("active", 0);
+                inactiveUsers = stats.getOrDefault("inactive", 0);
+                organizers = stats.getOrDefault("organizers", 0);
+                staffs = stats.getOrDefault("staffs", 0);
+                customers = stats.getOrDefault("customers", 0);
+            } else if (users != null) {
+                totalUsers = users.size();
                 for (User user : users) {
-
                     if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
                         activeUsers++;
                     } else {
@@ -39,19 +47,30 @@
 
                     if ("ORGANIZER".equalsIgnoreCase(user.getRole())) {
                         organizers++;
-                    }
-
-                    if ("STAFF".equalsIgnoreCase(user.getRole())) {
+                    } else if ("STAFF".equalsIgnoreCase(user.getRole())) {
                         staffs++;
-                    }
-
-                    if ("CUSTOMER".equalsIgnoreCase(user.getRole())) {
+                    } else if ("CUSTOMER".equalsIgnoreCase(user.getRole())) {
                         customers++;
                     }
                 }
             }
 
             String contextPath = request.getContextPath();
+            String keyword = (String) request.getAttribute("keyword");
+            if (keyword == null) {
+                keyword = "";
+            }
+            String selectedRole = (String) request.getAttribute("selectedRole");
+            if (selectedRole == null || selectedRole.isEmpty()) {
+                selectedRole = "ALL";
+            }
+            String selectedStatus = (String) request.getAttribute("selectedStatus");
+            if (selectedStatus == null || selectedStatus.isEmpty()) {
+                selectedStatus = "ALL";
+            }
+
+            String errorMessage = (String) request.getAttribute("errorMessage");
+            String successMessage = (String) request.getAttribute("successMessage");
         %>
 
         <div class="layout">
@@ -89,6 +108,10 @@
                             <a href="<%= contextPath%>/admin/users"
                                class="active">
                                 User List
+                            </a>
+
+                            <a href="<%= contextPath%>/admin/user-create">
+                                Create User
                             </a>
 
                         </div>
@@ -140,8 +163,17 @@
                 <!-- Topbar -->
                 <header class="topbar">
 
-                    <input class="search" type="text"
-                           placeholder="⌕  Search...">
+                    <form method="get" action="<%= contextPath%>/admin/users" style="margin: 0;">
+                        <input class="search" type="text" name="keyword"
+                               value="<%= keyword %>"
+                               placeholder="⌕  Search...">
+                        <% if (!"ALL".equalsIgnoreCase(selectedRole)) { %>
+                            <input type="hidden" name="role" value="<%= selectedRole %>">
+                        <% } %>
+                        <% if (!"ALL".equalsIgnoreCase(selectedStatus)) { %>
+                            <input type="hidden" name="status" value="<%= selectedStatus %>">
+                        <% } %>
+                    </form>
 
                     <a class="admin" href="<%= contextPath%>/admin/profile">
                         <img class="admin-avatar"
@@ -161,6 +193,18 @@
                             <p>Quản lý thông tin người dùng trong hệ thống Light Ticket</p>
                         </div>
                     </div>
+
+                    <% if (errorMessage != null) { %>
+                        <div class="profile-alert error">
+                            <i class="fa-solid fa-circle-exclamation"></i> <%= errorMessage %>
+                        </div>
+                    <% } %>
+
+                    <% if (successMessage != null) { %>
+                        <div class="profile-alert success">
+                            <i class="fa-solid fa-circle-check"></i> <%= successMessage %>
+                        </div>
+                    <% } %>
 
                     <!-- Statistics -->
                     <div class="stats">
@@ -205,7 +249,50 @@
                                 <h2>Users List</h2>
                                 <p>Danh sách tất cả người dùng trong hệ thống</p>
                             </div>
+
+                            <button class="add-button"
+                                    type="button"
+                                    onclick="window.location.href = '<%= contextPath%>/admin/user-create'">
+                                + &nbsp; Add New User
+                            </button>
                         </div>
+
+                        <!-- Search and Filter Bar -->
+                        <form method="get" action="<%= contextPath%>/admin/users" class="venue-filter-form">
+                            <div class="venue-search-group">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" name="keyword" value="<%= keyword %>"
+                                       placeholder="Search by username, full name, email or phone...">
+                            </div>
+
+                            <div class="venue-status-group">
+                                <select name="role">
+                                    <option value="ALL" <%= "ALL".equalsIgnoreCase(selectedRole) ? "selected" : ""%>>All Roles</option>
+                                    <option value="Admin" <%= "Admin".equalsIgnoreCase(selectedRole) ? "selected" : ""%>>Admin</option>
+                                    <option value="Organizer" <%= "Organizer".equalsIgnoreCase(selectedRole) ? "selected" : ""%>>Organizer</option>
+                                    <option value="Staff" <%= "Staff".equalsIgnoreCase(selectedRole) ? "selected" : ""%>>Staff</option>
+                                    <option value="Customer" <%= "Customer".equalsIgnoreCase(selectedRole) ? "selected" : ""%>>Customer</option>
+                                </select>
+                            </div>
+
+                            <div class="venue-status-group">
+                                <select name="status">
+                                    <option value="ALL" <%= "ALL".equalsIgnoreCase(selectedStatus) ? "selected" : ""%>>All Status</option>
+                                    <option value="ACTIVE" <%= "ACTIVE".equalsIgnoreCase(selectedStatus) ? "selected" : ""%>>Active</option>
+                                    <option value="INACTIVE" <%= "INACTIVE".equalsIgnoreCase(selectedStatus) ? "selected" : ""%>>Inactive</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="venue-filter-button">
+                                <i class="fa-solid fa-filter"></i> Filter
+                            </button>
+
+                            <% if (!keyword.isEmpty() || !"ALL".equalsIgnoreCase(selectedRole) || !"ALL".equalsIgnoreCase(selectedStatus)) { %>
+                                <a href="<%= contextPath%>/admin/users" class="venue-reset-button">
+                                    <i class="fa-solid fa-rotate-left"></i> Reset
+                                </a>
+                            <% } %>
+                        </form>
 
                         <div class="table-wrapper">
 
@@ -232,43 +319,56 @@
 
                                     <tr>
                                         <td><%= user.getUserId()%></td>
-                                        <td><%= user.getUsername()%></td>
-                                        <td><%= user.getFullName()%></td>
-                                        <td><%= user.getEmail()%></td>
+                                        <td><%= user.getUsername() != null ? user.getUsername() : ""%></td>
+                                        <td><%= user.getFullName() != null ? user.getFullName() : ""%></td>
+                                        <td><%= user.getEmail() != null ? user.getEmail() : ""%></td>
 
                                         <td>
-                                            <%= user.getPhone() != null
-                                                    ? user.getPhone() : ""%>
+                                            <%= user.getPhone() != null ? user.getPhone() : ""%>
                                         </td>
 
                                         <td>
-                                            <span class="role <%= user.getRole().toLowerCase()%>">
-                                                <%= user.getRole()%>
+                                            <span class="role <%= user.getRole() != null ? user.getRole().toLowerCase() : ""%>">
+                                                <%= user.getRole() != null ? user.getRole() : ""%>
                                             </span>
                                         </td>
 
                                         <td>
-                                            <span class="status <%= user.getStatus().toLowerCase()%>">
-                                                <%= user.getStatus()%>
+                                            <span class="status <%= user.getStatus() != null ? user.getStatus().toLowerCase() : ""%>">
+                                                <%= user.getStatus() != null ? user.getStatus() : ""%>
                                             </span>
                                         </td>
 
-                                        <td>
+                                        <td style="white-space: nowrap;">
                                             <a class="view-button"
                                                href="<%= contextPath%>/admin/user-detail?id=<%= user.getUserId()%>">
                                                 View
                                             </a>
+                                            <a class="view-button"
+                                               style="background: #202B3C; margin-left: 4px;"
+                                               href="<%= contextPath%>/admin/user-edit?id=<%= user.getUserId()%>">
+                                                Edit
+                                            </a>
+                                            <% if (!"ADMIN".equalsIgnoreCase(user.getRole())) { %>
+                                                <form method="post" action="<%= contextPath%>/admin/user-delete" style="display: inline; margin-left: 4px;"
+                                                      onsubmit="return confirm('Are you sure you want to delete user &quot;<%= user.getUsername()%>&quot;?');">
+                                                    <input type="hidden" name="id" value="<%= user.getUserId()%>">
+                                                    <button type="submit" class="view-button" style="background: #dc3545; border: none; cursor: pointer;">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            <% } %>
                                         </td>
                                     </tr>
 
                                     <%
-                                        }
-                                    } else {
+                                            }
+                                        } else {
                                     %>
 
                                     <tr>
                                         <td colspan="8" class="empty">
-                                            No users found.
+                                            <%= errorMessage != null ? "Failed to load users. Please retry later." : "No users found."%>
                                         </td>
                                     </tr>
 
