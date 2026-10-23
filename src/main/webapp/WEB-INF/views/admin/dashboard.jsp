@@ -74,11 +74,10 @@
                     </a>
 
                     <!-- Reviews -->
-                    <a href="#">
+                    <a href="${pageContext.request.contextPath}/admin/reviews">
                         <i class="fa-solid fa-star"></i>
                         Reviews
                     </a>
-
                     <!-- My Profile -->
                     <a href="${pageContext.request.contextPath}/admin/profile">
                         <i class="fa-solid fa-user"></i>
@@ -246,8 +245,9 @@
                         </a>
 
 
+
                         <!-- Reviews -->
-                        <a href="#"
+                        <a href="<%= request.getContextPath()%>/admin/reviews"
                            class="dashboard-card">
 
                             <div class="dashboard-icon">
