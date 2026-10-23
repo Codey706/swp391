@@ -45,7 +45,9 @@ public class BookTicketController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User customer = authenticatedCustomer(request, response);
-        if (customer == null) return;
+        if (customer == null) {
+            return;
+        }
 
         String path = request.getServletPath();
         try {
@@ -79,23 +81,46 @@ public class BookTicketController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         request.setCharacterEncoding("UTF-8");
+
         User customer = authenticatedCustomer(request, response);
-        if (customer == null) return;
+        if (customer == null) {
+            return;
+        }
 
         String path = request.getServletPath();
+
         if (PATH_SELECT_TICKET.equals(path)) {
             createBooking(request, response, customer);
+
         } else if (PATH_PAYMENT.equals(path)) {
             preparePayment(request, response, customer);
-        } else {
-            // Bước 2 (thông tin lấy từ tài khoản) -> chuyển sang bước thanh toán
-            response.sendRedirect(request.getContextPath() + PATH_PAYMENT + "?orderId="
-                    + ValidationUtils.parseIntOrDefault(request.getParameter("orderId"), -1));
+
+        } else if (PATH_CUSTOMER_INFO.equals(path)) {
+            int orderId = ValidationUtils.parseIntOrDefault(
+                    request.getParameter("orderId"), -1
+            );
+
+            if (orderId <= 0) {
+                response.sendError(
+                        HttpServletResponse.SC_BAD_REQUEST,
+                        "Mã đơn đặt vé không hợp lệ."
+                );
+                return;
+            }
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + PATH_PAYMENT
+                    + "?orderId=" + orderId
+            );
         }
     }
 
-    /** Lưu lại lựa chọn của người dùng để hiển thị lại form khi có lỗi. */
+    /**
+     * Lưu lại lựa chọn của người dùng để hiển thị lại form khi có lỗi.
+     */
     private void keepSelection(HttpServletRequest request, Map<Integer, Integer> quantities, List<Integer> seatIds) {
         request.setAttribute("selectedQty", quantities);
         request.setAttribute("selectedSeatIds", seatIds);
@@ -131,8 +156,11 @@ public class BookTicketController extends HttpServlet {
                 String raw = request.getParameter("quantity_" + ticket.getEventTicketId());
                 int qty = 0;
                 if (raw != null && !raw.isBlank()) {
-                    try { qty = Integer.parseInt(raw.trim()); }
-                    catch (NumberFormatException e) { qty = -1; }
+                    try {
+                        qty = Integer.parseInt(raw.trim());
+                    } catch (NumberFormatException e) {
+                        qty = -1;
+                    }
                 }
                 if (qty < 0 || qty > Constants.BOOKING_MAX_TICKETS_PER_ORDER) {
                     invalidQty = true;
@@ -159,8 +187,9 @@ public class BookTicketController extends HttpServlet {
             String[] selectedSeats = request.getParameterValues("seatIds");
             if (selectedSeats != null) {
                 for (String selected : selectedSeats) {
-                    try { seatIds.add(Integer.parseInt(selected.trim())); }
-                    catch (NumberFormatException e) {
+                    try {
+                        seatIds.add(Integer.parseInt(selected.trim()));
+                    } catch (NumberFormatException e) {
                         request.setAttribute("errorMessage", "Ghế đã chọn không hợp lệ.");
                         keepSelection(request, quantities, seatIdsForRetry(request));
                         showSelectTicket(request, response);
@@ -180,15 +209,21 @@ public class BookTicketController extends HttpServlet {
         } catch (BookingException e) {
             request.setAttribute("errorMessage", e.getMessage());
             keepSelection(request, quantities, seatIdsForRetry(request));
-            try { showSelectTicket(request, response); }
-            catch (SQLException ex) { throw new ServletException(ex); }
+            try {
+                showSelectTicket(request, response);
+            } catch (SQLException ex) {
+                throw new ServletException(ex);
+            }
         } catch (SQLException e) {
             getServletContext().log("Cannot create ticket booking", e);
             if (e.getErrorCode() == 1205) { // deadlock victim: giao dịch đã rollback, cho thử lại
                 request.setAttribute("errorMessage", "Hệ thống đang bận, vui lòng thử lại.");
                 keepSelection(request, quantities, seatIdsForRetry(request));
-                try { showSelectTicket(request, response); }
-                catch (SQLException ex) { response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); }
+                try {
+                    showSelectTicket(request, response);
+                } catch (SQLException ex) {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
                 return;
             }
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể tạo đơn đặt vé.");
@@ -200,46 +235,98 @@ public class BookTicketController extends HttpServlet {
         String[] values = request.getParameterValues("seatIds");
         if (values != null) {
             for (String v : values) {
-                try { ids.add(Integer.parseInt(v)); } catch (NumberFormatException ignored) { /* bỏ qua */ }
+                try {
+                    ids.add(Integer.parseInt(v));
+                } catch (NumberFormatException ignored) {
+                    /* bỏ qua */ }
             }
         }
         return ids;
     }
 
-    private void preparePayment(HttpServletRequest request, HttpServletResponse response, User customer)
-            throws ServletException, IOException {
-        int orderId = ValidationUtils.parseIntOrDefault(request.getParameter("orderId"), -1);
+    private void preparePayment(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            User customer
+    ) throws ServletException, IOException {
+
+        int orderId = ValidationUtils.parseIntOrDefault(
+                request.getParameter("orderId"), -1
+        );
+
         try {
-            Booking booking = orderId > 0 ? bookingDao.getBookingDetail(orderId, customer.getUserId()) : null;
+            Booking booking = orderId > 0
+                    ? bookingDao.getBookingDetail(orderId, customer.getUserId())
+                    : null;
+
             if (booking == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn đặt vé.");
+                response.sendError(
+                        HttpServletResponse.SC_NOT_FOUND,
+                        "Không tìm thấy đơn đặt vé."
+                );
                 return;
             }
+
             if (!Constants.ORDER_PENDING.equalsIgnoreCase(booking.getStatus())
                     || booking.getHoldExpiredAt() == null
-                    || !booking.getHoldExpiredAt().isAfter(java.time.LocalDateTime.now())) {
-                request.setAttribute("errorMessage", "Thời gian giữ vé đã hết. Vui lòng chọn vé lại.");
+                    || !booking.getHoldExpiredAt().isAfter(
+                            java.time.LocalDateTime.now())) {
+
+                request.setAttribute(
+                        "errorMessage",
+                        "Thời gian giữ vé đã hết. Vui lòng chọn vé lại."
+                );
                 request.setAttribute("booking", booking);
                 request.setAttribute("customer", customer);
-                request.getRequestDispatcher(PAYMENT_VIEW).forward(request, response);
+                request.getRequestDispatcher(PAYMENT_VIEW)
+                        .forward(request, response);
                 return;
             }
-            boolean created;
-            if (booking.getPayment() != null
-                    && "Pending".equalsIgnoreCase(booking.getPayment().getPaymentStatus())) {
-                created = true; // Tránh tạo thêm giao dịch Pending khi người dùng bấm nhiều lần.
-            } else {
-                created = paymentController.createPayment(orderId, booking.getFinalAmount());
-            }
-            request.setAttribute("booking", booking);
-            request.setAttribute("customer", customer);
-            request.setAttribute("paymentMessage", created
-                    ? "Yêu cầu thanh toán đang ở trạng thái chờ xử lý. Đơn chưa được xác nhận thanh toán."
-                    : "Không thể khởi tạo thanh toán. Vui lòng kiểm tra đơn hàng và thử lại.");
-            request.getRequestDispatcher(PAYMENT_VIEW).forward(request, response);
+
+            String paymentUrl = paymentController.createVNPayUrl(
+                    orderId,
+                    booking.getFinalAmount(),
+                    request
+            );
+
+            response.sendRedirect(paymentUrl);
+
         } catch (SQLException e) {
-            getServletContext().log("Cannot prepare ticket payment", e);
-            throw new ServletException("Không thể chuẩn bị thanh toán.", e);
+            getServletContext().log(
+                    "Cannot prepare ticket payment", e
+            );
+            throw new ServletException(
+                    "Không thể chuẩn bị thanh toán.", e
+            );
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            getServletContext().log(
+                    "Cannot create VNPay URL for order " + orderId, e
+            );
+
+            request.setAttribute(
+                    "errorMessage",
+                    "Không thể khởi tạo thanh toán VNPay. Vui lòng thử lại."
+            );
+            request.setAttribute("customer", customer);
+
+            try {
+                Booking booking = orderId > 0
+                        ? bookingDao.getBookingDetail(
+                                orderId, customer.getUserId()
+                        )
+                        : null;
+
+                request.setAttribute("booking", booking);
+
+            } catch (SQLException ex) {
+                throw new ServletException(
+                        "Không thể tải lại thông tin đơn hàng.", ex
+                );
+            }
+
+            request.getRequestDispatcher(PAYMENT_VIEW)
+                    .forward(request, response);
         }
     }
 
@@ -247,12 +334,19 @@ public class BookTicketController extends HttpServlet {
         HttpSession session = request.getSession(false);
         Object value = session == null ? null : session.getAttribute(Constants.SESSION_USER);
         User user = null;
-        if (value instanceof User) user = (User) value;
-        else if (value instanceof Auth) {
+        if (value instanceof User) {
+            user = (User) value;
+        } else if (value instanceof Auth) {
             Auth auth = (Auth) value;
-            user = new User(); user.setUserId(auth.getUserId()); user.setUsername(auth.getUsername());
-            user.setFullName(auth.getFullName()); user.setEmail(auth.getEmail()); user.setPhone(auth.getPhone());
-            user.setAddress(auth.getAddress()); user.setRole(auth.getRole()); user.setStatus(auth.getStatus());
+            user = new User();
+            user.setUserId(auth.getUserId());
+            user.setUsername(auth.getUsername());
+            user.setFullName(auth.getFullName());
+            user.setEmail(auth.getEmail());
+            user.setPhone(auth.getPhone());
+            user.setAddress(auth.getAddress());
+            user.setRole(auth.getRole());
+            user.setStatus(auth.getStatus());
         }
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");

@@ -10,7 +10,7 @@
         <nav>
             <a href="${pageContext.request.contextPath}/">Trang chủ</a>
             <a href="${pageContext.request.contextPath}/home#events">Khám phá sự kiện</a>
-            <a href="${pageContext.request.contextPath}/customer/booking-history">Vé của tôi</a>
+            <a href="${pageContext.request.contextPath}/customer/e-tickets">Vé điện tử</a>
         </nav>
         <a class="ck-account" href="${pageContext.request.contextPath}/CustomerProfileController">
             <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--ck-orange,#ff5722);color:#fff;text-align:center;line-height:28px;margin-right:6px;font-size:12px;font-weight:700;">
