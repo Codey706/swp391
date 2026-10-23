@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
  */
 public class Event {
 
+    // Số vé còn lại (từ bảng Event_Tickets). Được tính trong query DAO.
+    private int remainingTickets; // vé còn lại
+
     private int eventId;
     private int organizerId;
     private int categoryId;
@@ -167,6 +170,15 @@ public class Event {
 
     public void setTicketSold(int ticketSold) {
         this.ticketSold = ticketSold;
+    }
+
+    // ----------- remainingTickets getter & setter -----------
+    public int getRemainingTickets() {
+        return remainingTickets;
+    }
+
+    public void setRemainingTickets(int remainingTickets) {
+        this.remainingTickets = remainingTickets;
     }
 
     public java.math.BigDecimal getRevenue() {
