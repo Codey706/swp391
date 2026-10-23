@@ -1,5 +1,6 @@
 package controller.Staff;
 
+import static controller.Staff.StaffController.ERROR_GENERIC;
 import dao.StaffEventDAO;
 import model.Auth;
 import utils.Constants;
