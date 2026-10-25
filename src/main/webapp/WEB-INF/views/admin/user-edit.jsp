@@ -85,7 +85,7 @@
                     <span>Manage Users</span>
                 </a>
 
-                <a href="#" title="Chức năng chưa được kết nối">
+                <a href="${ctx}/admin/events">
                     <span class="material-symbols-outlined">event</span>
                     <span>Manage Events</span>
                 </a>
