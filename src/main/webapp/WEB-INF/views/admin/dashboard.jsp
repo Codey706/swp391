@@ -80,7 +80,15 @@
                         <span class="material-symbols-outlined">category</span>
                         <span>Manage Categories</span>
                     </a>
-
+                    <!-- Reviews -->
+                    <a href="${pageContext.request.contextPath}/admin/reviews">
+                        <i class="fa-solid fa-star"></i>
+                        Reviews
+                    </a>
+                    <!-- My Profile -->
+                    <a href="${pageContext.request.contextPath}/admin/profile">
+                        <i class="fa-solid fa-user"></i>
+                        My Profile
                     <a href="${ctx}/admin/venues">
                         <span class="material-symbols-outlined">location_on</span>
                         <span>Manage Venues</span>
@@ -315,6 +323,11 @@
                                 <p>Manage vouchers</p>
                             </div>
                         </a>
+
+
+                        <!-- Reviews -->
+                        <a href="<%= request.getContextPath()%>/admin/reviews"
+                           class="dashboard-card">
 
                         <!-- Reviews -->
                         <a href="#" class="dashboard-card" title="Chức năng chưa được kết nối">
