@@ -1,0 +1,83 @@
+[1mdiff --cc src/main/webapp/WEB-INF/views/admin/dashboard.jsp[m
+[1mindex 0c93398,2396bdb..0000000[m
+[1m--- a/src/main/webapp/WEB-INF/views/admin/dashboard.jsp[m
+[1m+++ b/src/main/webapp/WEB-INF/views/admin/dashboard.jsp[m
+[36m@@@ -329,61 -250,25 +329,71 @@@[m
+                          <a href="<%= request.getContextPath()%>/admin/reviews"[m
+                             class="dashboard-card">[m
+  [m
+[31m -                            <div class="dashboard-icon">[m
+[31m -                                <i class="fa-solid fa-star"></i>[m
+[31m -                            </div>[m
+[31m -[m
+[32m +                            <!-- Reviews -->[m
+[32m +                            <a href="#" class="dashboard-card" title="Chức năng chưa được kết nối">[m
+[32m +                                <div class="dashboard-icon">[m
+[32m +                                    <i class="fa-solid fa-star"></i>[m
+[32m +                                </div>[m
+[32m +[m
+[32m++<<<<<<< Updated upstream[m
+[32m +                                <div class="dashboard-info">[m
+[32m +                                    <h2>Reviews</h2>[m
+[32m +                                    <p>Manage customer reviews</p>[m
+[32m +                                </div>[m
+[32m +                            </a>[m
+[32m++=======[m
+[32m+                             <div class="dashboard-info">[m
+[32m+                                 <h2>Reviews</h2>[m
+[32m+                                 <p>Manage customer reviews</p>[m
+[32m+                             </div>[m
+[32m+ [m
+[32m+                         </a>[m
+[32m++>>>>>>> Stashed changes[m
+[32m+ [m
+  [m
+                      </div>[m
+[31m -[m
+                  </section>[m
+  [m
+[32m +                <footer class="admin-page-footer">[m
+[32m +                    © 2026 Light Ticket Platform JSC. All rights reserved.[m
+[32m +                </footer>[m
+              </main>[m
+[31m -[m
+          </div>[m
+  [m
+[32m +        <!-- Bootstrap JS dùng cho dropdown -->[m
+[32m +        <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>[m
+[32m +[m
+[32m +        <!-- Điều khiển sidebar trên màn hình nhỏ -->[m
+[32m +        <script>[m
+[32m +            (function () {[m
+[32m +                const sidebar = document.getElementById('adminSidebar');[m
+[32m +                const backdrop = document.getElementById('adminSidebarBackdrop');[m
+[32m +                const openButton = document.getElementById('adminSidebarOpen');[m
+[32m +                const closeButton = document.getElementById('adminSidebarClose');[m
+[32m +[m
+[32m +                function openSidebar() {[m
+[32m +                    sidebar.classList.add('is-open');[m
+[32m +                    backdrop.classList.add('is-visible');[m
+[32m +                    openButton.setAttribute('aria-expanded', 'true');[m
+[32m +                }[m
+[32m +[m
+[32m +                function closeSidebar() {[m
+[32m +                    sidebar.classList.remove('is-open');[m
+[32m +                    backdrop.classList.remove('is-visible');[m
+[32m +                    openButton.setAttribute('aria-expanded', 'false');[m
+[32m +                }[m
+[32m +[m
+[32m +                openButton.addEventListener('click', openSidebar);[m
+[32m +                closeButton.addEventListener('click', closeSidebar);[m
+[32m +                backdrop.addEventListener('click', closeSidebar);[m
+[32m +[m
+[32m +                document.addEventListener('keydown', function (event) {[m
+[32m +                    if (event.key === 'Escape') {[m
+[32m +                        closeSidebar();[m
+[32m +                    }[m
+[32m +                });[m
+[32m +            })();[m
+[32m +        </script>[m
+[32m +[m
+      </body>[m
+[31m -</html>[m
+[32m +</html>[m
