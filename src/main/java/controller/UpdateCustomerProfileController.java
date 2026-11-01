@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Auth;
 import model.User;
 
 @WebServlet(
@@ -27,14 +28,12 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId =
-                (Integer) session.getAttribute("userId");
+        Auth sessionUser = (Auth) session.getAttribute("user");
+        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
 
-        // Chưa đăng nhập
+        //Chưa đăng nhập
         if (userId == null) {
-            response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login"
-);
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
 
@@ -78,37 +77,33 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        Integer userId =
-                (Integer) session.getAttribute("userId");
+        Auth sessionUser = (Auth) session.getAttribute("user");
+        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
 
         // Chưa đăng nhập
         if (userId == null) {
-           response.sendRedirect(
-        request.getContextPath() + "/Auth?action=login"
-);
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
 
         // ==============================
         // Lấy dữ liệu từ form
         // ==============================
+        String fullName
+                = request.getParameter("fullName");
 
-        String fullName =
-                request.getParameter("fullName");
+        String email
+                = request.getParameter("email");
 
-        String email =
-                request.getParameter("email");
+        String phone
+                = request.getParameter("phone");
 
-        String phone =
-                request.getParameter("phone");
-
-        String address =
-                request.getParameter("address");
+        String address
+                = request.getParameter("address");
 
         // ==============================
         // Validation
         // ==============================
-
         if (fullName == null
                 || fullName.trim().isEmpty()) {
 
@@ -132,7 +127,6 @@ public class UpdateCustomerProfileController extends HttpServlet {
         // ==============================
         // Tạo User object
         // ==============================
-
         User user = new User();
 
         user.setUserId(userId);
@@ -147,26 +141,42 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         user.setPhone(
                 phone == null
-                ? ""
-                : phone.trim()
+                        ? ""
+                        : phone.trim()
         );
 
         user.setAddress(
                 address == null
-                ? ""
-                : address.trim()
+                        ? ""
+                        : address.trim()
         );
 
         // ==============================
         // Update Database
         // ==============================
-
         try {
 
-            boolean updated =
-                    userDao.updateUser(user);
+            boolean updated
+                    = userDao.updateUser(user);
 
             if (updated) {
+                // Đồng bộ thông tin mới vào session để Header cập nhật ngay lập tức
+                Object currentSessionUser = session.getAttribute("user");
+                if (currentSessionUser instanceof Auth) {
+                    Auth auth = (Auth) currentSessionUser;
+                    auth.setFullName(user.getFullName());
+                    auth.setEmail(user.getEmail());
+                    auth.setPhone(user.getPhone());
+                    auth.setAddress(user.getAddress());
+                    session.setAttribute("user", auth);
+                } else if (currentSessionUser instanceof User) {
+                    User u = (User) currentSessionUser;
+                    u.setFullName(user.getFullName());
+                    u.setEmail(user.getEmail());
+                    u.setPhone(user.getPhone());
+                    u.setAddress(user.getAddress());
+                    session.setAttribute("user", u);
+                }
 
                 response.sendRedirect(
                         request.getContextPath()

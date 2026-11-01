@@ -1,0 +1,513 @@
+
+:root {
+    --orange: #ff5722;
+    --orange-hover: #e94b19;
+    --green: #007653;
+    --green-bg: #e6f6ef;
+    --page-bg: #f8f8ff;
+    --text: #252641;
+    --muted: #777b95;
+    --border: #e8e9f3;
+    --purple-bg: #f0f1ff;
+    --shadow: 0 5px 20px rgba(41, 43, 72, .07);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+}
+
+.payment-page {
+    width: min(1000px, calc(100% - 32px));
+    margin: 32px auto 48px;
+}
+
+/* ===== THANH TIẾN TRÌNH ===== */
+
+.booking-steps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    width: 100%;
+    margin-bottom: 38px;
+    padding: 20px 24px;
+    background: #fff;
+    border: 1px solid #f0eff7;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(41, 43, 72, .04);
+}
+
+.booking-step {
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 10px;
+}
+
+.step-icon {
+    display: flex;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.step-text {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.step-label {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.step-name {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.booking-step.active .step-icon {
+    background: var(--orange);
+    outline: 5px solid #ffe0d5;
+}
+
+.booking-step.active .step-label,
+.booking-step.active .step-name {
+    color: var(--orange);
+}
+
+.booking-step:not(:last-child)::after {
+    content: "";
+    display: block;
+    flex: 1 1 auto;
+    min-width: 12px;
+    height: 3px;
+    margin: 0 18px;
+    border-radius: 10px;
+    background: var(--green);
+}
+
+.booking-step:nth-child(3)::after {
+    background: var(--orange);
+}
+
+/* ===== TIÊU ĐỀ THÀNH CÔNG ===== */
+
+.success-heading {
+    margin: 34px 0 28px;
+    text-align: center;
+}
+
+.success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 16px;
+    border: 7px solid #d8f3e7;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    font-size: 37px;
+    font-weight: 700;
+    box-shadow: 0 5px 14px rgba(7, 150, 106, .16);
+}
+
+.success-heading h1 {
+    margin: 0 0 8px;
+    color: var(--text);
+    font-size: clamp(25px, 4vw, 32px);
+    font-weight: 750;
+}
+
+.success-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+}
+
+/* ===== THÔNG TIN ĐƠN HÀNG ===== */
+
+.payment-card {
+    margin-bottom: 22px;
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--shadow);
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.title-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #fff0e9;
+    color: var(--orange);
+    font-size: 18px;
+}
+
+.order-code {
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    border: 1px dashed #ffb49c;
+    border-radius: 12px;
+    background: #fff7f3;
+}
+
+.order-code .label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.order-code strong {
+    color: var(--orange);
+    font-size: 22px;
+    overflow-wrap: anywhere;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.info-row .label {
+    color: var(--muted);
+}
+
+.info-row .value {
+    text-align: right;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.status-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 30px;
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.total-amount {
+    color: var(--orange);
+    font-size: 24px;
+    font-weight: 800;
+}
+
+/* ===== NÚT ĐIỀU HƯỚNG ===== */
+
+.payment-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 26px 0;
+}
+
+.payment-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 12px 22px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 650;
+    transition: background .2s, color .2s, transform .2s;
+}
+
+.payment-page .btn-primary {
+    background: var(--orange);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(255, 87, 34, .18);
+}
+
+.payment-page .btn-primary:hover {
+    transform: translateY(-1px);
+    background: var(--orange-hover);
+    color: #fff;
+}
+
+.payment-page .btn-outline {
+    border-color: var(--border);
+    background: #fff;
+    color: var(--text);
+}
+
+.payment-page .btn-outline:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+/* ===== KHỐI LƯU Ý ===== */
+
+.notice {
+    padding: 22px;
+    border: 1px solid #dfe3ff;
+    border-radius: 14px;
+    background: var(--purple-bg);
+}
+
+.notice h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 16px;
+}
+
+.notice-icon {
+    color: var(--orange);
+}
+
+.notice p {
+    position: relative;
+    margin: 8px 0;
+    padding-left: 18px;
+    color: #626783;
+}
+
+.notice p::before {
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    content: "•";
+    font-weight: 800;
+}
+
+.footer-note {
+    margin-top: 24px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 760px) {
+    .payment-page {
+        width: calc(100% - 20px);
+        margin: 20px auto 30px;
+    }
+
+    .booking-steps {
+        padding: 16px 10px;
+    }
+
+    .booking-step {
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 7px;
+        text-align: center;
+    }
+
+    .booking-step .step-icon {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .step-text {
+        align-items: center;
+    }
+
+    .step-label {
+        font-size: 10px;
+    }
+
+    .step-name {
+        font-size: 11px;
+        white-space: normal;
+    }
+
+    .booking-step:not(:last-child)::after {
+        flex: 1 1 auto;
+        min-width: 4px;
+        margin: 15px 5px 0;
+    }
+
+    .booking-step.active .step-icon {
+        outline-width: 3px;
+    }
+
+    .payment-card {
+        padding: 17px;
+    }
+
+    .info-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-row .value {
+        text-align: left;
+    }
+
+    .payment-actions {
+        flex-direction: column;
+    }
+
+    .payment-page .btn {
+        width: 100%;
+    }
+
+    .notice {
+        padding: 17px;
+    }
+}
+
+@media (max-width: 380px) {
+    .booking-steps {
+        padding: 12px 5px;
+    }
+
+    .booking-step {
+        gap: 5px;
+    }
+
+    .booking-step:not(:last-child)::after {
+        margin-right: 3px;
+        margin-left: 3px;
+    }
+
+    .step-name {
+        font-size: 10px;
+    }
+}
+
+/* Footer một hàng ngang */
+.simple-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    margin-top: 50px;
+    padding: 24px 5%;
+    border-top: 1px solid #e8e9f3;
+    border-bottom: 3px solid #7770ff;
+    background: #fff;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.simple-footer-brand {
+    flex-shrink: 0;
+    color: #ff5722;
+    font-size: 20px;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.simple-footer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 28px;
+}
+
+.simple-footer-nav a {
+    color: #292b48;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+
+.simple-footer-nav a:hover {
+    color: #ff5722;
+}
+
+.simple-footer-copyright {
+    flex-shrink: 0;
+    margin: 0;
+    color: #777b95;
+    font-size: 12px;
+    text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+    .simple-footer {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 18px 28px;
+        padding: 24px 16px;
+    }
+
+    .simple-footer-brand,
+    .simple-footer-nav,
+    .simple-footer-copyright {
+        flex: 1 1 100%;
+        text-align: center;
+    }
+
+    .simple-footer-nav {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .simple-footer-nav {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

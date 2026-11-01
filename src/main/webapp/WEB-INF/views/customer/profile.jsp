@@ -1,1424 +1,377 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<c:set var="userInitial" value="${empty user.fullName ? 'U' : fn:toUpperCase(fn:substring(user.fullName, 0, 1))}"/>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân - Light Ticketbox</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
-    <title>My Profile - Light Ticket</title>
+    <!-- Material Symbols Outlined -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Material Symbols -->
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-
+    <!-- Stitch Design System CSS -->
+    <link rel="stylesheet" href="${ctx}/assets/css/stitch-custom.css">
 </head>
 
+<body class="lt-body d-flex flex-column min-vh-100">
 
-<body class="bg-[#f8f9fc] min-h-screen text-gray-800">
-
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
-
-<header class="bg-white border-b border-gray-100 sticky top-0 z-40">
-
-    <div class="max-w-7xl mx-auto px-6 lg:px-10">
-
-        <div class="h-20 flex items-center justify-between">
-
-            <!-- LOGO -->
-
-            <a href="${pageContext.request.contextPath}/"
-               class="flex items-center gap-3">
-
-                <div class="w-10 h-10
-                            rounded-xl
-                            bg-[#ff7043]
-                            flex items-center
-                            justify-center
-                            shadow-sm">
-
-                    <span class="material-symbols-outlined text-white">
-                        confirmation_number
-                    </span>
-
+    <!-- ======================================================================
+         HEADER (STITCH COMPATIBLE)
+         ====================================================================== -->
+    <header class="lt-navbar">
+        <div class="container-xl d-flex align-items-center justify-content-between gap-3">
+            <!-- Brand Logo -->
+            <a class="lt-brand-logo" href="${ctx}/">
+                <div class="lt-brand-icon">
+                    <span class="material-symbols-outlined">confirmation_number</span>
                 </div>
-
-                <div>
-
-                    <div class="text-xl font-bold text-gray-900">
-                        Light Ticket
-                    </div>
-
-                    <div class="text-xs text-gray-400">
-                        Event Ticket Platform
-                    </div>
-
-                </div>
-
+                <span class="lt-brand-title">Light <span>Ticketbox</span></span>
             </a>
 
-
-            <!-- NAVIGATION -->
-
-            <nav class="hidden md:flex items-center gap-8">
-
-                <a href="${pageContext.request.contextPath}/"
-                   class="text-sm
-                          font-medium
-                          text-gray-500
-                          hover:text-[#ff7043]
-                          transition">
-
-                    Trang chủ
-
-                </a>
-
-                <a href="#"
-                   class="text-sm
-                          font-medium
-                          text-gray-500
-                          hover:text-[#ff7043]
-                          transition">
-
-                    Sự kiện
-
-                </a>
-
-                <a href="#"
-                   class="text-sm
-                          font-medium
-                          text-gray-500
-                          hover:text-[#ff7043]
-                          transition">
-
-                    Vé của tôi
-
-                </a>
-
-                <a href="#"
-                   class="text-sm
-                          font-medium
-                          text-[#ff7043]">
-
-                    Hồ sơ
-
-                </a>
-
+            <!-- Navigation Links -->
+            <nav class="d-none d-lg-flex align-items-center gap-1">
+                <a class="lt-nav-link" href="${ctx}/">Trang chủ</a>
+                <a class="lt-nav-link" href="${ctx}/home#events">Khám phá sự kiện</a>
+                <a class="lt-nav-link" href="${ctx}/customer/booking-history">Vé của tôi</a>
             </nav>
 
+            <!-- Search Bar -->
+            <div class="lt-search-box d-none d-md-block">
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input type="search" placeholder="Tìm concert, kịch, workshop...">
+            </div>
 
-            <!-- USER -->
-
-            <div class="flex items-center gap-3">
-
-                <button type="button"
-                        class="hidden sm:flex
-                               w-10 h-10
-                               rounded-full
-                               bg-gray-50
-                               items-center
-                               justify-center
-                               hover:bg-[#fff1ec]
-                               transition">
-
-                    <span class="material-symbols-outlined text-gray-600">
-                        notifications
-                    </span>
-
+            <!-- Actions & User Profile -->
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-light rounded-circle p-2 d-none d-sm-flex align-items-center justify-content-center text-secondary" title="Thông báo" style="width:38px;height:38px;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">notifications</span>
                 </button>
 
+                <!-- Avatar Dropdown -->
+                <div class="dropdown">
+                    <button class="lt-user-btn" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="lt-avatar-round">
+                            <span>${userInitial}</span>
+                        </div>
+                        <div class="lt-user-info-text d-none d-sm-block">
+                            <span class="lt-user-name"><c:out value="${empty user.fullName ? user.username : user.fullName}"/></span>
+                            <span class="lt-user-tier"><c:out value="${empty user.role ? 'Khách hàng' : user.role}"/></span>
+                        </div>
+                        <span class="material-symbols-outlined text-secondary d-none d-sm-inline" style="font-size:18px;">expand_more</span>
+                    </button>
 
-                <div class="h-9 w-px bg-gray-200 hidden sm:block"></div>
-
-
-                <div class="flex items-center gap-3">
-
-                    <div class="w-10 h-10
-                                rounded-full
-                                bg-[#ff7043]
-                                text-white
-                                flex items-center
-                                justify-center">
-
-                        <span class="material-symbols-outlined">
-                            person
-                        </span>
-
-                    </div>
-
-                    <div class="hidden sm:block">
-
-                        <p class="text-sm font-semibold">
-                            ${user.fullName}
-                        </p>
-
-                        <p class="text-xs text-gray-400">
-                            ${user.role}
-                        </p>
-
-                    </div>
-
+                    <ul class="dropdown-menu dropdown-menu-end lt-dropdown-menu" aria-labelledby="userMenuDropdown">
+                        <li class="lt-dropdown-header d-sm-none">
+                            <p class="fw-bold mb-0 text-dark small"><c:out value="${user.fullName}"/></p>
+                            <span class="text-secondary small"><c:out value="${user.role}"/></span>
+                        </li>
+                        <li>
+                            <a class="lt-dropdown-item" href="${ctx}/CustomerProfileController">
+                                <span class="material-symbols-outlined text-secondary" style="font-size:18px;">account_circle</span>
+                                Hồ sơ của tôi
+                            </a>
+                        </li>
+                        <li>
+                            <a class="lt-dropdown-item" href="${ctx}/customer/booking-history">
+                                <span class="material-symbols-outlined text-secondary" style="font-size:18px;">local_activity</span>
+                                Vé của tôi
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <form action="${ctx}/logout" method="POST" class="m-0">
+                                <button type="submit" class="lt-dropdown-item danger border-0 bg-transparent w-100 text-start">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
+                                    Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
-
             </div>
-
         </div>
+    </header>
 
-    </div>
+    <!-- ======================================================================
+         MAIN CONTENT
+         ====================================================================== -->
+    <main class="container-xl py-4 flex-grow-1">
+        
+        <!-- Breadcrumb -->
+        <nav aria-label="Breadcrumb" class="lt-breadcrumb">
+            <a href="${ctx}/" class="d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:16px;">home</span>
+                Trang chủ
+            </a>
+            <span class="material-symbols-outlined separator">chevron_right</span>
+            <span class="active">Hồ sơ cá nhân</span>
+        </nav>
 
-</header>
-
-
-
-<!-- =========================================================
-     MAIN
-========================================================= -->
-
-<main class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
-
-
-    <!-- PAGE HEADER -->
-
-    <div class="mb-8">
-
-        <div class="flex items-center gap-2
-                    text-sm
-                    text-gray-400
-                    mb-3">
-
-            <span>Trang chủ</span>
-
-            <span class="material-symbols-outlined text-sm">
-                chevron_right
-            </span>
-
-            <span class="text-[#ff7043]">
-                Hồ sơ cá nhân
-            </span>
-
-        </div>
-
-
-        <div class="flex flex-col
-                    md:flex-row
-                    md:items-end
-                    md:justify-between
-                    gap-4">
-
-            <div>
-
-                <h1 class="text-3xl
-                           lg:text-4xl
-                           font-bold
-                           text-gray-900">
-
-                    Hồ sơ cá nhân
-
-                </h1>
-
-                <p class="text-gray-500 mt-2">
-
-                    Quản lý và xem thông tin tài khoản của bạn.
-
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         PROFILE LAYOUT
-    ====================================================== -->
-
-    <div class="grid
-                grid-cols-1
-                lg:grid-cols-12
-                gap-6">
-
-
-        <!-- =================================================
-             LEFT SIDEBAR
-        ================================================== -->
-
-        <aside class="lg:col-span-4">
-
-
-            <!-- PROFILE SUMMARY -->
-
-            <div class="bg-white
-                        rounded-2xl
-                        border
-                        border-gray-100
-                        shadow-sm
-                        overflow-hidden">
-
-
-                <!-- COVER -->
-
-                <div class="h-28
-                            bg-gradient-to-r
-                            from-[#ff7043]
-                            to-[#ff9678]
-                            relative">
-
-                    <div class="absolute
-                                -bottom-10
-                                left-1/2
-                                -translate-x-1/2">
-
-                        <div class="w-20 h-20
-                                    rounded-full
-                                    bg-white
-                                    p-1
-                                    shadow-lg">
-
-                            <div class="w-full h-full
-                                        rounded-full
-                                        bg-[#fff1ec]
-                                        flex items-center
-                                        justify-center">
-
-                                <span class="material-symbols-outlined
-                                             text-4xl
-                                             text-[#ff7043]">
-
-                                    person
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- USER INFO -->
-
-                <div class="pt-14 px-6 pb-6 text-center">
-
-                    <h2 class="text-xl font-bold text-gray-900">
-
-                        ${user.fullName}
-
-                    </h2>
-
-                    <p class="text-sm text-gray-400 mt-1">
-
-                        @${user.username}
-
-                    </p>
-
-
-                    <!-- STATUS -->
-
-                    <div class="inline-flex
-                                items-center
-                                gap-2
-                                mt-4
-                                px-3 py-1.5
-                                rounded-full
-                                bg-emerald-50
-                                text-emerald-600
-                                text-xs
-                                font-semibold">
-
-                        <span class="w-2 h-2
-                                     rounded-full
-                                     bg-emerald-500">
+        <!-- Page Header Card -->
+        <div class="lt-card p-4 mb-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h1 class="h3 fw-bold text-dark mb-0">Hồ sơ cá nhân của tôi</h1>
+                        <span class="lt-pill lt-pill-vip">
+                            <span class="material-symbols-outlined" style="font-size:14px;">workspace_premium</span>
+                            Thành viên <c:out value="${user.role}"/>
                         </span>
-
-                        ${user.status}
-
                     </div>
-
-
-                    <!-- DIVIDER -->
-
-                    <div class="border-t
-                                border-gray-100
-                                my-6">
-                    </div>
-
-
-                    <!-- CONTACT -->
-
-                    <div class="space-y-4 text-left">
-
-
-                        <!-- EMAIL -->
-
-                        <div class="flex items-start gap-3">
-
-                            <div class="w-9 h-9
-                                        rounded-lg
-                                        bg-[#fff1ec]
-                                        flex items-center
-                                        justify-center
-                                        shrink-0">
-
-                                <span class="material-symbols-outlined
-                                             text-[#ff7043]
-                                             text-lg">
-
-                                    mail
-
-                                </span>
-
-                            </div>
-
-                            <div class="min-w-0">
-
-                                <p class="text-xs text-gray-400">
-                                    Email
-                                </p>
-
-                                <p class="text-sm
-                                          font-medium
-                                          text-gray-800
-                                          break-all">
-
-                                    ${user.email}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- PHONE -->
-
-                        <div class="flex items-start gap-3">
-
-                            <div class="w-9 h-9
-                                        rounded-lg
-                                        bg-[#fff1ec]
-                                        flex items-center
-                                        justify-center
-                                        shrink-0">
-
-                                <span class="material-symbols-outlined
-                                             text-[#ff7043]
-                                             text-lg">
-
-                                    phone
-
-                                </span>
-
-                            </div>
-
-                            <div>
-
-                                <p class="text-xs text-gray-400">
-                                    Số điện thoại
-                                </p>
-
-                                <p class="text-sm
-                                          font-medium
-                                          text-gray-800">
-
-                                    ${empty user.phone
-                                        ? "Chưa cập nhật"
-                                        : user.phone}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- ADDRESS -->
-
-                        <div class="flex items-start gap-3">
-
-                            <div class="w-9 h-9
-                                        rounded-lg
-                                        bg-[#fff1ec]
-                                        flex items-center
-                                        justify-center
-                                        shrink-0">
-
-                                <span class="material-symbols-outlined
-                                             text-[#ff7043]
-                                             text-lg">
-
-                                    location_on
-
-                                </span>
-
-                            </div>
-
-                            <div>
-
-                                <p class="text-xs text-gray-400">
-                                    Địa chỉ
-                                </p>
-
-                                <p class="text-sm
-                                          font-medium
-                                          text-gray-800">
-
-                                    ${empty user.address
-                                        ? "Chưa cập nhật"
-                                        : user.address}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- ACCOUNT MENU -->
-
-            <div class="bg-white
-                        rounded-2xl
-                        border
-                        border-gray-100
-                        shadow-sm
-                        mt-6
-                        p-3">
-
-
-                <div class="px-3 py-2">
-
-                    <p class="text-xs
-                              font-semibold
-                              text-gray-400
-                              uppercase
-                              tracking-wider">
-
-                        Tài khoản
-
+                    <p class="text-secondary mb-0 small">
+                        Quản lý thông tin định danh khách hàng, cập nhật tài khoản và bảo mật mật khẩu.
                     </p>
-
                 </div>
-
-
-                <!-- ACTIVE -->
-
-                <a href="#"
-                   class="flex items-center
-                          gap-3
-                          px-3 py-3
-                          rounded-xl
-                          bg-[#fff1ec]
-                          text-[#ff7043]
-                          font-semibold
-                          text-sm">
-
-                    <span class="material-symbols-outlined">
-                        person
-                    </span>
-
-                    Thông tin cá nhân
-
-                </a>
-
-
-                <a href="#"
-                   class="flex items-center
-                          gap-3
-                          px-3 py-3
-                          rounded-xl
-                          text-gray-500
-                          hover:bg-gray-50
-                          hover:text-[#ff7043]
-                          text-sm
-                          transition">
-
-                    <span class="material-symbols-outlined">
-                        confirmation_number
-                    </span>
-
-                    Vé của tôi
-
-                </a>
-
-
-                <a href="#"
-                   class="flex items-center
-                          gap-3
-                          px-3 py-3
-                          rounded-xl
-                          text-gray-500
-                          hover:bg-gray-50
-                          hover:text-[#ff7043]
-                          text-sm
-                          transition">
-
-                    <span class="material-symbols-outlined">
-                        favorite
-                    </span>
-
-                    Sự kiện yêu thích
-
-                </a>
-
-
-                <a href="#"
-                   class="flex items-center
-                          gap-3
-                          px-3 py-3
-                          rounded-xl
-                          text-gray-500
-                          hover:bg-gray-50
-                          hover:text-[#ff7043]
-                          text-sm
-                          transition">
-
-                    <span class="material-symbols-outlined">
-                        settings
-                    </span>
-
-                    Cài đặt
-
-                </a>
-
-            </div>
-
-        </aside>
-
-
-
-        <!-- =================================================
-             RIGHT CONTENT
-        ================================================== -->
-
-        <section class="lg:col-span-8 space-y-6">
-
-
-            <!-- WELCOME BANNER -->
-
-            <div class="relative
-                        overflow-hidden
-                        rounded-2xl
-                        bg-gradient-to-r
-                        from-[#ff7043]
-                        to-[#ff9678]
-                        p-7
-                        text-white">
-
-
-                <div class="relative z-10">
-
-                    <div class="flex items-center gap-2
-                                text-sm
-                                opacity-90
-                                mb-2">
-
-                        <span class="material-symbols-outlined text-lg">
-                            waving_hand
-                        </span>
-
-                        Chào mừng trở lại!
-
-                    </div>
-
-
-                    <h2 class="text-2xl
-                               font-bold">
-
-                        Xin chào, ${user.fullName}!
-
-                    </h2>
-
-
-                    <p class="mt-2
-                              text-sm
-                              opacity-90
-                              max-w-lg">
-
-                        Đây là khu vực quản lý thông tin
-                        cá nhân của bạn trên Light Ticket.
-
-                    </p>
-
-                </div>
-
-
-                <!-- DECORATION -->
-
-                <div class="absolute
-                            -right-10
-                            -bottom-16
-                            w-48 h-48
-                            rounded-full
-                            bg-white/10">
-                </div>
-
-                <div class="absolute
-                            right-20
-                            -top-12
-                            w-28 h-28
-                            rounded-full
-                            bg-white/10">
-                </div>
-
-
-                <span class="material-symbols-outlined
-                             absolute
-                             right-8
-                             bottom-7
-                             text-7xl
-                             text-white/20">
-
-                    confirmation_number
-
-                </span>
-
-            </div>
-
-
-
-            <!-- PERSONAL INFORMATION -->
-
-            <section class="bg-white
-                            rounded-2xl
-                            border
-                            border-gray-100
-                            shadow-sm
-                            p-6 lg:p-8">
-
-
-                <!-- SECTION HEADER -->
-
-                <div class="flex flex-col
-                            sm:flex-row
-                            sm:items-center
-                            sm:justify-between
-                            gap-4
-                            mb-7">
-
-
-                    <div>
-
-                        <div class="flex items-center gap-3">
-
-                            <div class="w-10 h-10
-                                        rounded-xl
-                                        bg-[#fff1ec]
-                                        flex items-center
-                                        justify-center">
-
-                                <span class="material-symbols-outlined
-                                             text-[#ff7043]">
-
-                                    badge
-
-                                </span>
-
-                            </div>
-
-                            <div>
-
-                                <h2 class="text-xl
-                                           font-bold
-                                           text-gray-900">
-
-                                    Thông tin cá nhân
-
-                                </h2>
-
-                                <p class="text-sm
-                                          text-gray-400
-                                          mt-0.5">
-
-                                    Thông tin tài khoản hiện tại
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- EDIT -->
-
-                    <a href="${pageContext.request.contextPath}/UpdateCustomerProfileController"
-                       class="inline-flex
-                              items-center
-                              justify-center
-                              gap-2
-                              px-4 py-2.5
-                              rounded-xl
-                              bg-[#ff7043]
-                              hover:bg-[#e85d32]
-                              text-white
-                              text-sm
-                              font-semibold
-                              shadow-sm
-                              transition">
-
-                        <span class="material-symbols-outlined text-lg">
-                            edit
-                        </span>
-
-                        Chỉnh sửa thông tin
-
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <a href="${ctx}/UpdateCustomerProfileController" class="btn-lt-primary">
+                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                        Chỉnh sửa hồ sơ
                     </a>
-
+                    <a href="${ctx}/change-password" class="btn-lt-secondary">
+                        <span class="material-symbols-outlined" style="font-size:18px;">lock_reset</span>
+                        Đổi mật khẩu
+                    </a>
                 </div>
+            </div>
+        </div>
 
-
-
-                <!-- INFORMATION GRID -->
-
-                <div class="grid
-                            grid-cols-1
-                            md:grid-cols-2
-                            gap-5">
-
-
-                    <!-- FULL NAME -->
-
-                    <div class="rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                person
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Họ và tên
-
-                            </p>
-
+        <!-- 2-Column Desktop Grid Layout -->
+        <div class="row g-4 align-items-start">
+            
+            <!-- LEFT COLUMN: Account Sidebar Navigation & ID Summary Card -->
+            <aside class="col-lg-4">
+                <!-- User ID Card -->
+                <div class="lt-card overflow-hidden text-center mb-4">
+                    <div style="height: 90px; background: linear-gradient(135deg, #ff7043, #ff9678); position: relative;"></div>
+                    
+                    <div class="position-relative px-4 pb-4">
+                        <!-- Avatar -->
+                        <div class="position-relative d-inline-block" style="margin-top: -45px; margin-bottom: 12px;">
+                            <div class="lt-avatar-round border border-4 border-white shadow-sm" style="width: 86px; height: 86px; font-size: 2rem;">
+                                <span>${userInitial}</span>
+                            </div>
+                            <a href="${ctx}/UpdateCustomerProfileController" class="position-absolute bottom-0 end-0 btn btn-sm btn-primary rounded-circle p-1 d-flex align-items-center justify-content-center text-white shadow" style="width:28px;height:28px;background:var(--lt-primary);border:2px solid #fff;" title="Chỉnh sửa thông tin">
+                                <span class="material-symbols-outlined" style="font-size:15px;">photo_camera</span>
+                            </a>
                         </div>
 
-                        <p class="font-semibold text-gray-800">
-
-                            ${user.fullName}
-
-                        </p>
-
-                    </div>
-
-
-
-                    <!-- USERNAME -->
-
-                    <div class="rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                alternate_email
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Tên đăng nhập
-
-                            </p>
-
-                        </div>
-
-                        <p class="font-semibold text-gray-800">
-
-                            ${user.username}
-
-                        </p>
-
-                    </div>
-
-
-
-                    <!-- EMAIL -->
-
-                    <div class="rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                mail
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Email
-
-                            </p>
-
-                        </div>
-
-                        <p class="font-semibold
-                                  text-gray-800
-                                  break-all">
-
-                            ${user.email}
-
-                        </p>
-
-                    </div>
-
-
-
-                    <!-- PHONE -->
-
-                    <div class="rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                phone
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Số điện thoại
-
-                            </p>
-
-                        </div>
-
-                        <p class="font-semibold text-gray-800">
-
-                            ${empty user.phone
-                                ? "Chưa cập nhật"
-                                : user.phone}
-
-                        </p>
-
-                    </div>
-
-
-
-                    <!-- ADDRESS -->
-
-                    <div class="md:col-span-2
-                                rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                location_on
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Địa chỉ
-
-                            </p>
-
-                        </div>
-
-                        <p class="font-semibold text-gray-800">
-
-                            ${empty user.address
-                                ? "Chưa cập nhật"
-                                : user.address}
-
-                        </p>
-
-                    </div>
-
-
-
-                    <!-- ROLE -->
-
-                    <div class="rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                manage_accounts
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Vai trò
-
-                            </p>
-
-                        </div>
-
-                        <p class="font-semibold text-gray-800">
-
-                            ${user.role}
-
-                        </p>
-
-                    </div>
-
-
-
-                    <!-- STATUS -->
-
-                    <div class="rounded-xl
-                                border
-                                border-gray-100
-                                bg-gray-50/70
-                                p-4">
-
-                        <div class="flex items-center gap-2 mb-2">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-400
-                                         text-lg">
-
-                                verified_user
-
-                            </span>
-
-                            <p class="text-xs
-                                      font-semibold
-                                      text-gray-400
-                                      uppercase">
-
-                                Trạng thái
-
-                            </p>
-
-                        </div>
-
-
-                        <div class="flex items-center gap-2">
-
-                            <span class="w-2.5 h-2.5
-                                         rounded-full
-                                         bg-emerald-500">
-                            </span>
-
-                            <p class="font-semibold
-                                      text-emerald-600">
-
-                                ${user.status}
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- ACCOUNT SECURITY -->
-
-            <section class="bg-white
-                            rounded-2xl
-                            border
-                            border-gray-100
-                            shadow-sm
-                            p-6 lg:p-8">
-
-
-                <div class="flex items-center gap-3 mb-6">
-
-                    <div class="w-10 h-10
-                                rounded-xl
-                                bg-blue-50
-                                flex items-center
-                                justify-center">
-
-                        <span class="material-symbols-outlined text-blue-500">
-                            security
-                        </span>
-
-                    </div>
-
-                    <div>
-
-                        <h2 class="text-lg
-                                   font-bold
-                                   text-gray-900">
-
-                            Bảo mật tài khoản
-
+                        <!-- Name & Role -->
+                        <h2 class="h5 fw-bold text-dark mb-1">
+                            <c:out value="${user.fullName}"/>
+                            <span class="material-symbols-outlined text-primary align-middle" style="font-size:18px;color:var(--lt-primary)!important;" title="Tài khoản chính thức">verified</span>
                         </h2>
+                        <p class="text-secondary small mb-2"><c:out value="${user.email}"/></p>
+                        
+                        <div class="mb-3">
+                            <span class="lt-pill lt-pill-paid">
+                                <span class="material-symbols-outlined" style="font-size:13px;">check_circle</span>
+                                Trạng thái: <c:out value="${user.status}"/>
+                            </span>
+                        </div>
 
-                        <p class="text-sm text-gray-400">
+                        <hr class="my-3" style="border-color: var(--lt-surface-border);">
 
-                            Thông tin liên quan đến tài khoản của bạn.
+                        <!-- Contact Quick Info -->
+                        <div class="text-start d-flex flex-column gap-2 small">
+                            <div class="d-flex align-items-center gap-2 text-secondary">
+                                <span class="material-symbols-outlined text-muted" style="font-size:18px;">mail</span>
+                                <span class="text-break"><c:out value="${user.email}"/></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 text-secondary">
+                                <span class="material-symbols-outlined text-muted" style="font-size:18px;">phone</span>
+                                <span><c:out value="${empty user.phone ? 'Chưa cập nhật SĐT' : user.phone}"/></span>
+                            </div>
+                            <div class="d-flex align-items-start gap-2 text-secondary">
+                                <span class="material-symbols-outlined text-muted mt-1" style="font-size:18px;">location_on</span>
+                                <span><c:out value="${empty user.address ? 'Chưa cập nhật địa chỉ' : user.address}"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Account Navigation Menu Card -->
+                <div class="lt-card p-3">
+                    <div class="lt-sidebar-nav-title">Danh mục tài khoản</div>
+                    <nav class="lt-sidebar-nav">
+                        <a href="${ctx}/CustomerProfileController" class="lt-sidebar-item active">
+                            <div class="item-left">
+                                <span class="material-symbols-outlined" style="font-size:19px;">person</span>
+                                <span>Hồ sơ của tôi</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">chevron_right</span>
+                        </a>
+
+                        <a href="${ctx}/UpdateCustomerProfileController" class="lt-sidebar-item">
+                            <div class="item-left">
+                                <span class="material-symbols-outlined" style="font-size:19px;">edit_square</span>
+                                <span>Chỉnh sửa thông tin</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">chevron_right</span>
+                        </a>
+
+                        <a href="${ctx}/customer/booking-history" class="lt-sidebar-item">
+                            <div class="item-left">
+                                <span class="material-symbols-outlined" style="font-size:19px;">confirmation_number</span>
+                                <span>Vé của tôi</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">chevron_right</span>
+                        </a>
+
+                        <a href="${ctx}/change-password" class="lt-sidebar-item">
+                            <div class="item-left">
+                                <span class="material-symbols-outlined" style="font-size:19px;">lock</span>
+                                <span>Đổi mật khẩu</span>
+                            </div>
+                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">open_in_new</span>
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- RIGHT COLUMN: Account Details & Security Cards -->
+            <section class="col-lg-8 d-flex flex-column gap-4">
+                
+                <!-- Welcome Banner Card -->
+                <div class="lt-card p-4 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #ff5722 0%, #b02f00 100%);">
+                    <div class="position-relative" style="z-index: 2;">
+                        <div class="d-flex align-items-center gap-2 mb-2 opacity-75 small">
+                            <span class="material-symbols-outlined" style="font-size:18px;">waving_hand</span>
+                            <span>Xin chào trở lại!</span>
+                        </div>
+                        <h2 class="h4 fw-bold mb-2">Xin chào, <c:out value="${user.fullName}"/>!</h2>
+                        <p class="mb-0 opacity-90 small" style="max-width: 32rem;">
+                            Đây là khu vực quản lý thông tin định danh khách hàng trên Light Ticketbox. Hãy đảm bảo thông tin của bạn luôn chính xác để việc nhận vé điện tử và check-in sự kiện diễn ra thuận tiện.
                         </p>
-
                     </div>
-
-                </div>
-
-
-                <div class="grid
-                            grid-cols-1
-                            md:grid-cols-2
-                            gap-4">
-
-
-                    <div class="flex items-center
-                                justify-between
-                                p-4
-                                rounded-xl
-                                bg-gray-50
-                                border
-                                border-gray-100">
-
-                        <div class="flex items-center gap-3">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-500">
-
-                                lock
-
-                            </span>
-
-                            <div>
-
-                                <p class="text-sm font-semibold">
-                                    Mật khẩu
-                                </p>
-
-                                <p class="text-xs text-gray-400">
-                                    Được bảo vệ
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <span class="text-xs
-                                     font-semibold
-                                     text-emerald-600">
-
-                            Đã thiết lập
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="flex items-center
-                                justify-between
-                                p-4
-                                rounded-xl
-                                bg-gray-50
-                                border
-                                border-gray-100">
-
-                        <div class="flex items-center gap-3">
-
-                            <span class="material-symbols-outlined
-                                         text-gray-500">
-
-                                verified
-
-                            </span>
-
-                            <div>
-
-                                <p class="text-sm font-semibold">
-                                    Tài khoản
-                                </p>
-
-                                <p class="text-xs text-gray-400">
-                                    Trạng thái hiện tại
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        <span class="text-xs
-                                     font-semibold
-                                     text-emerald-600">
-
-                            ${user.status}
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- QUICK ACTION -->
-
-            <section class="bg-[#fff8f5]
-                            border
-                            border-[#ffe0d6]
-                            rounded-2xl
-                            p-6">
-
-
-                <div class="flex
-                            flex-col
-                            sm:flex-row
-                            sm:items-center
-                            sm:justify-between
-                            gap-4">
-
-
-                    <div class="flex items-center gap-4">
-
-                        <div class="w-12 h-12
-                                    rounded-xl
-                                    bg-[#ff7043]
-                                    text-white
-                                    flex items-center
-                                    justify-center">
-
-                            <span class="material-symbols-outlined">
-                                edit_note
-                            </span>
-
-                        </div>
-
-
-                        <div>
-
-                            <h3 class="font-bold
-                                       text-gray-900">
-
-                                Cập nhật thông tin
-
-                            </h3>
-
-                            <p class="text-sm
-                                      text-gray-500
-                                      mt-1">
-
-                                Thay đổi email, họ tên,
-                                số điện thoại hoặc địa chỉ.
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <a href="${pageContext.request.contextPath}/UpdateCustomerProfileController"
-                       class="inline-flex
-                              items-center
-                              justify-center
-                              gap-2
-                              px-5 py-2.5
-                              rounded-xl
-                              bg-white
-                              border
-                              border-[#ff7043]
-                              text-[#ff7043]
-                              hover:bg-[#ff7043]
-                              hover:text-white
-                              text-sm
-                              font-semibold
-                              transition">
-
-                        Cập nhật ngay
-
-                        <span class="material-symbols-outlined text-lg">
-                            arrow_forward
-                        </span>
-
-                    </a>
-
-                </div>
-
-            </section>
-
-        </section>
-
-    </div>
-
-</main>
-
-
-
-<!-- =========================================================
-     FOOTER
-========================================================= -->
-
-<footer class="border-t
-               border-gray-100
-               bg-white
-               mt-10">
-
-    <div class="max-w-7xl
-                mx-auto
-                px-6 lg:px-10
-                py-8">
-
-        <div class="flex
-                    flex-col
-                    md:flex-row
-                    md:items-center
-                    md:justify-between
-                    gap-4">
-
-            <div class="flex items-center gap-2">
-
-                <div class="w-8 h-8
-                            rounded-lg
-                            bg-[#ff7043]
-                            flex items-center
-                            justify-center">
-
-                    <span class="material-symbols-outlined
-                                 text-white
-                                 text-lg">
-
-                        confirmation_number
-
+                    <span class="material-symbols-outlined position-absolute" style="right: 20px; bottom: 10px; font-size: 110px; opacity: 0.12; pointer-events: none;">
+                        badge
                     </span>
-
                 </div>
 
-                <span class="font-bold text-gray-800">
+                <!-- Personal Information Grid Card -->
+                <div class="lt-card p-4">
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 pb-3 mb-3 border-bottom" style="border-color: var(--lt-surface-border)!important;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 p-2" style="background: var(--lt-primary-fixed); color: var(--lt-primary);">
+                                <span class="material-symbols-outlined" style="font-size:22px;">badge</span>
+                            </div>
+                            <div>
+                                <h3 class="h6 fw-bold text-dark mb-0">Thông tin cá nhân</h3>
+                                <p class="text-secondary small mb-0">Chi tiết tài khoản hiện tại trên hệ thống</p>
+                            </div>
+                        </div>
+                        <a href="${ctx}/UpdateCustomerProfileController" class="btn-lt-secondary btn-sm">
+                            <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                            Chỉnh sửa
+                        </a>
+                    </div>
 
-                    Light Ticket
+                    <div class="row g-3">
+                        <!-- Họ và tên -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3" style="background-color: var(--lt-surface-low); border: 1px solid var(--lt-surface-border);">
+                                <span class="text-secondary d-block small mb-1">Họ và tên</span>
+                                <strong class="text-dark"><c:out value="${user.fullName}"/></strong>
+                            </div>
+                        </div>
 
-                </span>
+                        <!-- Tên đăng nhập -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3" style="background-color: var(--lt-surface-low); border: 1px solid var(--lt-surface-border);">
+                                <span class="text-secondary d-block small mb-1">Tên đăng nhập</span>
+                                <strong class="text-dark"><c:out value="${user.username}"/></strong>
+                            </div>
+                        </div>
 
-            </div>
+                        <!-- Email nhận vé -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3" style="background-color: var(--lt-surface-low); border: 1px solid var(--lt-surface-border);">
+                                <span class="text-secondary d-block small mb-1">Email nhận vé điện tử</span>
+                                <strong class="text-dark text-break"><c:out value="${user.email}"/></strong>
+                            </div>
+                        </div>
 
+                        <!-- Số điện thoại -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3" style="background-color: var(--lt-surface-low); border: 1px solid var(--lt-surface-border);">
+                                <span class="text-secondary d-block small mb-1">Số điện thoại liên hệ</span>
+                                <strong class="text-dark"><c:out value="${empty user.phone ? 'Chưa cập nhật' : user.phone}"/></strong>
+                            </div>
+                        </div>
 
-            <p class="text-xs text-gray-400">
+                        <!-- Địa chỉ -->
+                        <div class="col-12">
+                            <div class="p-3 rounded-3" style="background-color: var(--lt-surface-low); border: 1px solid var(--lt-surface-border);">
+                                <span class="text-secondary d-block small mb-1">Địa chỉ</span>
+                                <strong class="text-dark"><c:out value="${empty user.address ? 'Chưa cập nhật địa chỉ' : user.address}"/></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                © 2025 Light Ticket Joint Stock Co.
-                Bảo lưu mọi quyền.
+                <!-- Security & Notice Card -->
+                <div class="lt-card p-3 p-md-4 d-flex align-items-start gap-3" style="background-color: #f0fdf4; border-color: #bbf7d0;">
+                    <span class="material-symbols-outlined text-success mt-1" style="font-size:24px;">security</span>
+                    <div class="small text-secondary">
+                        <strong class="text-dark d-block mb-1">Bảo mật thông tin & Định danh vé điện tử</strong>
+                        Hệ thống Light Ticketbox bảo vệ an toàn thông tin khách hàng, sử dụng dữ liệu định danh để đối chiếu và phát hành mã QR check-in tại cổng sự kiện.
+                    </div>
+                </div>
 
-            </p>
+                <!-- Quick Navigation Action Banner -->
+                <div class="lt-card p-4 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle p-3" style="background: var(--lt-primary-fixed); color: var(--lt-primary);">
+                            <span class="material-symbols-outlined" style="font-size:24px;">confirmation_number</span>
+                        </div>
+                        <div>
+                            <h4 class="h6 fw-bold text-dark mb-1">Bạn muốn kiểm tra vé hoặc đặt vé mới?</h4>
+                            <p class="text-secondary small mb-0">Xem danh sách các đơn hàng đã mua hoặc khám phá sự kiện hot đang mở bán.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 flex-shrink-0">
+                        <a href="${ctx}/customer/booking-history" class="btn-lt-secondary btn-sm">Vé của tôi</a>
+                        <a href="${ctx}/home#events" class="btn-lt-primary btn-sm">Mua vé ngay</a>
+                    </div>
+                </div>
 
-
-            <div class="flex items-center gap-5">
-
-                <a href="#"
-                   class="text-xs
-                          text-gray-400
-                          hover:text-[#ff7043]">
-
-                    Điều khoản
-
-                </a>
-
-                <a href="#"
-                   class="text-xs
-                          text-gray-400
-                          hover:text-[#ff7043]">
-
-                    Chính sách bảo mật
-
-                </a>
-
-                <a href="#"
-                   class="text-xs
-                          text-gray-400
-                          hover:text-[#ff7043]">
-
-                    Liên hệ
-
-                </a>
-
-            </div>
-
+            </section>
         </div>
+    </main>
 
-    </div>
+    <!-- ======================================================================
+         FOOTER
+         ====================================================================== -->
+    <footer class="lt-footer">
+        <div class="container-xl d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="lt-brand-icon" style="width:30px;height:30px;border-radius:8px;">
+                    <span class="material-symbols-outlined" style="font-size:18px;">confirmation_number</span>
+                </div>
+                <span class="fw-bold text-dark">Light Ticketbox</span>
+            </div>
+            <div class="d-flex align-items-center gap-4 small">
+                <a href="${ctx}/">Trang chủ</a>
+                <a href="${ctx}/customer/booking-history">Vé của tôi</a>
+                <a href="${ctx}/CustomerProfileController">Hồ sơ cá nhân</a>
+            </div>
+            <span class="text-secondary small">© 2026 Light Ticket. All rights reserved.</span>
+        </div>
+    </footer>
 
-</footer>
-
-
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

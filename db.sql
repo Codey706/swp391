@@ -1,11 +1,24 @@
 ﻿-- =========================================================
 -- SYSTEM: Light Ticket Management (LTM)
--- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES)
+-- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES + SEAT MAP + ORGANIZER PROFILE)
 -- =========================================================
 
+USE master;
+GO
+
+-- Xóa database cũ nếu đã tồn tại
+IF DB_ID('LightTicketDB') IS NOT NULL
+BEGIN
+    ALTER DATABASE LightTicketDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE LightTicketDB;
+END
+GO
+
+-- Tạo database mới
 CREATE DATABASE LightTicketDB;
 GO
 
+-- Sử dụng database mới
 USE LightTicketDB;
 GO
 
@@ -226,32 +239,78 @@ CREATE TABLE Reviews (
 GO
 
 -- =========================================================
+-- SEAT MAP THEO TỪNG SỰ KIỆN (Organizer thiết kế sơ đồ kiểu Ticketbox)
+-- (gộp từ seatmap.sql; các lệnh đều có kiểm tra tồn tại nên an toàn khi chạy lại)
+-- Phải đặt sau khi đã tạo Events, Event_Tickets, Event_Seats và trước phần INSERT demo.
+-- =========================================================
+
+-- 16a. Khu vực của sơ đồ: sân khấu / khu ngồi (hàng x ghế) / khu đứng
+IF OBJECT_ID('Event_Zones', 'U') IS NULL
+BEGIN
+    CREATE TABLE Event_Zones (
+        zone_id INT IDENTITY(1,1) PRIMARY KEY,
+        event_id INT NOT NULL FOREIGN KEY REFERENCES Events(event_id),
+        event_ticket_id INT NULL FOREIGN KEY REFERENCES Event_Tickets(event_ticket_id), -- hạng vé (giá) của khu; NULL với sân khấu
+        zone_name NVARCHAR(100) NOT NULL,
+        zone_type VARCHAR(20) NOT NULL,            -- SEATED, STANDING, STAGE
+        color VARCHAR(7) NOT NULL DEFAULT '#FF7043',
+        pos_x INT NOT NULL,
+        pos_y INT NOT NULL,
+        width INT NOT NULL,
+        height INT NOT NULL,
+        row_count INT NOT NULL DEFAULT 0,          -- chỉ khu ngồi
+        seats_per_row INT NOT NULL DEFAULT 0,      -- chỉ khu ngồi
+        capacity INT NOT NULL DEFAULT 0,           -- số chỗ bán được (khu ngồi = số ghế thực tế)
+        blocked_seats NVARCHAR(MAX) NULL,          -- ghế bỏ trống/lối đi, dạng "r:c,r:c" (chỉ số từ 0)
+        sort_order INT NOT NULL DEFAULT 0,
+        CONSTRAINT UQ_Event_Zones_Name UNIQUE (event_id, zone_name)
+    );
+END
+GO
+
+-- 16b. Event_Seats thuộc về một khu
+IF COL_LENGTH('Event_Seats', 'zone_id') IS NULL
+    ALTER TABLE Event_Seats ADD zone_id INT NULL;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Event_Seats_Zone')
+    ALTER TABLE Event_Seats
+        ADD CONSTRAINT FK_Event_Seats_Zone FOREIGN KEY (zone_id) REFERENCES Event_Zones(zone_id);
+GO
+
+-- 16c. Ghế do Organizer tự vẽ không có ghế gốc trong bảng Seats (mẫu theo địa điểm)
+ALTER TABLE Event_Seats ALTER COLUMN source_seat_id INT NULL;
+GO
+
+-- =========================================================
 -- INSERT DEMO DATA (2 RECORDS PER TABLE)
 -- =========================================================
 
 -- 1. Users
 INSERT INTO Users (username, email, password, full_name, phone, address, role, status)
 VALUES 
-('organizer01', 'organizer1@ltm.vn', 'Pass@1234', N'M�y Lang Thang Production', '0901234567', N'?� L?t, L�m ??ng', 'Organizer', 'ACTIVE'),
-('customer01', 'customer1@gmail.com', 'Pass@1234', N'Nguy?n V?n A', '0912345678', N'C?n Th?', 'Customer', 'ACTIVE');
+('organizer01', 'organizer1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Mây Lang Thang Production', '0901234567', N'Đà Lạt, Lâm Đồng', 'Organizer', 'ACTIVE'),
+('admin01', 'admin1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn C', '0903434567', N'Cần Thơ', 'Admin', 'ACTIVE'),
+('staff01', 'staff1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn B', '0561434567', N'Cần Thơ', 'Staff', 'ACTIVE'),
+('customer01', 'customer1@gmail.com', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn A', '0912345678', N'Cần Thơ', 'Customer', 'ACTIVE');
 
 -- 2. Categories
 INSERT INTO Categories (category_name, description, status)
 VALUES 
-(N'Concert �m Nh?c', N'S? ki?n bi?u di?n �m nh?c, liveshow', 'ACTIVE'),
-(N'S�n Kh?u & K?ch', N'V? k?ch, bi?u di?n ngh? thu?t s�n kh?u', 'ACTIVE');
+(N'Concert Âm Nhạc', N'Sự kiện biểu diễn âm nhạc, liveshow', 'ACTIVE'),
+(N'Sân Khấu & Kịch', N'Vở kịch, biểu diễn nghệ thuật sân khấu', 'ACTIVE');
 
 -- 3. Venues
 INSERT INTO Venues (venue_name, address, description, capacity, status)
 VALUES 
-(N'S�n v?n ??ng M? ?�nh', N'???ng L� ??c Th?, Nam T? Li�m, H� N?i', N'S�n v?n ??ng qu?c gia', 40000, 'ACTIVE'),
-(N'Nh� H�t L?n H� N?i', N'S? 1 Tr�ng Ti?n, Ho�n Ki?m, H� N?i', N'Nh� h�t c? ?i?n', 600, 'ACTIVE');
+(N'Sân vận động Mỹ Đình', N'Đường Lê Đức Thọ, Nam Từ Liêm, Hà Nội', N'Sân vận động quốc gia', 40000, 'ACTIVE'),
+(N'Nhà Hát Lớn Hà Nội', N'Số 1 Tràng Tiền, Hoàn Kiếm, Hà Nội', N'Nhà hát cổ điển', 600, 'ACTIVE');
 
 -- 4. Seat_Maps
 INSERT INTO Seat_Maps (venue_id, map_name, description, status)
 VALUES 
-(1, N'S? ?? Concert 2026 M? ?�nh', N'S? ?? cho s? ki?n l?n', 'ACTIVE'),
-(2, N'S? ?? Kh�n ph�ng Nh� H�t L?n', N'S? ?? ti�u chu?n nh� h�t', 'ACTIVE');
+(1, N'Sơ đồ Concert 2026 Mỹ Đình', N'Sơ đồ cho sự kiện lớn', 'ACTIVE'),
+(2, N'Sơ đồ Khán phòng Nhà Hát Lớn', N'Sơ đồ tiêu chuẩn nhà hát', 'ACTIVE');
 
 -- 5. Seats
 INSERT INTO Seats (seat_map_id, row_label, seat_number, seat_label, seat_type, status)
@@ -262,8 +321,8 @@ VALUES
 -- 6. Events
 INSERT INTO Events (organizer_id, category_id, venue_id, event_name, description, event_image, start_time, end_time, status)
 VALUES 
-(1, 1, 1, N'Chuy?n Bay Ho�ng H�n: Live Concert 2026', N'Concert �m nh?c ??nh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'Active'),
-(1, 2, 2, N'V? K?ch Kinh ?i?n: Ng??i T�nh M�a Thu', N'V? k?ch s�n kh?u t�m l�', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'Active');
+(1, 1, 1, N'Chuyến Bay Hoàng Hôn: Live Concert 2026', N'Concert âm nhạc đỉnh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'ACTIVE'),
+(1, 2, 2, N'Vở Kịch Kinh Điển: Người Tình Mùa Thu', N'Vở kịch sân khấu tâm lý', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'ACTIVE');
 
 -- 7. Event_Seats
 INSERT INTO Event_Seats (event_id, source_seat_id, row_label, seat_number, seat_label, seat_type, status)
@@ -274,8 +333,8 @@ VALUES
 -- 8. Event_Tickets
 INSERT INTO Event_Tickets (event_id, ticket_name, description, price, quantity, available_quantity, status)
 VALUES 
-(1, N'V� VIP Zone A', N'Bao g?m qu� t?ng & l?i ?i ri�ng', 2800000.00, 100, 99, 'ACTIVE'),
-(1, N'V� GA Ph? Th�ng', N'Khu ??ng t? do', 650000.00, 500, 500, 'ACTIVE');
+(1, N'Vé VIP Zone A', N'Bao gồm quà tặng & lối đi riêng', 2800000.00, 100, 99, 'ACTIVE'),
+(1, N'Vé GA Phổ Thông', N'Khu đứng tự do', 650000.00, 500, 500, 'ACTIVE');
 
 -- 9. Event_Staff
 INSERT INTO Event_Staff (event_id, staff_id, status)
@@ -286,8 +345,8 @@ VALUES
 -- 10. Vouchers
 INSERT INTO Vouchers (voucher_code, voucher_name, discount_type, discount_value, min_order_amount, max_discount_amount, start_time, end_time, usage_limit, used_count, status)
 VALUES 
-('EARLYBIRD10', N'Gi?m 10% v� s?m', 'Percentage', 10.00, 500000.00, 200000.00, '2026-10-01 00:00:00', '2026-10-31 23:59:59', 100, 1, 'ACTIVE'),
-('LTMVIP50K', N'Gi?m tr?c ti?p 50k', 'Fixed', 50000.00, 300000.00, 50000.00, '2026-10-01 00:00:00', '2026-12-31 23:59:59', 200, 0, 'ACTIVE');
+('EARLYBIRD10', N'Giảm 10% vé sớm', 'Percentage', 10.00, 500000.00, 200000.00, '2026-10-01 00:00:00', '2026-10-31 23:59:59', 100, 1, 'ACTIVE'),
+('LTMVIP50K', N'Giảm trực tiếp 50k', 'Fixed', 50000.00, 300000.00, 50000.00, '2026-10-01 00:00:00', '2026-12-31 23:59:59', 200, 0, 'ACTIVE');
 
 -- 11. Orders
 INSERT INTO Orders (customer_id, voucher_id, order_code, total_amount, discount_amount, final_amount, status, hold_started_at, hold_expired_at)
@@ -322,6 +381,130 @@ VALUES
 -- 16. Reviews
 INSERT INTO Reviews (customer_id, event_id, ticket_id, rating, comment, status)
 VALUES 
-(2, 1, 2, 5, N'S? ki?n r?t tuy?t v?i, �m thanh ??nh cao!', 'Active'),
-(2, 2, 1, 4, N'S�n kh?u ??p nh?ng gh? ng?i h?i ch?t.', 'Active');
+(2, 1, 2, 5, N'Sự kiện rất tuyệt vời, âm thanh đỉnh cao!', 'ACTIVE'),
+(2, 2, 1, 4, N'Sân khấu đẹp nhưng ghế ngồi hơi chật.', 'ACTIVE');
+GO
+
+-- =========================================================
+-- 17-19. ORGANIZER PROFILE (UC-20): bảng hồ sơ mở rộng + quy tắc giấy phép kinh doanh + dữ liệu demo
+-- (cùng nội dung với db-organizer-profile.sql dành cho DB đã tồn tại)
+-- =========================================================
+-- 17. ORGANIZER PROFILES: thông tin mở rộng, quan hệ 1-1 với Users
+IF OBJECT_ID('Organizer_Profiles', 'U') IS NULL
+CREATE TABLE Organizer_Profiles (
+    user_id INT NOT NULL PRIMARY KEY FOREIGN KEY REFERENCES Users(user_id),
+    summary NVARCHAR(300) NULL,                 -- mô tả ngắn giới thiệu đơn vị
+    logo_url VARCHAR(500) NULL,                 -- logo 1:1
+    cover_url VARCHAR(500) NULL,                -- ảnh bìa 16:9
+    cover_scale INT NOT NULL DEFAULT 100 CHECK (cover_scale BETWEEN 50 AND 200),  -- % kích thước hiển thị ảnh bìa (không đổi tệp gốc)
+    logo_scale INT NOT NULL DEFAULT 100 CHECK (logo_scale BETWEEN 50 AND 200),    -- % kích thước hiển thị logo
+    tax_code VARCHAR(20) NULL,                  -- mã số thuế doanh nghiệp
+    legal_representative NVARCHAR(150) NULL,    -- người đại diện pháp luật & chức vụ
+    website_url VARCHAR(500) NULL,
+    facebook_url VARCHAR(500) NULL,
+    youtube_url VARCHAR(500) NULL,              -- YouTube / TikTok
+    spotify_url VARCHAR(500) NULL,
+    bank_name NVARCHAR(150) NULL,               -- ngân hàng - chi nhánh
+    bank_account_number VARCHAR(30) NULL,
+    bank_account_holder NVARCHAR(150) NULL,
+    -- Các cột do Admin quản lý, Organizer chỉ xem (không có trong form chỉnh sửa)
+    kyc_level TINYINT NOT NULL DEFAULT 0 CHECK (kyc_level BETWEEN 0 AND 2),
+    verification_status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (verification_status IN ('PENDING', 'VERIFIED', 'REJECTED')),
+    partner_tier NVARCHAR(50) NULL,             -- ví dụ: Đối tác Bạch Kim
+    withdrawal_limit DECIMAL(18,2) NULL,        -- NULL = không giới hạn
+    created_at DATETIME2 DEFAULT GETDATE(),
+    updated_at DATETIME2 DEFAULT GETDATE()
+);
+GO
+
+-- Nâng cấp DB đã có sẵn bảng Organizer_Profiles (chưa có cột kích thước hiển thị ảnh); bỏ qua nếu đã có
+IF COL_LENGTH('Organizer_Profiles', 'cover_scale') IS NULL
+    ALTER TABLE Organizer_Profiles ADD cover_scale INT NOT NULL
+        CONSTRAINT DF_Organizer_Profiles_cover_scale DEFAULT 100
+        CONSTRAINT CK_Organizer_Profiles_cover_scale CHECK (cover_scale BETWEEN 50 AND 200);
+GO
+IF COL_LENGTH('Organizer_Profiles', 'logo_scale') IS NULL
+    ALTER TABLE Organizer_Profiles ADD logo_scale INT NOT NULL
+        CONSTRAINT DF_Organizer_Profiles_logo_scale DEFAULT 100
+        CONSTRAINT CK_Organizer_Profiles_logo_scale CHECK (logo_scale BETWEEN 50 AND 200);
+GO
+
+-- Mã số thuế không được trùng giữa các tổ chức (bỏ qua NULL)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Organizer_Profiles_tax_code')
+CREATE UNIQUE INDEX UX_Organizer_Profiles_tax_code
+    ON Organizer_Profiles(tax_code) WHERE tax_code IS NOT NULL;
+GO
+
+-- 18. ORGANIZER CATEGORIES: thể loại sự kiện chuyên trách (dùng lại bảng Categories)
+IF OBJECT_ID('Organizer_Categories', 'U') IS NULL
+CREATE TABLE Organizer_Categories (
+    user_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id),
+    category_id INT NOT NULL FOREIGN KEY REFERENCES Categories(category_id),
+    PRIMARY KEY (user_id, category_id)
+);
+GO
+
+-- 19. ORGANIZER DOCUMENTS: tài liệu pháp lý (Admin duyệt)
+IF OBJECT_ID('Organizer_Documents', 'U') IS NULL
+CREATE TABLE Organizer_Documents (
+    document_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL FOREIGN KEY REFERENCES Users(user_id),
+    doc_type VARCHAR(30) NOT NULL
+        CHECK (doc_type IN ('BUSINESS_LICENSE', 'PERFORMANCE_PERMIT', 'COPYRIGHT_CONTRACT', 'OTHER')),
+    doc_name NVARCHAR(200) NOT NULL,            -- tên file người dùng tải lên
+    file_name VARCHAR(200) NOT NULL,            -- tên file đã lưu trên server (không phải đường dẫn)
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    uploaded_at DATETIME2 DEFAULT GETDATE(),
+    reviewed_at DATETIME2 NULL
+);
+GO
+
+-- QUY TẮC NGHIỆP VỤ: tổ chức chỉ được xác minh (VERIFIED) khi có Giấy phép kinh doanh đã được duyệt.
+-- Trigger chỉ kiểm tra khi verification_status chuyển sang VERIFIED, nên không chặn
+-- Organizer cập nhật hồ sơ (các lệnh cập nhật hồ sơ không đụng tới cột này).
+CREATE OR ALTER TRIGGER TR_Organizer_Profiles_RequireBusinessLicense
+ON Organizer_Profiles
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        LEFT JOIN deleted d ON d.user_id = i.user_id
+        WHERE i.verification_status = 'VERIFIED'
+          AND (d.user_id IS NULL OR d.verification_status <> 'VERIFIED')
+          AND NOT EXISTS (
+                SELECT 1 FROM Organizer_Documents od
+                WHERE od.user_id = i.user_id
+                  AND od.doc_type = 'BUSINESS_LICENSE'
+                  AND od.status = 'APPROVED')
+    )
+    BEGIN
+        RAISERROR (N'Phải có Giấy phép kinh doanh đã được duyệt mới được xác minh tổ chức.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
+
+-- Dữ liệu demo cho organizer01 (bỏ qua nếu đã có). Giấy phép KD phải được duyệt trước khi VERIFIED.
+IF NOT EXISTS (SELECT 1 FROM Organizer_Documents WHERE doc_type = 'BUSINESS_LICENSE'
+               AND user_id = (SELECT user_id FROM Users WHERE username = 'organizer01'))
+INSERT INTO Organizer_Documents (user_id, doc_type, doc_name, file_name, status, reviewed_at)
+SELECT user_id, 'BUSINESS_LICENSE', N'Giấy ĐKKD.pdf', 'demo-business-license.pdf', 'APPROVED', GETDATE()
+FROM Users WHERE username = 'organizer01';
+GO
+
+-- Hồ sơ demo cho organizer01
+IF NOT EXISTS (SELECT 1 FROM Organizer_Profiles WHERE user_id = (SELECT user_id FROM Users WHERE username = 'organizer01'))
+INSERT INTO Organizer_Profiles (user_id, summary, tax_code, legal_representative, website_url,
+                                bank_name, bank_account_number, bank_account_holder,
+                                kyc_level, verification_status)
+SELECT user_id, N'Đơn vị tổ chức các đêm nhạc acoustic và workshop sáng tạo tại Đà Lạt.',
+       '0315894120', N'Nguyễn Minh Anh - Tổng Giám Đốc', 'https://example.com',
+       N'Vietcombank - CN Đà Lạt', '0071000882688', N'CONG TY TNHH MAY LANG THANG PRODUCTION',
+       2, 'VERIFIED'
+FROM Users WHERE username = 'organizer01';
 GO

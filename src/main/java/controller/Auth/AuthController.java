@@ -301,7 +301,7 @@ public class AuthController extends HttpServlet {
             } else if ("Staff".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/staff");
             } else if ("Organizer".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/organizer/event/create");
+                response.sendRedirect(request.getContextPath() + "/organizer/event/list");
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }
@@ -646,7 +646,8 @@ public class AuthController extends HttpServlet {
 
     private void forward(HttpServletRequest request, HttpServletResponse response, String page)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/login/" + page).forward(request, response);
+        String basePath = "/WEB-INF/views/" + ("change-password.jsp".equals(page) ? "common/" : "login/");
+        request.getRequestDispatcher(basePath + page).forward(request, response);
     }
 
     @Override
