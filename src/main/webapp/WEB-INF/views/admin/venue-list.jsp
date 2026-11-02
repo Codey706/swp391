@@ -126,7 +126,7 @@
                         <span>Manage Vouchers</span>
                     </a>
 
-                    <a href="#" title="Chức năng chưa được kết nối">
+                    <a href="${pageContext.request.contextPath}/admin/reviews">
                         <span class="material-symbols-outlined">star</span>
                         <span>Manage Reviews</span>
                     </a>

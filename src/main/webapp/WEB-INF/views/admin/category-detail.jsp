@@ -23,431 +23,431 @@
 
     <body class="admin-portal-page">
 
-    <c:set var="ctx" value="${pageContext.request.contextPath}"/>
-    <c:set var="adminName" value="${not empty sessionScope.user && not empty sessionScope.user.fullName ? sessionScope.user.fullName : 'Admin'}"/>
-    <c:set var="adminInitial" value="${fn:toUpperCase(fn:substring(adminName, 0, 1))}"/>
+        <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+        <c:set var="adminName" value="${not empty sessionScope.user && not empty sessionScope.user.fullName ? sessionScope.user.fullName : 'Admin'}"/>
+        <c:set var="adminInitial" value="${fn:toUpperCase(fn:substring(adminName, 0, 1))}"/>
 
-    <%
-        Category category = (Category) request.getAttribute("category");
-        String contextPath = request.getContextPath();
+        <%
+            Category category = (Category) request.getAttribute("category");
+            String contextPath = request.getContextPath();
 
-        if (category == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-    %>
+            if (category == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+        %>
 
-    <!-- Lớp nền khi mở sidebar trên điện thoại -->
-    <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
+        <!-- Lớp nền khi mở sidebar trên điện thoại -->
+        <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar" id="adminSidebar" aria-label="Điều hướng Admin Portal">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Điều hướng Admin Portal">
 
-        <div class="admin-sidebar-top">
+            <div class="admin-sidebar-top">
 
-            <div class="admin-brand-row">
-                <a class="admin-brand" href="${ctx}/admin">
-                    <span class="admin-brand-logo">
+                <div class="admin-brand-row">
+                    <a class="admin-brand" href="${ctx}/admin">
+                        <span class="admin-brand-logo">
+                            <span class="material-symbols-outlined">confirmation_number</span>
+                        </span>
+
+                        <span class="admin-brand-text">
+                            <span class="admin-brand-name">
+                                <span>Light</span>
+                                <span class="admin-brand-accent">Ticket</span>
+                            </span>
+                            <small>Admin Portal</small>
+                        </span>
+                    </a>
+
+                    <button type="button"
+                            class="admin-sidebar-close"
+                            id="adminSidebarClose"
+                            aria-label="Đóng menu">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="admin-nav-label">WORKSPACE</div>
+
+                <nav class="admin-nav">
+
+                    <a href="${ctx}/admin">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a href="${ctx}/admin/users">
+                        <span class="material-symbols-outlined">group</span>
+                        <span>Manage Users</span>
+                    </a>
+
+                    <a href="${ctx}/admin/events">
+                        <span class="material-symbols-outlined">event</span>
+                        <span>Manage Events</span>
+                    </a>
+
+                    <a href="${ctx}/admin/categories" class="is-active" aria-current="page">
+                        <span class="material-symbols-outlined">category</span>
+                        <span>Manage Categories</span>
+                    </a>
+
+                    <a href="${ctx}/admin/venues">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <span>Manage Venues</span>
+                    </a>
+
+                    <a href="${ctx}/admin/vouchers">
                         <span class="material-symbols-outlined">confirmation_number</span>
-                    </span>
+                        <span>Manage Vouchers</span>
+                    </a>
 
-                    <span class="admin-brand-text">
-                        <span class="admin-brand-name">
-                            <span>Light</span>
-                            <span class="admin-brand-accent">Ticket</span>
-                        </span>
-                        <small>Admin Portal</small>
-                    </span>
-                </a>
+                    <a href="${pageContext.request.contextPath}/admin/reviews">
+                        <span class="material-symbols-outlined">star</span>
+                        <span>Manage Reviews</span>
+                    </a>
 
-                <button type="button"
-                        class="admin-sidebar-close"
-                        id="adminSidebarClose"
-                        aria-label="Đóng menu">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
+                    <a href="${ctx}/admin/profile">
+                        <span class="material-symbols-outlined">account_circle</span>
+                        <span>Manage Profile</span>
+                    </a>
+
+                </nav>
             </div>
 
-            <div class="admin-nav-label">WORKSPACE</div>
+            <!-- Khu vực dưới sidebar -->
+            <div class="admin-sidebar-bottom">
 
-            <nav class="admin-nav">
-
-                <a href="${ctx}/admin">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    <span>Dashboard</span>
-                </a>
-
-                <a href="${ctx}/admin/users">
-                    <span class="material-symbols-outlined">group</span>
-                    <span>Manage Users</span>
-                </a>
-
-                <a href="${ctx}/admin/events">
-                    <span class="material-symbols-outlined">event</span>
-                    <span>Manage Events</span>
-                </a>
-
-                <a href="${ctx}/admin/categories" class="is-active" aria-current="page">
-                    <span class="material-symbols-outlined">category</span>
-                    <span>Manage Categories</span>
-                </a>
-
-                <a href="${ctx}/admin/venues">
-                    <span class="material-symbols-outlined">location_on</span>
-                    <span>Manage Venues</span>
-                </a>
-
-                <a href="${ctx}/admin/vouchers">
-                    <span class="material-symbols-outlined">confirmation_number</span>
-                    <span>Manage Vouchers</span>
-                </a>
-
-                <a href="#" title="Chức năng chưa được kết nối">
-                    <span class="material-symbols-outlined">star</span>
-                    <span>Manage Reviews</span>
-                </a>
-
-                <a href="${ctx}/admin/profile">
-                    <span class="material-symbols-outlined">account_circle</span>
-                    <span>Manage Profile</span>
-                </a>
-
-            </nav>
-        </div>
-
-        <!-- Khu vực dưới sidebar -->
-        <div class="admin-sidebar-bottom">
-
-            <div class="admin-sidebar-user">
-                <span class="admin-sidebar-user-avatar">
-                    <c:out value="${adminInitial}"/>
-                </span>
-
-                <span class="admin-sidebar-user-meta">
-                    <span class="admin-sidebar-user-name">
-                        <c:out value="${adminName}"/>
+                <div class="admin-sidebar-user">
+                    <span class="admin-sidebar-user-avatar">
+                        <c:out value="${adminInitial}"/>
                     </span>
-                    <small>Administrator</small>
-                </span>
-            </div>
 
-            <form method="post" action="${ctx}/logout" class="m-0">
-                <button type="submit" class="admin-sidebar-logout">
-                    <span class="material-symbols-outlined">logout</span>
-                    Đăng xuất
-                </button>
-            </form>
-
-        </div>
-    </aside>
-
-    <!-- Nội dung chính -->
-    <div class="admin-shell" id="adminShell">
-
-        <!-- Topbar -->
-        <header class="admin-topbar">
-
-            <button type="button"
-                    class="admin-hamburger"
-                    id="adminSidebarOpen"
-                    aria-label="Mở menu"
-                    aria-controls="adminSidebar"
-                    aria-expanded="false">
-                <span class="material-symbols-outlined">menu</span>
-            </button>
-
-            <div class="admin-top-actions">
-
-                <button type="button"
-                        class="admin-top-button admin-help-button"
-                        aria-label="Hỗ trợ"
-                        title="Hỗ trợ">
-                    <span class="material-symbols-outlined">help_outline</span>
-                </button>
-
-                <button type="button"
-                        class="admin-top-button"
-                        aria-label="Thông báo"
-                        title="Thông báo">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span class="admin-notification-dot"></span>
-                </button>
-
-                <!-- Avatar và dropdown -->
-                <div class="dropdown admin-account-dropdown">
-
-                    <button class="admin-account-toggle"
-                            type="button"
-                            id="adminAccountDropdown"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                            title="Tài khoản Admin">
-
-                        <span class="admin-account-avatar">
-                            <c:out value="${adminInitial}"/>
-                        </span>
-
-                        <span class="admin-account-name">
+                    <span class="admin-sidebar-user-meta">
+                        <span class="admin-sidebar-user-name">
                             <c:out value="${adminName}"/>
                         </span>
+                        <small>Administrator</small>
+                    </span>
+                </div>
 
-                        <span class="material-symbols-outlined admin-account-chevron">
-                            keyboard_arrow_down
-                        </span>
+                <form method="post" action="${ctx}/logout" class="m-0">
+                    <button type="submit" class="admin-sidebar-logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        Đăng xuất
+                    </button>
+                </form>
+
+            </div>
+        </aside>
+
+        <!-- Nội dung chính -->
+        <div class="admin-shell" id="adminShell">
+
+            <!-- Topbar -->
+            <header class="admin-topbar">
+
+                <button type="button"
+                        class="admin-hamburger"
+                        id="adminSidebarOpen"
+                        aria-label="Mở menu"
+                        aria-controls="adminSidebar"
+                        aria-expanded="false">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+
+                <div class="admin-top-actions">
+
+                    <button type="button"
+                            class="admin-top-button admin-help-button"
+                            aria-label="Hỗ trợ"
+                            title="Hỗ trợ">
+                        <span class="material-symbols-outlined">help_outline</span>
                     </button>
 
-                    <ul class="dropdown-menu dropdown-menu-end admin-account-menu shadow-sm"
-                        aria-labelledby="adminAccountDropdown">
+                    <button type="button"
+                            class="admin-top-button"
+                            aria-label="Thông báo"
+                            title="Thông báo">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="admin-notification-dot"></span>
+                    </button>
 
-                        <li class="admin-account-heading">
-                            <span class="admin-account-heading-name">
+                    <!-- Avatar và dropdown -->
+                    <div class="dropdown admin-account-dropdown">
+
+                        <button class="admin-account-toggle"
+                                type="button"
+                                id="adminAccountDropdown"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                title="Tài khoản Admin">
+
+                            <span class="admin-account-avatar">
+                                <c:out value="${adminInitial}"/>
+                            </span>
+
+                            <span class="admin-account-name">
                                 <c:out value="${adminName}"/>
                             </span>
-                            <small>Administrator</small>
-                        </li>
 
-                        <li>
-                            <a class="dropdown-item" href="${ctx}/admin/profile">
-                                <span class="material-symbols-outlined">account_circle</span>
-                                Hồ sơ của tôi
-                            </a>
-                        </li>
+                            <span class="material-symbols-outlined admin-account-chevron">
+                                keyboard_arrow_down
+                            </span>
+                        </button>
 
-                        <li>
-                            <a class="dropdown-item" href="${ctx}/home">
-                                <span class="material-symbols-outlined">home</span>
-                                Về trang chủ
-                            </a>
-                        </li>
+                        <ul class="dropdown-menu dropdown-menu-end admin-account-menu shadow-sm"
+                            aria-labelledby="adminAccountDropdown">
 
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                            <li class="admin-account-heading">
+                                <span class="admin-account-heading-name">
+                                    <c:out value="${adminName}"/>
+                                </span>
+                                <small>Administrator</small>
+                            </li>
 
-                        <li>
-                            <form action="${ctx}/logout" method="post" class="m-0">
-                                <button type="submit" class="dropdown-item admin-dropdown-logout">
-                                    <span class="material-symbols-outlined">logout</span>
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        </li>
+                            <li>
+                                <a class="dropdown-item" href="${ctx}/admin/profile">
+                                    <span class="material-symbols-outlined">account_circle</span>
+                                    Hồ sơ của tôi
+                                </a>
+                            </li>
 
-                    </ul>
+                            <li>
+                                <a class="dropdown-item" href="${ctx}/home">
+                                    <span class="material-symbols-outlined">home</span>
+                                    Về trang chủ
+                                </a>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <form action="${ctx}/logout" method="post" class="m-0">
+                                    <button type="submit" class="dropdown-item admin-dropdown-logout">
+                                        <span class="material-symbols-outlined">logout</span>
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Breadcrumb -->
+            <div class="admin-subbar">
+                <div class="admin-breadcrumbs">
+                    <span class="material-symbols-outlined">home</span>
+                    <a href="${ctx}/admin">Admin Portal</a>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                    <a href="${ctx}/admin/categories">Manage Categories</a>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                    <span class="admin-breadcrumb-current">Category Detail</span>
+                </div>
+
+                <div class="admin-system-label">
+                    <span class="admin-system-dot"></span>
+                    Light Ticket Management System
                 </div>
             </div>
-        </header>
 
-        <!-- Breadcrumb -->
-        <div class="admin-subbar">
-            <div class="admin-breadcrumbs">
-                <span class="material-symbols-outlined">home</span>
-                <a href="${ctx}/admin">Admin Portal</a>
-                <span class="material-symbols-outlined">chevron_right</span>
-                <a href="${ctx}/admin/categories">Manage Categories</a>
-                <span class="material-symbols-outlined">chevron_right</span>
-                <span class="admin-breadcrumb-current">Category Detail</span>
-            </div>
+            <!-- Nội dung trang -->
+            <main class="admin-content">
+                <section class="content">
 
-            <div class="admin-system-label">
-                <span class="admin-system-dot"></span>
-                Light Ticket Management System
-            </div>
+                    <div class="detail-container">
+
+                        <div class="page-heading">
+                            <div>
+                                <h1>Category Detail</h1>
+                                <p>Thông tin chi tiết danh mục sự kiện trong Light Ticket</p>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin danh mục -->
+                        <div class="detail-card">
+
+                            <!-- Category Profile -->
+                            <div class="profile-header">
+
+                                <div class="avatar">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </div>
+
+                                <div class="profile-info">
+
+                                    <h2>
+                                        <%= category.getCategoryName() != null
+                                            ? category.getCategoryName() : ""%>
+                                    </h2>
+
+                                    <p>
+                                        Category ID: #<%= category.getCategoryId()%>
+                                    </p>
+
+                                          <span class="status <%= category.getStatus() != null
+                                        ? category.getStatus().toLowerCase() : ""%>">
+                                        <%= category.getStatus() != null
+                                            ? category.getStatus() : "Unknown"%>
+                                    </span>
+
+                                </div>
+                            </div>
+
+                            <!-- Category Information -->
+                            <h3 class="section-title">
+                                <i class="fa-solid fa-circle-info"></i>
+                                Category Information
+                            </h3>
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Category ID</span>
+                                    <div class="detail-value">
+                                        #<%= category.getCategoryId()%>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Category Name</span>
+                                    <div class="detail-value">
+                                        <%= category.getCategoryName() != null
+                                            ? category.getCategoryName() : ""%>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Status</span>
+                                    <div class="detail-value">
+                                          <span class="status <%= category.getStatus() != null
+                                            ? category.getStatus().toLowerCase() : ""%>">
+                                            <%= category.getStatus() != null
+                                                ? category.getStatus() : "Unknown"%>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Description</span>
+                                    <div class="detail-value">
+                                        <%= category.getDescription() != null
+                                                && !category.getDescription().trim().isEmpty()
+                                                ? category.getDescription()
+                                                : "No description provided"%>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- System Information -->
+                            <h3 class="section-title account-section-title">
+                                <i class="fa-solid fa-clock"></i>
+                                System Information
+                            </h3>
+
+                            <div class="detail-grid">
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Created At</span>
+                                    <div class="detail-value">
+                                        <%= category.getCreatedAt() != null
+                                                ? category.getCreatedAt()
+                                                : "Not available"%>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <span class="detail-label">Updated At</span>
+                                    <div class="detail-value">
+                                        <%= category.getUpdatedAt() != null
+                                                ? category.getUpdatedAt()
+                                                : "Not available"%>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="detail-actions">
+
+                                <a class="back-button"
+                                   href="<%= contextPath%>/admin/categories">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                    Back to Categories
+                                </a>
+
+                                <!-- Delete Category -->
+                                <form method="post"
+                                      action="<%= contextPath%>/admin/category-delete"
+                                      style="display: inline;">
+                                    <input type="hidden"
+                                           name="id"
+                                           value="<%= category.getCategoryId()%>">
+
+                                    <button type="submit" class="delete-button">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Delete Category
+                                    </button>
+                                </form>
+
+                                <!-- Update Category -->
+                                <a class="back-button"
+                                   href="<%= contextPath%>/admin/category-edit?id=<%= category.getCategoryId()%>"
+                                   style="background: #FF7043; color: white;">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Update Category
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="admin-page-footer">
+                    © 2026 Light Ticket Platform JSC. All rights reserved.
+                </footer>
+            </main>
         </div>
 
-        <!-- Nội dung trang -->
-        <main class="admin-content">
-            <section class="content">
+        <!-- Bootstrap JS dùng cho dropdown -->
+        <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>
 
-                <div class="detail-container">
+        <!-- Điều khiển sidebar trên màn hình nhỏ -->
+        <script>
+            (function () {
+                const sidebar = document.getElementById('adminSidebar');
+                const backdrop = document.getElementById('adminSidebarBackdrop');
+                const openButton = document.getElementById('adminSidebarOpen');
+                const closeButton = document.getElementById('adminSidebarClose');
 
-                    <div class="page-heading">
-                        <div>
-                            <h1>Category Detail</h1>
-                            <p>Thông tin chi tiết danh mục sự kiện trong Light Ticket</p>
-                        </div>
-                    </div>
-
-                    <!-- Thông tin danh mục -->
-                    <div class="detail-card">
-
-                        <!-- Category Profile -->
-                        <div class="profile-header">
-
-                            <div class="avatar">
-                                <i class="fa-solid fa-folder-open"></i>
-                            </div>
-
-                            <div class="profile-info">
-
-                                <h2>
-                                    <%= category.getCategoryName() != null
-                                                ? category.getCategoryName() : ""%>
-                                </h2>
-
-                                <p>
-                                    Category ID: #<%= category.getCategoryId()%>
-                                </p>
-
-                                <span class="status <%= category.getStatus() != null
-                                            ? category.getStatus().toLowerCase() : ""%>">
-                                    <%= category.getStatus() != null
-                                                ? category.getStatus() : "Unknown"%>
-                                </span>
-
-                            </div>
-                        </div>
-
-                        <!-- Category Information -->
-                        <h3 class="section-title">
-                            <i class="fa-solid fa-circle-info"></i>
-                            Category Information
-                        </h3>
-
-                        <div class="detail-grid">
-
-                            <div class="detail-item">
-                                <span class="detail-label">Category ID</span>
-                                <div class="detail-value">
-                                    #<%= category.getCategoryId()%>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Category Name</span>
-                                <div class="detail-value">
-                                    <%= category.getCategoryName() != null
-                                                ? category.getCategoryName() : ""%>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Status</span>
-                                <div class="detail-value">
-                                    <span class="status <%= category.getStatus() != null
-                                                ? category.getStatus().toLowerCase() : ""%>">
-                                        <%= category.getStatus() != null
-                                                    ? category.getStatus() : "Unknown"%>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Description</span>
-                                <div class="detail-value">
-                                    <%= category.getDescription() != null
-                                            && !category.getDescription().trim().isEmpty()
-                                            ? category.getDescription()
-                                            : "No description provided"%>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- System Information -->
-                        <h3 class="section-title account-section-title">
-                            <i class="fa-solid fa-clock"></i>
-                            System Information
-                        </h3>
-
-                        <div class="detail-grid">
-
-                            <div class="detail-item">
-                                <span class="detail-label">Created At</span>
-                                <div class="detail-value">
-                                    <%= category.getCreatedAt() != null
-                                            ? category.getCreatedAt()
-                                            : "Not available"%>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Updated At</span>
-                                <div class="detail-value">
-                                    <%= category.getUpdatedAt() != null
-                                            ? category.getUpdatedAt()
-                                            : "Not available"%>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="detail-actions">
-
-                            <a class="back-button"
-                               href="<%= contextPath%>/admin/categories">
-                                <i class="fa-solid fa-arrow-left"></i>
-                                Back to Categories
-                            </a>
-
-                            <!-- Delete Category -->
-                            <form method="post"
-                                  action="<%= contextPath%>/admin/category-delete"
-                                  style="display: inline;">
-                                <input type="hidden"
-                                       name="id"
-                                       value="<%= category.getCategoryId()%>">
-
-                                <button type="submit" class="delete-button">
-                                    <i class="fa-solid fa-trash"></i>
-                                    Delete Category
-                                </button>
-                            </form>
-
-                            <!-- Update Category -->
-                            <a class="back-button"
-                               href="<%= contextPath%>/admin/category-edit?id=<%= category.getCategoryId()%>"
-                               style="background: #FF7043; color: white;">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                                Update Category
-                            </a>
-
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <footer class="admin-page-footer">
-                © 2026 Light Ticket Platform JSC. All rights reserved.
-            </footer>
-        </main>
-    </div>
-
-    <!-- Bootstrap JS dùng cho dropdown -->
-    <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>
-
-    <!-- Điều khiển sidebar trên màn hình nhỏ -->
-    <script>
-        (function () {
-            const sidebar = document.getElementById('adminSidebar');
-            const backdrop = document.getElementById('adminSidebarBackdrop');
-            const openButton = document.getElementById('adminSidebarOpen');
-            const closeButton = document.getElementById('adminSidebarClose');
-
-            function openSidebar() {
-                sidebar.classList.add('is-open');
-                backdrop.classList.add('is-visible');
-                openButton.setAttribute('aria-expanded', 'true');
-            }
-
-            function closeSidebar() {
-                sidebar.classList.remove('is-open');
-                backdrop.classList.remove('is-visible');
-                openButton.setAttribute('aria-expanded', 'false');
-            }
-
-            openButton.addEventListener('click', openSidebar);
-            closeButton.addEventListener('click', closeSidebar);
-            backdrop.addEventListener('click', closeSidebar);
-
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') {
-                    closeSidebar();
+                function openSidebar() {
+                    sidebar.classList.add('is-open');
+                    backdrop.classList.add('is-visible');
+                    openButton.setAttribute('aria-expanded', 'true');
                 }
-            });
-        })();
-    </script>
 
-</body>
+                function closeSidebar() {
+                    sidebar.classList.remove('is-open');
+                    backdrop.classList.remove('is-visible');
+                    openButton.setAttribute('aria-expanded', 'false');
+                }
+
+                openButton.addEventListener('click', openSidebar);
+                closeButton.addEventListener('click', closeSidebar);
+                backdrop.addEventListener('click', closeSidebar);
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeSidebar();
+                    }
+                });
+            })();
+        </script>
+
+    </body>
 </html>
