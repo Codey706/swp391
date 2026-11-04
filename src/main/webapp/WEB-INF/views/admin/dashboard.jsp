@@ -80,15 +80,12 @@
                         <span class="material-symbols-outlined">category</span>
                         <span>Manage Categories</span>
                     </a>
-                    <!-- Reviews -->
-                    <a href="${pageContext.request.contextPath}/admin/reviews">
-                        <i class="fa-solid fa-star"></i>
-                        Reviews
-                    </a>
                     <!-- My Profile -->
-                    <a href="${pageContext.request.contextPath}/admin/profile">
+                    <a href="${ctx}/admin/profile">
                         <i class="fa-solid fa-user"></i>
                         My Profile
+                    </a>
+
                     <a href="${ctx}/admin/venues">
                         <span class="material-symbols-outlined">location_on</span>
                         <span>Manage Venues</span>
@@ -99,7 +96,7 @@
                         <span>Manage Vouchers</span>
                     </a>
 
-                    <a href="#" title="Chức năng chưa được kết nối">
+                    <a href="${pageContext.request.contextPath}/admin/reviews">
                         <span class="material-symbols-outlined">star</span>
                         <span>Manage Reviews</span>
                     </a>
@@ -326,11 +323,7 @@
 
 
                         <!-- Reviews -->
-                        <a href="<%= request.getContextPath()%>/admin/reviews"
-                           class="dashboard-card">
-
-                        <!-- Reviews -->
-                        <a href="#" class="dashboard-card" title="Chức năng chưa được kết nối">
+                        <a href="${ctx}/admin/reviews" class="dashboard-card">
                             <div class="dashboard-icon">
                                 <i class="fa-solid fa-star"></i>
                             </div>
