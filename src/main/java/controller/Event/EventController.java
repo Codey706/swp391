@@ -55,25 +55,22 @@ public abstract class EventController extends HttpServlet {
     /**
      * Yêu cầu đã đăng nhập và có role Organizer.
      *
-     * @return Auth hợp lệ (luôn khác null ở giai đoạn test, xem TODO).
+     * @return Auth hợp lệ, hoặc null nếu đã redirect / gửi lỗi.
      */
     protected Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        // Đã đăng nhập bằng tài khoản Organizer thì dùng đúng tài khoản đó
         HttpSession session = request.getSession(false);
         Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
-        if (sessionUser instanceof Auth) {
-            Auth loggedIn = (Auth) sessionUser;
-            if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(loggedIn.getRole())) {
-                return loggedIn;
-            }
+        if (!(sessionUser instanceof Auth)) {
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
+            return null;
         }
-
-        // TODO: bỏ nhánh test này khi tích hợp xong đăng nhập (chuyển sang redirect /Auth?action=login)
-        Auth testUser = new Auth();
-        testUser.setUserId(1); // organizer01 trong db.sql
-        testUser.setRole(Constants.ROLE_ORGANIZER);
-        return testUser;
+        Auth loggedIn = (Auth) sessionUser;
+        if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(loggedIn.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return loggedIn;
     }
 
     /**

@@ -96,7 +96,7 @@ public class EventDAO {
             + "WHERE t.event_id = e.event_id AND o.status = 'Paid') AS revenue, "
             + "(SELECT ISNULL(SUM(t.available_quantity), 0) FROM Event_Tickets t WHERE t.event_id = e.event_id) AS remaining "
             + "FROM Events e JOIN Categories c ON c.category_id = e.category_id "
-            + "JOIN Venues v ON v.venue_id = e.venue_id";
+            + "JOIN Venues v ON v.venue_id = e.venue_id "; // dấu cách cuối: các hàm ghép tiếp "WHERE ..."
 
     private static final String[] DELETE_EVENT_STATEMENTS = {
         "DELETE FROM Event_Staff WHERE event_id = ?",
@@ -315,10 +315,12 @@ public class EventDAO {
     /**
      * Lấy chi tiết một sự kiện công khai không kiểm tra organizer.
      */
+    /** Chỉ trả về sự kiện đã được duyệt (ACTIVE); bản nháp / chờ duyệt / bị từ chối không công khai. */
     public Event getPublicEventById(int eventId) {
-        String sql = SELECT_EVENT_COLUMNS + " WHERE e.event_id = ?";
+        String sql = SELECT_EVENT_COLUMNS + " WHERE e.event_id = ? AND e.status = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, eventId);
+            stmt.setString(2, Constants.EVENT_ACTIVE);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() ? mapEvent(rs) : null;
             }
@@ -867,4 +869,69 @@ public class EventDAO {
         }
     }
 
+
+    public enum CancelResult { CANCELLED, NOT_ACTIVE, HAS_PAID_ORDERS }
+
+    /**
+     * UC-20: Organizer hủy sự kiện ACTIVE của chính mình khi CHƯA có đơn Paid.
+     * Khóa dòng sự kiện để không có đơn nào kịp thanh toán xen giữa lúc kiểm tra và lúc hủy
+     * (thanh toán đến sau sẽ bị PaymentDAO chuyển sang RefundPending vì sự kiện không còn ACTIVE).
+     */
+    public CancelResult cancelEvent(int eventId, int organizerId, String reason) throws SQLException {
+        try (Connection connection = DBContext.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "SELECT status FROM Events WITH (UPDLOCK, ROWLOCK) WHERE event_id = ? AND organizer_id = ?")) {
+                    statement.setInt(1, eventId);
+                    statement.setInt(2, organizerId);
+                    try (ResultSet rs = statement.executeQuery()) {
+                        if (!rs.next() || !Constants.EVENT_ACTIVE.equalsIgnoreCase(rs.getString(1))) {
+                            connection.rollback();
+                            return CancelResult.NOT_ACTIVE;
+                        }
+                    }
+                }
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "SELECT 1 FROM Orders o JOIN Order_Details od ON od.order_id = o.order_id "
+                        + "JOIN Event_Tickets et ON et.event_ticket_id = od.event_ticket_id "
+                        + "WHERE et.event_id = ? AND o.status = 'Paid'")) {
+                    statement.setInt(1, eventId);
+                    try (ResultSet rs = statement.executeQuery()) {
+                        if (rs.next()) {
+                            connection.rollback();
+                            return CancelResult.HAS_PAID_ORDERS;
+                        }
+                    }
+                }
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE Events SET status = ?, cancellation_reason = ?, updated_at = GETDATE() WHERE event_id = ?")) {
+                    statement.setString(1, Constants.EVENT_CANCELLED);
+                    statement.setString(2, reason);
+                    statement.setInt(3, eventId);
+                    statement.executeUpdate();
+                }
+                connection.commit();
+                return CancelResult.CANCELLED;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        }
+    }
+
+    /** UC-29: {email, họ tên organizer, tên sự kiện} để gửi thông báo duyệt; null nếu không có. */
+    public String[] getOrganizerContact(int eventId) {
+        String sql = "SELECT u.email, u.full_name, e.event_name FROM Events e "
+                + "JOIN Users u ON u.user_id = e.organizer_id WHERE e.event_id = ?";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, eventId);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next() ? new String[]{rs.getString(1), rs.getString(2), rs.getString(3)} : null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -65,6 +65,7 @@ public class EventListController extends EventController {
         request.setAttribute("salesSummary", eventDAO.getOrganizerSalesSummary(organizer.getUserId()));
         request.setAttribute("pageSize", Constants.EVENT_PAGE_SIZE);
         moveFlashMessage(request, "successMessage", "errorMessage");
+        //utils.CsrfUtils.expose(request);
         request.getRequestDispatcher(EVENT_LIST_VIEW).forward(request, response);
     }
 
