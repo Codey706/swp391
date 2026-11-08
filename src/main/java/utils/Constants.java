@@ -54,7 +54,6 @@ public final class Constants {
     public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
 
     // Booking: Select Event
-    public static final int BOOKING_EVENT_PAGE_SIZE = 9;
     public static final int MAX_TICKETS_PER_ORDER = 10;
     public static final String SESSION_BOOKING_SELECTION = "bookingSelection";
     public static final String BOOKING_CHECKOUT_URL = "/booking/checkout";
@@ -132,5 +131,11 @@ public final class Constants {
     public static final String BUSINESS_ZONE_ID = "Asia/Ho_Chi_Minh";   // múi giờ nghiệp vụ để xác định "hôm nay"
     public static final int STAFF_SEAT_MAX_EVENTS = 20;                  // số sự kiện tối đa trong ô chọn sự kiện
     public static final double STANDING_NEAR_FULL_RATIO = 0.8;           // khu đứng "Gần đầy" khi số người đã vào >= 80% sức chứa
+
+    // Staff - Check-in vé (Tickets.ticket_code VARCHAR(100))
+    public static final String SESSION_STAFF_CHECKIN_CSRF = "staffCheckInCsrf";
+    public static final String SESSION_STAFF_CHECKIN_RESULT = "staffCheckInResult";
+    public static final int TICKET_CODE_MAX_LENGTH = 100;
+    public static final int STAFF_CHECKIN_RECENT = 10;                   // số lượt check-in gần nhất hiển thị
 
 }
