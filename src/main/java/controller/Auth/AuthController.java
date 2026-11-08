@@ -19,9 +19,14 @@ import utils.EmailService;
 import utils.ValidationUtils;
 import utils.GoogleUtils;
 import utils.GoogleUtils.GoogleProfile;
+import utils.AuthFilter;
+import utils.Constants;
 
 @WebServlet(name = "AuthServlet", urlPatterns = {"/Auth"})
 public class AuthController extends HttpServlet {
+
+    private static final long OTP_RESEND_COOLDOWN_MS = 60 * 1000;
+    private static final String FORGOT_NOTICE = "Nếu email này đã được đăng ký, mã OTP đã được gửi tới hộp thư của bạn.";
 
     private final AuthDAO authDAO = new AuthDAO();
     private final Map<String, Integer> otpFail = new ConcurrentHashMap<>();
@@ -104,6 +109,9 @@ public class AuthController extends HttpServlet {
             request.setAttribute("success", session.getAttribute("success"));
             session.removeAttribute("success");
         }
+        if ("inactive".equals(request.getParameter("reason")) && request.getAttribute("error") == null) {
+            request.setAttribute("error", "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
+        }
         if (request.getAttribute("identifier") == null) {
             String remembered = cookieValue(request, "rememberId");
             if (remembered != null) {
@@ -140,7 +148,19 @@ public class AuthController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
-        request.setAttribute("requireOld", currentUser(request) != null && !resetFlow);
+        boolean requireOld = false;
+        if (!resetFlow) {
+            try {
+                requireOld = needsOldPassword(currentUser(request));
+            } catch (SQLException e) {
+                e.printStackTrace();
+                requireOld = true; // không đọc được DB thì giữ mặc định an toàn
+            }
+        }
+        request.setAttribute("requireOld", requireOld);
+        if (!resetFlow && currentUser(request) != null && currentUser(request).isMustChangePassword()) {
+            request.setAttribute("error", "Bạn đang dùng mật khẩu tạm do quản trị viên cấp. Vui lòng đổi mật khẩu để tiếp tục.");
+        }
         forward(request, response, "change-password.jsp");
     }
 
@@ -182,9 +202,11 @@ public class AuthController extends HttpServlet {
                 user.setUsername(finalUsername);
                 user.setFullName(profile.getName());
                 user.setPhone(""); // Trống do Google không trả về phone
-                // Tạo mật khẩu ngẫu nhiên cho tài khoản đăng ký qua Google
-                String randomPassword = EmailService.createOtp() + "G@"; 
+                // Cột password NOT NULL nên vẫn lưu một chuỗi ngẫu nhiên không ai biết (không đoán được);
+                // password_set = 0 để lần đầu người dùng vào "Thiết lập mật khẩu" mà không cần mật khẩu cũ.
+                String randomPassword = java.util.UUID.randomUUID() + "G@" + EmailService.createOtp();
                 user.setPassword(BCrypt.hashpw(randomPassword, BCrypt.gensalt()));
+                user.setPasswordSet(false);
                 
                 if (!authDAO.insertCustomer(user)) {
                     request.setAttribute("error", "Lỗi tạo tài khoản từ Google.");
@@ -202,7 +224,7 @@ public class AuthController extends HttpServlet {
             }
 
             // Reset failed attempts if any
-            if (user.getFailedAttempts() > 0) {
+            if (user.getFailedAttempts() > 0 || user.getLockedUntil() != null) {
                 authDAO.resetFailedAttempts(user.getUserId());
             }
 
@@ -214,16 +236,8 @@ public class AuthController extends HttpServlet {
             user.setPassword(null);
             session.setAttribute("user", user);
 
-            String role = user.getRole();
-            if ("Admin".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/admin");
-            } else if ("Staff".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/staff");
-            } else if ("Organizer".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/organizer");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/home");
-            }
+            response.sendRedirect(request.getContextPath() + (user.isMustChangePassword()
+                    ? "/Auth?action=changePassword" : AuthFilter.homeFor(user.getRole())));
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
@@ -258,6 +272,13 @@ public class AuthController extends HttpServlet {
                 return;
             }
 
+            // Hết thời gian khóa: bắt đầu đếm lại số lần sai từ 0
+            if (user.getLockedUntil() != null) {
+                authDAO.resetFailedAttempts(user.getUserId());
+                user.setFailedAttempts(0);
+                user.setLockedUntil(null);
+            }
+
             if (!BCrypt.checkpw(password, user.getPassword())) {
                 int fail = user.getFailedAttempts() + 1;
                 Timestamp lock = null;
@@ -278,7 +299,7 @@ public class AuthController extends HttpServlet {
                 return;
             }
 
-            if (user.getFailedAttempts() > 0) {
+            if (user.getFailedAttempts() > 0 || user.getLockedUntil() != null) {
                 authDAO.resetFailedAttempts(user.getUserId());
             }
 
@@ -295,16 +316,8 @@ public class AuthController extends HttpServlet {
             cookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
             response.addCookie(cookie);
 
-            String role = user.getRole();
-            if ("Admin".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/admin");
-            } else if ("Staff".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/staff");
-            } else if ("Organizer".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/organizer/event/list");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/home");
-            }
+            response.sendRedirect(request.getContextPath() + (user.isMustChangePassword()
+                    ? "/Auth?action=changePassword" : AuthFilter.homeFor(user.getRole())));
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("error", "Hệ thống không thể xác thực. Vui lòng thử lại sau.");
@@ -380,7 +393,7 @@ public class AuthController extends HttpServlet {
             pending.setRole("Customer");
             pending.setStatus("ACTIVE");
 
-            if (!startOtp(request, "register", pending, email)) {
+            if (!startOtp(request, "register", pending, email, true)) {
                 request.setAttribute("error", "Không gửi được OTP. Vui lòng thử lại sau.");
                 forward(request, response, "register.jsp");
                 return;
@@ -405,17 +418,20 @@ public class AuthController extends HttpServlet {
         }
 
         try {
+            // Không tiết lộ email có tồn tại hay không: luôn chuyển sang trang nhập OTP với
+            // cùng một thông báo. Email chưa đăng ký thì không gửi mail và OTP không bao giờ khớp.
             Auth user = authDAO.findByEmail(email);
-            if (user == null) {
-                request.setAttribute("error", "Không tìm thấy tài khoản với email này.");
-                forward(request, response, "forgot.jsp");
-                return;
+            boolean exists = user != null;
+            if (!exists) {
+                user = new Auth();
+                user.setEmail(email);
             }
-            if (!startOtp(request, "forgot", user, email)) {
+            if (!startOtp(request, "forgot", user, email, exists)) {
                 request.setAttribute("error", "Không gửi được OTP. Vui lòng thử lại sau.");
                 forward(request, response, "forgot.jsp");
                 return;
             }
+            request.getSession().setAttribute("otpNotice", FORGOT_NOTICE);
             response.sendRedirect(request.getContextPath() + "/Auth?action=otp");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -453,7 +469,8 @@ public class AuthController extends HttpServlet {
             forward(request, response, "otp.jsp");
             return;
         }
-        if (!input.equals(session.getAttribute("otpCode"))) {
+        boolean fakeOtp = Boolean.TRUE.equals(session.getAttribute("otpFake"));
+        if (fakeOtp || !input.equals(session.getAttribute("otpCode"))) {
             int fail = otpFail.getOrDefault(key, 0) + 1;
             otpFail.put(key, fail);
             if (fail > 5) {
@@ -504,9 +521,14 @@ public class AuthController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
-        Auth pending = (Auth) session.getAttribute("pendingUser");
-        String purpose = (String) session.getAttribute("otpPurpose");
-        startOtp(request, purpose, pending, pending.getEmail());
+        // Chỉ cho gửi lại sau 60 giây để tránh spam email
+        Long sentAt = (Long) session.getAttribute("otpSentAt");
+        if (sentAt == null || System.currentTimeMillis() - sentAt >= OTP_RESEND_COOLDOWN_MS) {
+            Auth pending = (Auth) session.getAttribute("pendingUser");
+            String purpose = (String) session.getAttribute("otpPurpose");
+            startOtp(request, purpose, pending, pending.getEmail(),
+                    !Boolean.TRUE.equals(session.getAttribute("otpFake")));
+        }
         response.sendRedirect(request.getContextPath() + "/Auth?action=otp");
     }
 
@@ -516,13 +538,23 @@ public class AuthController extends HttpServlet {
         Auth loginUser = currentUser(request);
         Integer resetUserId = session == null ? null : (Integer) session.getAttribute("resetUserId");
         boolean resetFlow = resetUserId != null;
-        boolean requireOld = loginUser != null && !resetFlow;
 
         if (loginUser == null && !resetFlow) {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
 
+        // Tài khoản Google chưa tự đặt mật khẩu: thiết lập lần đầu, không hỏi mật khẩu hiện tại
+        boolean requireOld;
+        try {
+            requireOld = !resetFlow && needsOldPassword(loginUser);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("requireOld", true);
+            request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
+            forward(request, response, "change-password.jsp");
+            return;
+        }
         request.setAttribute("requireOld", requireOld);
         String oldPassword = request.getParameter("oldPassword");
         String newPassword = request.getParameter("newPassword");
@@ -557,7 +589,7 @@ public class AuthController extends HttpServlet {
                 forward(request, response, "change-password.jsp");
                 return;
             }
-            if (BCrypt.checkpw(newPassword, dbUser.getPassword())) {
+            if (dbUser.isPasswordSet() && BCrypt.checkpw(newPassword, dbUser.getPassword())) {
                 request.setAttribute("error", "Mật khẩu mới không được trùng mật khẩu hiện tại.");
                 forward(request, response, "change-password.jsp");
                 return;
@@ -573,7 +605,18 @@ public class AuthController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/Auth?action=login");
                 return;
             }
-            request.setAttribute("success", "Đổi mật khẩu thành công.");
+            boolean firstTime = !dbUser.isPasswordSet();
+            loginUser.setPasswordSet(true);
+            if (loginUser.isMustChangePassword()) {
+                loginUser.setMustChangePassword(false);
+                response.sendRedirect(request.getContextPath() + AuthFilter.homeFor(loginUser.getRole()));
+                return;
+            }
+            // Từ giờ trang hiển thị dạng "Đổi mật khẩu" (có ô mật khẩu hiện tại)
+            request.setAttribute("requireOld", true);
+            request.setAttribute("success", firstTime
+                    ? "Thiết lập mật khẩu thành công. Từ giờ bạn có thể đăng nhập bằng email hoặc username và mật khẩu này, ngoài đăng nhập Google."
+                    : "Đổi mật khẩu thành công.");
             forward(request, response, "change-password.jsp");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -581,21 +624,24 @@ public class AuthController extends HttpServlet {
             forward(request, response, "change-password.jsp");
         }
     } 
-    private boolean startOtp(HttpServletRequest request, String purpose, Auth pending, String email) {
+    /** @param send false: tạo phiên OTP giả cho email chưa đăng ký (không gửi mail, không bao giờ khớp) */
+    private boolean startOtp(HttpServletRequest request, String purpose, Auth pending, String email, boolean send) {
         String key = email.toLowerCase();
         if (isLocked(otpLock, key)) {
             return false;
         }
         String otp = EmailService.createOtp();
-        if (!EmailService.sendOtp(email, otp)) {
+        if (send && !EmailService.sendOtp(email, otp)) {
             return false;
         }
         HttpSession session = request.getSession(true);
         session.setAttribute("otpCode", otp);
         session.setAttribute("otpExpire", System.currentTimeMillis() + 3 * 60 * 1000);
+        session.setAttribute("otpSentAt", System.currentTimeMillis());
         session.setAttribute("otpPurpose", purpose);
         session.setAttribute("otpEmail", email);
         session.setAttribute("pendingUser", pending);
+        session.setAttribute("otpFake", !send);
         return true;
     }
 
@@ -605,6 +651,23 @@ public class AuthController extends HttpServlet {
         session.removeAttribute("otpPurpose");
         session.removeAttribute("otpEmail");
         session.removeAttribute("pendingUser");
+        session.removeAttribute("otpSentAt");
+        session.removeAttribute("otpFake");
+        session.removeAttribute("otpNotice");
+    }
+
+    /**
+     * Đổi mật khẩu khi đang đăng nhập thì phải nhập mật khẩu hiện tại, trừ tài khoản
+     * Google chưa từng tự đặt mật khẩu (đọc từ DB, không tin giá trị cũ trong session).
+     */
+    private boolean needsOldPassword(Auth loginUser) throws SQLException {
+        if (loginUser == null) {
+            return false;
+        }
+        Auth dbUser = authDAO.findById(loginUser.getUserId());
+        boolean passwordSet = dbUser == null || dbUser.isPasswordSet();
+        loginUser.setPasswordSet(passwordSet);
+        return passwordSet;
     }
 
     private Auth currentUser(HttpServletRequest request) {
@@ -646,8 +709,24 @@ public class AuthController extends HttpServlet {
 
     private void forward(HttpServletRequest request, HttpServletResponse response, String page)
             throws ServletException, IOException {
-        String basePath = "/WEB-INF/views/" + ("change-password.jsp".equals(page) ? "common/" : "login/");
-        request.getRequestDispatcher(basePath + page).forward(request, response);
+        String folder = "login/";
+        if ("change-password.jsp".equals(page)) {
+            // Đổi mật khẩu khi đã đăng nhập dùng giao diện riêng của Customer/Organizer/Staff;
+            // luồng quên mật khẩu và các role khác dùng trang chung ở login/
+            HttpSession session = request.getSession(false);
+            boolean resetFlow = session != null && session.getAttribute("resetUserId") != null;
+            Auth user = currentUser(request);
+            if (!resetFlow && user != null) {
+                if (Constants.ROLE_CUSTOMER.equalsIgnoreCase(user.getRole())) {
+                    folder = "customer/";
+                } else if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(user.getRole())) {
+                    folder = "organizer/";
+                } else if (Constants.ROLE_STAFF.equalsIgnoreCase(user.getRole())) {
+                    folder = "staff/";
+                }
+            }
+        }
+        request.getRequestDispatcher("/WEB-INF/views/" + folder + page).forward(request, response);
     }
 
     @Override

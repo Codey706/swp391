@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Light Ticket - Đăng ký</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/assets/css/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
 </head>
 <body>
   <div class="glow-shape-1"></div>
@@ -21,16 +27,16 @@
       <div class="d-flex align-items-center justify-content-between mb-4">
         <a class="pill-badge shadow-sm" href="${pageContext.request.contextPath}/home">
           <svg style="width: 20px; height: 20px;" viewBox="0 0 32 32">
-            <rect fill="#ac3509" fill-opacity="0.95" height="22" rx="4" width="28" x="2" y="5"></rect>
-            <circle cx="2" cy="16" fill="#f8f9ff" r="3.5"></circle>
-            <circle cx="30" cy="16" fill="#f8f9ff" r="3.5"></circle>
-            <line stroke="#f8f9ff" stroke-dasharray="2 3" stroke-width="2" x1="12" x2="12" y1="7" y2="25"></line>
-            <circle cx="8" cy="16" fill="#f8f9ff" r="2"></circle>
+            <rect fill="#8a2315" fill-opacity="0.95" height="22" rx="4" width="28" x="2" y="5"></rect>
+            <circle cx="2" cy="16" fill="#f5f5f6" r="3.5"></circle>
+            <circle cx="30" cy="16" fill="#f5f5f6" r="3.5"></circle>
+            <line stroke="#f5f5f6" stroke-dasharray="2 3" stroke-width="2" x1="12" x2="12" y1="7" y2="25"></line>
+            <circle cx="8" cy="16" fill="#f5f5f6" r="2"></circle>
           </svg>
           <span style="font-size: 0.875rem;">Light Ticket</span>
         </a>
         <button class="mode-toggle-btn shadow-sm" id="themeToggleBtn" type="button">
-          <i class="bi bi-brightness-high text-warning-emphasis" id="modeIcon"></i>
+          <i class="ph ph-sun text-warning-emphasis" id="modeIcon"></i>
           <span id="modeText">Chế độ sáng</span>
         </button>
       </div>
@@ -50,41 +56,41 @@
         <div class="mb-3">
           <label class="form-label form-label-custom" for="fullName">Họ và tên</label>
           <div class="custom-input-group">
-            <span class="input-icon-prefix"><i class="bi bi-person"></i></span>
-            <input class="form-control" id="fullName" name="fullName" required type="text" value="${fullName}"/>
+            <span class="input-icon-prefix"><i class="ph ph-user"></i></span>
+            <input class="form-control" id="fullName" name="fullName" required type="text" value="${fn:escapeXml(fullName)}"/>
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label form-label-custom" for="username">Username</label>
           <div class="custom-input-group">
-            <span class="input-icon-prefix"><i class="bi bi-at"></i></span>
-            <input class="form-control" id="username" name="username" required type="text" value="${username}"/>
+            <span class="input-icon-prefix"><i class="ph ph-at"></i></span>
+            <input class="form-control" id="username" name="username" required type="text" value="${fn:escapeXml(username)}"/>
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label form-label-custom" for="email">Gmail</label>
           <div class="custom-input-group">
-            <span class="input-icon-prefix"><i class="bi bi-envelope"></i></span>
-            <input class="form-control" id="email" name="email" required type="email" value="${email}"/>
+            <span class="input-icon-prefix"><i class="ph ph-envelope-simple"></i></span>
+            <input class="form-control" id="email" name="email" required type="email" value="${fn:escapeXml(email)}"/>
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label form-label-custom" for="phone">Số điện thoại</label>
           <div class="custom-input-group">
-            <span class="input-icon-prefix"><i class="bi bi-phone"></i></span>
-            <input class="form-control" id="phone" name="phone" required type="text" value="${phone}"/>
+            <span class="input-icon-prefix"><i class="ph ph-phone"></i></span>
+            <input class="form-control" id="phone" name="phone" required type="text" value="${fn:escapeXml(phone)}"/>
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label form-label-custom" for="password">Mật khẩu</label>
           <div class="custom-input-group">
-            <span class="input-icon-prefix"><i class="bi bi-lock"></i></span>
+            <span class="input-icon-prefix"><i class="ph ph-lock"></i></span>
             <input class="form-control" id="password" minlength="8" name="password" required type="password"/>
-            <button class="btn-eye" id="togglePassword" type="button"><i class="bi bi-eye" id="eyeIcon"></i></button>
+            <button class="btn-eye" id="togglePassword" type="button"><i class="ph ph-eye" id="eyeIcon"></i></button>
           </div>
           <ul class="password-rules">
             <li>Tối thiểu 8 ký tự</li>
@@ -96,7 +102,7 @@
         <div class="mb-3">
           <label class="form-label form-label-custom" for="confirmPassword">Xác nhận mật khẩu</label>
           <div class="custom-input-group">
-            <span class="input-icon-prefix"><i class="bi bi-lock-fill"></i></span>
+            <span class="input-icon-prefix"><i class="ph ph-lock"></i></span>
             <input class="form-control" id="confirmPassword" name="confirmPassword" required type="password"/>
           </div>
         </div>
@@ -108,7 +114,7 @@
 
         <button class="btn-submit-orange" type="submit">
           <span>Gửi mã OTP</span>
-          <i class="bi bi-arrow-right"></i>
+          <i class="ph ph-arrow-right"></i>
         </button>
       </form>
 
