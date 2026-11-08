@@ -1,282 +1,57 @@
 
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="model.Review" %>
+<%@ page import="utils.HtmlUtils" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-
-<%!
-    private String escReview(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        return value.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#x27;");
-    }
-%>
 
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Manage Reviews - Light Ticket</title>
 
-        <title>Review Management - Light Ticket</title>
 
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=5">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-              rel="stylesheet">
-
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-              rel="stylesheet">
-
-        <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-
-        <link rel="stylesheet"
-              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-        <link rel="stylesheet"
-              href="${pageContext.request.contextPath}/css/admin.css?v=5">
-
-        <style>
-            /* Main content */
-            .review-content {
-                padding: 32px;
-                min-width: 0;
-                width: 100%;
-            }
-
-            /* Page heading */
-            .review-heading {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 15px;
-                margin-bottom: 28px;
-            }
-
-            .review-heading h1 {
-                margin: 0 0 8px;
-                font-size: 28px;
-                color: #202B3C;
-            }
-
-            .review-heading p {
-                margin: 0;
-                color: #8290A7;
-                font-size: 14px;
-            }
-
-            .review-summary {
-                color: #526078;
-                white-space: nowrap;
-            }
-
-            /* Review table container */
-            .review-card {
-                background: #FFFFFF;
-                border: 1px solid #E9EDF6;
-                border-radius: 16px;
-                padding: 22px;
-                box-shadow: 0 5px 20px rgba(40, 55, 90, 0.04);
-                min-width: 0;
-            }
-
-            .review-table-wrapper {
-                width: 100%;
-                overflow-x: auto;
-            }
-
-            .review-table {
-                width: 100%;
-                min-width: 1000px;
-                border-collapse: collapse;
-            }
-
-            .review-table th {
-                background: #F2F5FC;
-                color: #526078;
-                font-size: 12px;
-                font-weight: 600;
-                text-align: left;
-                padding: 16px 12px;
-            }
-
-            .review-table td {
-                padding: 17px 12px;
-                border-bottom: 1px solid #EDF0F7;
-                font-size: 13px;
-                vertical-align: top;
-            }
-
-            .review-table tbody tr:hover {
-                background: #FFFAF8;
-            }
-
-            .review-table small {
-                display: inline-block;
-                margin-top: 5px;
-                color: #8290A7;
-            }
-
-            /* Rating stars */
-            .review-stars {
-                color: #F59E0B;
-                white-space: nowrap;
-            }
-
-            /* Review status */
-            .review-status {
-                display: inline-block;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 11px;
-                font-weight: bold;
-            }
-
-            .status-active {
-                background: #E2F7EF;
-                color: #13966D;
-            }
-
-            .status-hidden {
-                background: #FFE9E9;
-                color: #D94B4B;
-            }
-
-            /* Action buttons */
-            .review-action {
-                border: none;
-                border-radius: 8px;
-                padding: 9px 13px;
-                color: white;
-                cursor: pointer;
-                font-size: 12px;
-                white-space: nowrap;
-            }
-
-            .action-hide {
-                background: #E94B4B;
-            }
-
-            .action-show {
-                background: #20B486;
-            }
-
-            .review-action:hover {
-                opacity: 0.85;
-            }
-
-            /* Review comment */
-            .review-comment {
-                max-width: 260px;
-                white-space: pre-wrap;
-                overflow-wrap: anywhere;
-            }
-
-            /* Alert */
-            .review-alert {
-                padding: 12px 15px;
-                border-radius: 8px;
-                margin-bottom: 16px;
-                background: #E2F7EF;
-                color: #13966D;
-            }
-
-            /* Empty data */
-            .review-empty {
-                text-align: center;
-                padding: 30px;
-                color: #8290A7;
-            }
-
-            /* Responsive */
-            @media (max-width: 768px) {
-                .review-content {
-                    padding: 18px;
-                }
-
-                .review-heading {
-                    align-items: flex-start;
-                    flex-direction: column;
-                }
-
-                .review-card {
-                    padding: 12px;
-                }
-            }
-        </style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
     </head>
 
     <body class="admin-portal-page">
 
-        <c:set var="ctx"
-               value="${pageContext.request.contextPath}"/>
+        <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+        <c:set var="adminName" value="${not empty sessionScope.user && not empty sessionScope.user.fullName ? sessionScope.user.fullName : 'Admin'}"/>
+        <c:set var="adminInitial" value="${fn:toUpperCase(fn:substring(adminName, 0, 1))}"/>
 
-        <c:set var="adminName"
-               value="${not empty sessionScope.user && not empty sessionScope.user.fullName
-                        ? sessionScope.user.fullName : 'Admin'}"/>
 
-        <c:set var="adminInitial"
-               value="${fn:toUpperCase(fn:substring(adminName, 0, 1))}"/>
-
-        <%
-            List<Review> reviews
-                    = (List<Review>) request.getAttribute("reviews");
-
-            String message = request.getParameter("message");
-
-            int total = reviews == null ? 0 : reviews.size();
-
-            int active = 0;
-
-            if (reviews != null) {
-                for (Review r : reviews) {
-                    if ("ACTIVE".equalsIgnoreCase(r.getStatus())) {
-                        active++;
-                    }
-                }
-            }
-        %>
-
-        <!-- Sidebar backdrop -->
-        <div class="admin-sidebar-backdrop"
-             id="adminSidebarBackdrop">
-        </div>
+        <!-- Lớp nền khi mở sidebar trên điện thoại -->
+        <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
 
         <!-- Sidebar -->
-        <aside class="admin-sidebar"
-               id="adminSidebar"
-               aria-label="Điều hướng Admin Portal">
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Điều hướng Admin Portal">
 
             <div class="admin-sidebar-top">
 
                 <div class="admin-brand-row">
-
                     <a class="admin-brand" href="${ctx}/admin">
-
                         <span class="admin-brand-logo">
-                            <span class="material-symbols-outlined">
-                                confirmation_number
-                            </span>
+                            <i class="ph ph-ticket" aria-hidden="true"></i>
                         </span>
 
                         <span class="admin-brand-text">
-
                             <span class="admin-brand-name">
                                 <span>Light</span>
                                 <span class="admin-brand-accent">Ticket</span>
                             </span>
-
                             <small>Admin Portal</small>
-
                         </span>
                     </a>
 
@@ -284,11 +59,7 @@
                             class="admin-sidebar-close"
                             id="adminSidebarClose"
                             aria-label="Đóng menu">
-
-                        <span class="material-symbols-outlined">
-                            close
-                        </span>
-
+                        <i class="ph ph-x" aria-hidden="true"></i>
                     </button>
                 </div>
 
@@ -297,95 +68,78 @@
                 <nav class="admin-nav">
 
                     <a href="${ctx}/admin">
-                        <span class="material-symbols-outlined">dashboard</span>
+                        <i class="ph ph-squares-four" aria-hidden="true"></i>
                         <span>Dashboard</span>
                     </a>
 
                     <a href="${ctx}/admin/users">
-                        <span class="material-symbols-outlined">group</span>
+                        <i class="ph ph-users" aria-hidden="true"></i>
                         <span>Manage Users</span>
                     </a>
 
                     <a href="${ctx}/admin/events">
-                        <span class="material-symbols-outlined">event</span>
+                        <i class="ph ph-calendar-blank" aria-hidden="true"></i>
                         <span>Manage Events</span>
                     </a>
 
                     <a href="${ctx}/admin/categories">
-                        <span class="material-symbols-outlined">category</span>
+                        <i class="ph ph-tag" aria-hidden="true"></i>
                         <span>Manage Categories</span>
                     </a>
 
-                    <a href="${ctx}/admin/profile">
-                        <span class="material-symbols-outlined">person</span>
-                        <span>My Profile</span>
-                    </a>
-
                     <a href="${ctx}/admin/venues">
-                        <span class="material-symbols-outlined">location_on</span>
+                        <i class="ph ph-map-pin" aria-hidden="true"></i>
                         <span>Manage Venues</span>
                     </a>
 
                     <a href="${ctx}/admin/vouchers">
-                        <span class="material-symbols-outlined">confirmation_number</span>
+                        <i class="ph ph-ticket" aria-hidden="true"></i>
                         <span>Manage Vouchers</span>
                     </a>
 
-                    <a href="${ctx}/admin/reviews"
-                       class="is-active"
-                       aria-current="page">
-
-                        <span class="material-symbols-outlined">star</span>
+                    <a href="${ctx}/admin/reviews" class="is-active" aria-current="page">
+                        <i class="ph ph-star" aria-hidden="true"></i>
                         <span>Manage Reviews</span>
+                    </a>
 
+                    <a href="${ctx}/admin/profile">
+                        <i class="ph ph-user-circle" aria-hidden="true"></i>
+                        <span>Manage Profile</span>
                     </a>
 
                 </nav>
             </div>
 
-            <!-- Sidebar bottom -->
+            <!-- Khu vực dưới sidebar -->
             <div class="admin-sidebar-bottom">
 
                 <div class="admin-sidebar-user">
-
                     <span class="admin-sidebar-user-avatar">
                         <c:out value="${adminInitial}"/>
                     </span>
 
                     <span class="admin-sidebar-user-meta">
-
                         <span class="admin-sidebar-user-name">
                             <c:out value="${adminName}"/>
                         </span>
-
                         <small>Administrator</small>
-
                     </span>
                 </div>
 
-                <form method="post"
-                      action="${ctx}/logout"
-                      class="m-0">
-
-                    <button type="submit"
-                            class="admin-sidebar-logout">
-
-                        <span class="material-symbols-outlined">
-                            logout
-                        </span>
-
+                <form method="post" action="${ctx}/logout" class="m-0">
+                    <button type="submit" class="admin-sidebar-logout">
+                        <i class="ph ph-sign-out" aria-hidden="true"></i>
                         Đăng xuất
-
                     </button>
                 </form>
 
             </div>
         </aside>
 
-        <!-- Main shell -->
+        <!-- Nội dung chính -->
         <div class="admin-shell" id="adminShell">
 
-            <!-- Header -->
+            <!-- Topbar -->
             <header class="admin-topbar">
 
                 <button type="button"
@@ -394,436 +148,152 @@
                         aria-label="Mở menu"
                         aria-controls="adminSidebar"
                         aria-expanded="false">
-
-                    <span class="material-symbols-outlined">
-                        menu
-                    </span>
-
+                    <i class="ph ph-list" aria-hidden="true"></i>
                 </button>
 
                 <div class="admin-top-actions">
 
-                    <button type="button"
-                            class="admin-top-button admin-help-button"
-                            aria-label="Hỗ trợ"
-                            title="Hỗ trợ">
-
-                        <span class="material-symbols-outlined">
-                            help_outline
-                        </span>
-
-                    </button>
-
-                    <button type="button"
-                            class="admin-top-button"
-                            aria-label="Thông báo"
-                            title="Thông báo">
-
-                        <span class="material-symbols-outlined">
-                            notifications
-                        </span>
-
-                        <span class="admin-notification-dot"></span>
-
-                    </button>
-
-                    <div class="dropdown admin-account-dropdown">
-
-                        <button class="admin-account-toggle"
-                                type="button"
-                                id="adminAccountDropdown"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                title="Tài khoản Admin">
-
-                            <span class="admin-account-avatar">
-                                <c:out value="${adminInitial}"/>
-                            </span>
-
-                            <span class="admin-account-name">
-                                <c:out value="${adminName}"/>
-                            </span>
-
-                            <span class="material-symbols-outlined admin-account-chevron">
-                                keyboard_arrow_down
-                            </span>
-
-                        </button>
-
-                        <ul class="dropdown-menu dropdown-menu-end admin-account-menu shadow-sm"
-                            aria-labelledby="adminAccountDropdown">
-
-                            <li class="admin-account-heading">
-
-                                <span class="admin-account-heading-name">
-                                    <c:out value="${adminName}"/>
-                                </span>
-
-                                <small>Administrator</small>
-
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="${ctx}/admin/profile">
-
-                                    <span class="material-symbols-outlined">
-                                        account_circle
-                                    </span>
-
-                                    Hồ sơ của tôi
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="${ctx}/home">
-
-                                    <span class="material-symbols-outlined">
-                                        home
-                                    </span>
-
-                                    Về trang chủ
-                                </a>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <li>
-
-                                <form action="${ctx}/logout"
-                                      method="post"
-                                      class="m-0">
-
-                                    <button type="submit"
-                                            class="dropdown-item admin-dropdown-logout">
-
-                                        <span class="material-symbols-outlined">
-                                            logout
-                                        </span>
-
-                                        Đăng xuất
-
-                                    </button>
-                                </form>
-
-                            </li>
-
-                        </ul>
-                    </div>
+                    <!-- Avatar và dropdown -->
+                    <jsp:include page="/WEB-INF/views/common/user-menu.jsp"/>
                 </div>
             </header>
 
             <!-- Breadcrumb -->
             <div class="admin-subbar">
-
                 <div class="admin-breadcrumbs">
-
-                    <span class="material-symbols-outlined">
-                        home
-                    </span>
-
-                    <a href="${ctx}/admin">
-                        Admin Portal
-                    </a>
-
-                    <span class="material-symbols-outlined">
-                        chevron_right
-                    </span>
-
-                    <span class="admin-breadcrumb-current">
-                        Manage Reviews
-                    </span>
-
+                    <i class="ph ph-house" aria-hidden="true"></i>
+                    <a href="${ctx}/admin">Admin Portal</a>
+                    <i class="ph ph-caret-right" aria-hidden="true"></i>
+                    <a href="${ctx}/admin">Admin Portal</a>
+                    <i class="ph ph-caret-right" aria-hidden="true"></i>
+                    <span class="admin-breadcrumb-current">Manage Reviews</span>
                 </div>
 
                 <div class="admin-system-label">
                     <span class="admin-system-dot"></span>
                     Light Ticket Management System
                 </div>
-
             </div>
 
-            <!-- Main content -->
+            <!-- Nội dung trang -->
             <main class="admin-content">
-
-                <section class="content review-content">
-
-                    <!-- Page heading -->
-                    <div class="page-heading review-heading">
-
+                <section class="content">
+                    <div class="page-heading">
                         <div>
-                            <h1>Review Management</h1>
-                            <p>
-                                View customer feedback and manage review visibility.
-                            </p>
+                            <h1>Manage Reviews</h1>
+                            <p>Kiểm duyệt đánh giá của khách hàng. Đánh giá bị ẩn không hiển thị công khai.</p>
+                        </div>
+                    </div>
+
+                    <div class="user-panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Reviews (${total})</h2>
+                                <p>Lọc theo trạng thái, số sao hoặc từ khóa (sự kiện, khách hàng, nội dung)</p>
+                            </div>
                         </div>
 
-                        <div class="review-summary">
+                        <form method="get" action="${ctx}/admin/reviews" class="d-flex flex-wrap gap-2 mb-3">
+                            <select name="status" class="form-select" style="max-width:180px">
+                                <option value="">All status</option>
+                                <option value="ACTIVE" ${status eq 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+                                <option value="HIDDEN" ${status eq 'HIDDEN' ? 'selected' : ''}>HIDDEN</option>
+                            </select>
+                            <select name="rating" class="form-select" style="max-width:150px">
+                                <option value="">All ratings</option>
+                                <c:forEach var="n" begin="1" end="5">
+                                    <option value="${n}" ${rating eq n ? 'selected' : ''}>${n} ★</option>
+                                </c:forEach>
+                            </select>
+                            <input type="text" name="keyword" maxlength="100" class="form-control" style="max-width:280px"
+                                   placeholder="Event, customer, comment" value="${fn:escapeXml(keyword)}">
+                            <button type="submit" class="add-button">Filter</button>
+                        </form>
 
-                            <strong><%=total%></strong> reviews
-
-                            &nbsp; | &nbsp;
-
-                            <strong><%=active%></strong> active
-
-                        </div>
-
-                    </div>
-
-                    <!-- Messages -->
-                    <% if ("updated".equals(message)) { %>
-
-                    <div class="review-alert">
-                        Review status updated successfully.
-                    </div>
-
-                    <% } %>
-
-                    <% if ("notfound".equals(message)) { %>
-
-                    <div class="review-alert">
-                        The selected review was not found.
-                    </div>
-
-                    <% } %>
-
-                    <!-- Review table -->
-                    <section class="review-card">
-
-                        <div class="review-table-wrapper">
-
-                            <table class="review-table">
-
+                        <div class="table-wrapper">
+                            <table>
                                 <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Customer</th>
-                                        <th>Event</th>
-                                        <th>Rating</th>
-                                        <th>Comment</th>
-                                        <th>Created at</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
+                                    <tr><th>Date</th><th>Event</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Status</th><th>Action</th></tr>
                                 </thead>
-
                                 <tbody>
-
-                                    <% if (reviews == null || reviews.isEmpty()) { %>
-
-                                    <tr>
-                                        <td colspan="8" class="review-empty">
-                                            No reviews are available.
-                                        </td>
-                                    </tr>
-
-                                    <% } else {
-
-                                        for (Review r : reviews) {
-
-                                            boolean isActive
-                                                    = "ACTIVE".equalsIgnoreCase(r.getStatus());
-
-                                    %>
-
-                                    <tr>
-
-                                        <td>
-                                            #<%=r.getReviewId()%>
-                                        </td>
-
-                                        <td>
-                                            <%=escReview(r.getCustomerName())%>
-                                            <br>
-
-                                            <small>
-                                                Customer ID: <%=r.getCustomerId()%>
-                                            </small>
-                                        </td>
-
-                                        <td>
-                                            <%=escReview(r.getEventName())%>
-                                            <br>
-
-                                            <small>
-                                                Event ID: <%=r.getEventId()%>
-                                            </small>
-                                        </td>
-
-                                        <td>
-
-                                            <span class="review-stars">
-                                                <%="★".repeat(
-                                                        Math.max(
-                                                                0,
-                                                                Math.min(5, r.getRating())
-                                                        )
-                                                )%>
-                                            </span>
-
-                                            <%=r.getRating()%>/5
-
-                                        </td>
-
-                                        <td>
-
-                                            <div class="review-comment">
-                                                <%=escReview(r.getComment())%>
-                                            </div>
-
-                                        </td>
-
-                                        <td>
-
-                                            <%=r.getCreatedAt() == null
-                                                    ? "—"
-                                                    : r.getCreatedAt()
-                                                            .toString()
-                                                            .replace('T', ' ')%>
-
-                                        </td>
-
-                                        <td>
-
-                                                  <span class="review-status <%=isActive
-                                                    ? "status-active"
-                                                    : "status-hidden"%>">
-
-                                                <%=escReview(r.getStatus())%>
-
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-
-                                            <form method="post"
-                                                  action="${ctx}/admin/reviews"
-                                                  onsubmit="return confirm('Are you sure you want to change this review status?');">
-
-                                                <input type="hidden"
-                                                       name="action"
-                                                       value="changeStatus">
-
-                                                <input type="hidden"
-                                                       name="reviewId"
-                                                       value="<%=r.getReviewId()%>">
-
-                                                <input type="hidden"
-                                                       name="status"
-                                                       value="<%=isActive
-                                                               ? "HIDDEN"
-                                                               : "ACTIVE"%>">
-
-                                                        <button class="review-action <%=isActive
-                                                        ? "action-hide"
-                                                        : "action-show"%>"
-                                                        type="submit">
-
-                                                    <%=isActive
-                                                            ? "Hide review"
-                                                            : "Show review"%>
-
-                                                </button>
-
-                                            </form>
-
-                                        </td>
-
-                                    </tr>
-
-                                    <%  }
-                                        }
-                                    %>
-
+                                    <c:forEach var="r" items="${reviews}">
+                                        <tr>
+                                            <td style="white-space:nowrap"><c:out value="${empty r.createdAt ? '' : fn:substring(r.createdAt, 0, 10)}"/></td>
+                                            <td><c:out value="${r.eventName}"/></td>
+                                            <td><c:out value="${r.customerName}"/><br><small>@<c:out value="${r.username}"/></small></td>
+                                            <td style="white-space:nowrap">${r.rating} ★</td>
+                                            <td style="max-width:360px"><c:out value="${r.comment}" default="-"/></td>
+                                            <td><span class="status ${r.status eq 'ACTIVE' ? 'active' : 'inactive'}"><c:out value="${r.status}"/></span></td>
+                                            <td>
+                                                <form method="post" action="${ctx}/admin/reviews" class="m-0">
+                                                    <input type="hidden" name="csrfToken" value="${csrfToken}">
+                                                    <input type="hidden" name="reviewId" value="${r.reviewId}">
+                                                    <input type="hidden" name="back" value="${fn:escapeXml(filterQuery)}&amp;page=${page}">
+                                                    <input type="hidden" name="action" value="${r.status eq 'ACTIVE' ? 'hide' : 'show'}">
+                                                    <button type="submit" class="${r.status eq 'ACTIVE' ? 'delete-button' : 'view-button'}">
+                                                        ${r.status eq 'ACTIVE' ? 'Hide' : 'Show'}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    <c:if test="${empty reviews}">
+                                        <tr><td colspan="7" style="text-align:center">No reviews found.</td></tr>
+                                    </c:if>
                                 </tbody>
-
                             </table>
-
                         </div>
 
-                    </section>
+                        <c:if test="${totalPages > 1}">
+                            <div class="d-flex gap-2 mt-3 flex-wrap">
+                                <c:forEach var="p" begin="1" end="${totalPages}">
+                                    <a class="${p == page ? 'add-button' : 'view-button'}" href="${ctx}/admin/reviews?${fn:escapeXml(filterQuery)}&amp;page=${p}">${p}</a>
+                                </c:forEach>
+                            </div>
+                        </c:if>
+                    </div>
 
                 </section>
 
-                <!-- Footer -->
                 <footer class="admin-page-footer">
                     © 2026 Light Ticket Platform JSC. All rights reserved.
                 </footer>
-
             </main>
         </div>
 
-        <!-- Bootstrap -->
-        <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
+        <!-- Bootstrap JS dùng cho dropdown -->
+        <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>
 
-        <!-- Sidebar script -->
+        <!-- Điều khiển sidebar trên màn hình nhỏ -->
         <script>
-                                                          (function () {
+            (function () {
+                const sidebar = document.getElementById('adminSidebar');
+                const backdrop = document.getElementById('adminSidebarBackdrop');
+                const openButton = document.getElementById('adminSidebarOpen');
+                const closeButton = document.getElementById('adminSidebarClose');
 
-                                                              const sidebar =
-                                                                      document.getElementById('adminSidebar');
+                function openSidebar() {
+                    sidebar.classList.add('is-open');
+                    backdrop.classList.add('is-visible');
+                    openButton.setAttribute('aria-expanded', 'true');
+                }
 
-                                                              const backdrop =
-                                                                      document.getElementById('adminSidebarBackdrop');
+                function closeSidebar() {
+                    sidebar.classList.remove('is-open');
+                    backdrop.classList.remove('is-visible');
+                    openButton.setAttribute('aria-expanded', 'false');
+                }
 
-                                                              const openButton =
-                                                                      document.getElementById('adminSidebarOpen');
+                openButton.addEventListener('click', openSidebar);
+                closeButton.addEventListener('click', closeSidebar);
+                backdrop.addEventListener('click', closeSidebar);
 
-                                                              const closeButton =
-                                                                      document.getElementById('adminSidebarClose');
-
-                                                              if (!sidebar || !backdrop || !openButton || !closeButton) {
-                                                                  return;
-                                                              }
-
-                                                              function openSidebar() {
-                                                                  sidebar.classList.add('is-open');
-                                                                  backdrop.classList.add('is-visible');
-
-                                                                  openButton.setAttribute(
-                                                                          'aria-expanded',
-                                                                          'true'
-                                                                          );
-                                                              }
-
-                                                              function closeSidebar() {
-                                                                  sidebar.classList.remove('is-open');
-                                                                  backdrop.classList.remove('is-visible');
-
-                                                                  openButton.setAttribute(
-                                                                          'aria-expanded',
-                                                                          'false'
-                                                                          );
-                                                              }
-
-                                                              openButton.addEventListener(
-                                                                      'click',
-                                                                      openSidebar
-                                                                      );
-
-                                                              closeButton.addEventListener(
-                                                                      'click',
-                                                                      closeSidebar
-                                                                      );
-
-                                                              backdrop.addEventListener(
-                                                                      'click',
-                                                                      closeSidebar
-                                                                      );
-
-                                                              document.addEventListener('keydown', function (event) {
-
-                                                                  if (event.key === 'Escape') {
-                                                                      closeSidebar();
-                                                                  }
-
-                                                              });
-
-                                                          })();
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeSidebar();
+                    }
+                });
+            })();
         </script>
 
     </body>
