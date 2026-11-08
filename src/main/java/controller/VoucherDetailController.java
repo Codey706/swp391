@@ -50,6 +50,7 @@ public class VoucherDetailController extends HttpServlet {
             }
 
             request.setAttribute("voucher", voucher);
+            utils.CsrfUtils.expose(request);
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/admin/voucher-detail.jsp"

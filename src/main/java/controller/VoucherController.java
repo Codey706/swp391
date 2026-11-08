@@ -129,6 +129,27 @@ public class VoucherController extends HttpServlet {
             return;
         }
 
+        // Ngung / kich hoat voucher (khong xoa cung)
+        if ("activate".equals(action) || "deactivate".equals(action)) {
+            if (!utils.CsrfUtils.isValid(request)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+            int voucherId = utils.ValidationUtils.parseIntOrDefault(request.getParameter("id"), -1);
+            try {
+                if (voucherId <= 0 || !voucherDAO.updateStatus(voucherId,
+                        "activate".equals(action) ? "ACTIVE" : "INACTIVE")) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Voucher not found");
+                    return;
+                }
+            } catch (java.sql.SQLException e) {
+                throw new ServletException("Cannot change voucher status", e);
+            }
+            response.sendRedirect(request.getContextPath() + "/admin/voucher-detail?id=" + voucherId
+                    + "&msg=" + ("activate".equals(action) ? "activated" : "deactivated"));
+            return;
+        }
+
         response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
 

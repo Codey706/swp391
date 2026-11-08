@@ -259,4 +259,13 @@ public class VoucherDAO {
         }
     }
 
+    // Ngừng / kích hoạt voucher; voucher không bị xóa cứng để giữ lịch sử đơn hàng
+    public boolean updateStatus(int voucherId, String status) throws SQLException {
+        String sql = "UPDATE Vouchers SET status = ?, updated_at = GETDATE() WHERE voucher_id = ?";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, status);
+            statement.setInt(2, voucherId);
+            return statement.executeUpdate() > 0;
+        }
+    }
 }
