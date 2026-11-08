@@ -1,6 +1,6 @@
-package controller;
+package controller.Staff;
 
-import controller.Staff.StaffController;
+import static controller.Staff.StaffController.ERROR_GENERIC;
 import dao.StaffCustomerDAO;
 import dao.StaffEventDAO;
 import model.Auth;
@@ -23,11 +23,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * GET /staff/customers : thông tin khách hàng có vé trong các sự kiện được phân công cho Staff.
- * Tham số: tab (all|checked|unchecked), keyword, page, customerId, eventId.
+ * GET /staff/customers : thông tin khách hàng có vé trong các sự kiện được phân
+ * công cho Staff. Tham số: tab (all|checked|unchecked), keyword, page,
+ * customerId, eventId.
  *
- * customerId / eventId chỉ là gợi ý chọn: server luôn kiểm tra lại với phạm vi sự kiện của staff
- * (lấy từ session) và trả 403 nếu nằm ngoài phạm vi.
+ * customerId / eventId chỉ là gợi ý chọn: server luôn kiểm tra lại với phạm vi
+ * sự kiện của staff (lấy từ session) và trả 403 nếu nằm ngoài phạm vi.
  */
 @WebServlet(name = "StaffCustomerController", urlPatterns = {"/staff/customers"})
 public class StaffCustomerController extends StaffController {

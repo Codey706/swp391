@@ -9,6 +9,15 @@
         <title>Trạng thái chỗ ngồi - Light Ticket</title>
         <jsp:include page="/WEB-INF/views/staff/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/staff-seats.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
     </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/staff/_header.jsp">
@@ -24,21 +33,21 @@
                 </div>
 
                 <div class="ss-notice" role="note">
-                    <span class="material-symbols-outlined">info</span>
+                    <i class="ph ph-info" aria-hidden="true"></i>
                     <span>Bạn chỉ có thể xem sự kiện được phân công diễn ra trong ngày hôm nay. Không có quyền chỉnh sửa sơ đồ chỗ ngồi.</span>
                 </div>
 
                 <c:choose>
                     <c:when test="${not empty loadError}">
                         <div class="ss-panel ss-empty" role="alert">
-                            <span class="material-symbols-outlined">error</span>
+                            <i class="ph ph-warning-circle" aria-hidden="true"></i>
                             <p><c:out value="${loadError}"/></p>
                         </div>
                     </c:when>
 
                     <c:when test="${empty events}">
                         <div class="ss-panel ss-empty">
-                            <span class="material-symbols-outlined">event_busy</span>
+                            <i class="ph ph-calendar-x" aria-hidden="true"></i>
                             <p>Hiện chưa có sự kiện được phân công đang diễn ra trong hôm nay.</p>
                         </div>
                     </c:when>
@@ -51,29 +60,29 @@
                                     <img class="ss-thumb" alt="" src="${ctx}/<c:out value='${event.eventImage}'/>">
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="ss-thumb ss-thumb-empty"><span class="material-symbols-outlined">image</span></span>
-                                </c:otherwise>
-                            </c:choose>
+                                    <span class="ss-thumb ss-thumb-empty"><i class="ph ph-image" aria-hidden="true"></i></span>
+                                    </c:otherwise>
+                                </c:choose>
 
                             <div class="ss-event-main">
                                 <div class="ss-title-row">
                                     <h2><c:out value="${event.eventName}"/></h2>
                                     <span class="ss-badge is-live">Đang diễn ra</span>
                                 </div>
-                                <div class="ss-meta"><span class="material-symbols-outlined">category</span><span><c:out value="${event.categoryName}"/></span></div>
-                                <c:if test="${not empty timeText}">
-                                    <div class="ss-meta"><span class="material-symbols-outlined">schedule</span><span><c:out value="${timeText}"/></span></div>
-                                </c:if>
-                                <div class="ss-meta"><span class="material-symbols-outlined">location_on</span>
+                                <div class="ss-meta"><i class="ph ph-tag" aria-hidden="true"></i><span><c:out value="${event.categoryName}"/></span></div>
+                                        <c:if test="${not empty timeText}">
+                                    <div class="ss-meta"><i class="ph ph-clock" aria-hidden="true"></i><span><c:out value="${timeText}"/></span></div>
+                                        </c:if>
+                                <div class="ss-meta"><i class="ph ph-map-pin" aria-hidden="true"></i>
                                     <span><c:out value="${event.venueName}"/><c:if test="${not empty event.venueAddress}"> - <c:out value="${event.venueAddress}"/></c:if></span></div>
                                 </div>
 
                                 <div class="ss-event-side">
                                     <h3>Thông tin phân công</h3>
                                 <c:if test="${not empty assignedText}">
-                                    <div class="ss-meta"><span class="material-symbols-outlined">assignment_ind</span><span>Được phân công ngày <c:out value="${assignedText}"/></span></div>
-                                </c:if>
-                                <c:if test="${fn:length(events) > 1}">
+                                    <div class="ss-meta"><i class="ph ph-user-list" aria-hidden="true"></i><span>Được phân công ngày <c:out value="${assignedText}"/></span></div>
+                                        </c:if>
+                                        <c:if test="${fn:length(events) > 1}">
                                     <form method="get" action="${ctx}/staff/seats" id="ssEventForm" class="ss-switch">
                                         <label for="ssEventSelect">Sự kiện đang xem</label>
                                         <select id="ssEventSelect" name="eventId">
@@ -101,12 +110,12 @@
                                 <div class="ss-pane" id="ssPaneSeated" role="tabpanel" aria-labelledby="ssTabSeated" ${hasSeated || !hasStanding ? '' : 'hidden'}>
                                     <c:choose>
                                         <c:when test="${noLayout}">
-                                            <div class="ss-empty"><span class="material-symbols-outlined">grid_off</span><p>Sự kiện này chưa có sơ đồ chỗ ngồi.</p></div>
-                                        </c:when>
-                                        <c:when test="${!hasSeated}">
-                                            <div class="ss-empty"><span class="material-symbols-outlined">event_seat</span><p>Sự kiện này không có khu vực ghế ngồi.</p></div>
-                                        </c:when>
-                                        <c:otherwise>
+                                            <div class="ss-empty"><i class="ph ph-prohibit" aria-hidden="true"></i><p>Sự kiện này chưa có sơ đồ chỗ ngồi.</p></div>
+                                                </c:when>
+                                                <c:when test="${!hasSeated}">
+                                            <div class="ss-empty"><i class="ph ph-armchair" aria-hidden="true"></i><p>Sự kiện này không có khu vực ghế ngồi.</p></div>
+                                                </c:when>
+                                                <c:otherwise>
                                             <div class="ss-toolbar">
                                                 <ul class="ss-legend" aria-label="Chú thích">
                                                     <li><i class="st-0"></i>Còn trống</li>
@@ -117,9 +126,9 @@
                                                     <li><i class="st-vip"></i>Ghế VIP</li>
                                                 </ul>
                                                 <div class="ss-zoom" aria-label="Thu phóng sơ đồ">
-                                                    <button type="button" class="ss-icon-btn" id="ssZoomIn" title="Phóng to" aria-label="Phóng to"><span class="material-symbols-outlined">add</span></button>
-                                                    <button type="button" class="ss-icon-btn" id="ssZoomOut" title="Thu nhỏ" aria-label="Thu nhỏ"><span class="material-symbols-outlined">remove</span></button>
-                                                    <button type="button" class="ss-icon-btn" id="ssZoomReset" title="Vừa khung" aria-label="Vừa khung"><span class="material-symbols-outlined">center_focus_strong</span></button>
+                                                    <button type="button" class="ss-icon-btn" id="ssZoomIn" title="Phóng to" aria-label="Phóng to"><i class="ph ph-plus" aria-hidden="true"></i></button>
+                                                    <button type="button" class="ss-icon-btn" id="ssZoomOut" title="Thu nhỏ" aria-label="Thu nhỏ"><i class="ph ph-minus" aria-hidden="true"></i></button>
+                                                    <button type="button" class="ss-icon-btn" id="ssZoomReset" title="Vừa khung" aria-label="Vừa khung"><i class="ph ph-crosshair" aria-hidden="true"></i></button>
                                                 </div>
                                             </div>
                                             <div class="ss-canvas" id="ssCanvas">
@@ -127,7 +136,7 @@
                                             </div>
                                             <c:if test="${unassignedSeats > 0 || unmappedSeats > 0}">
                                                 <p class="ss-hint">
-                                                    <span class="material-symbols-outlined">info</span>
+                                                    <i class="ph ph-info" aria-hidden="true"></i>
                                                     <span><c:if test="${unassignedSeats > 0}"><fmt:formatNumber value="${unassignedSeats}" pattern="#,##0"/> ghế chưa gắn khu vực nên không hiển thị trên sơ đồ. </c:if>
                                                         <c:if test="${unmappedSeats > 0}"><fmt:formatNumber value="${unmappedSeats}" pattern="#,##0"/> ghế có nhãn hàng/số ghế không khớp lưới của khu nên không vẽ được (vẫn được tính trong thống kê).</c:if></span>
                                                     </p>
@@ -141,12 +150,12 @@
                                 <div class="ss-pane" id="ssPaneStanding" role="tabpanel" aria-labelledby="ssTabStanding" ${hasSeated || !hasStanding ? 'hidden' : ''}>
                                     <c:choose>
                                         <c:when test="${noLayout}">
-                                            <div class="ss-empty"><span class="material-symbols-outlined">grid_off</span><p>Sự kiện này chưa có khu vực nào được thiết lập.</p></div>
-                                        </c:when>
-                                        <c:when test="${!hasStanding}">
-                                            <div class="ss-empty"><span class="material-symbols-outlined">groups</span><p>Sự kiện này không có khu vực đứng.</p></div>
-                                        </c:when>
-                                        <c:otherwise>
+                                            <div class="ss-empty"><i class="ph ph-prohibit" aria-hidden="true"></i><p>Sự kiện này chưa có khu vực nào được thiết lập.</p></div>
+                                                </c:when>
+                                                <c:when test="${!hasStanding}">
+                                            <div class="ss-empty"><i class="ph ph-users-three" aria-hidden="true"></i><p>Sự kiện này không có khu vực đứng.</p></div>
+                                                </c:when>
+                                                <c:otherwise>
                                             <div class="ss-standing-grid">
                                                 <c:forEach var="z" items="${standingZones}">
                                                     <article class="ss-zone-card">
@@ -162,9 +171,9 @@
                                                         </header>
                                                         <dl class="ss-stats">
                                                             <div><dt>Sức chứa</dt><dd><fmt:formatNumber value="${z.capacity}" pattern="#,##0"/></dd></div>
-                                                            <div><dt>Vé đã bán</dt><dd><c:choose><c:when test="${z.ticketsSold != null}"><fmt:formatNumber value="${z.ticketsSold}" pattern="#,##0"/></c:when><c:otherwise>—</c:otherwise></c:choose></dd></div>
-                                                            <div><dt>Đã vào (check-in)</dt><dd><c:choose><c:when test="${z.ticketsCheckedIn != null}"><fmt:formatNumber value="${z.ticketsCheckedIn}" pattern="#,##0"/></c:when><c:otherwise>—</c:otherwise></c:choose></dd></div>
-                                                            <div><dt>Còn lại</dt><dd class="is-strong"><c:choose><c:when test="${z.remaining != null}"><fmt:formatNumber value="${z.remaining}" pattern="#,##0"/></c:when><c:otherwise>—</c:otherwise></c:choose></dd></div>
+                                                            <div><dt>Vé đã bán</dt><dd><c:choose><c:when test="${z.ticketsSold != null}"><fmt:formatNumber value="${z.ticketsSold}" pattern="#,##0"/></c:when><c:otherwise>-</c:otherwise></c:choose></dd></div>
+                                                            <div><dt>Đã vào (check-in)</dt><dd><c:choose><c:when test="${z.ticketsCheckedIn != null}"><fmt:formatNumber value="${z.ticketsCheckedIn}" pattern="#,##0"/></c:when><c:otherwise>-</c:otherwise></c:choose></dd></div>
+                                                            <div><dt>Còn lại</dt><dd class="is-strong"><c:choose><c:when test="${z.remaining != null}"><fmt:formatNumber value="${z.remaining}" pattern="#,##0"/></c:when><c:otherwise>-</c:otherwise></c:choose></dd></div>
                                                                 </dl>
                                                         <c:if test="${z.ticketsCheckedIn != null && z.capacity > 0}">
                                                             <div class="ss-bar" title="${z.standingPercent}% sức chứa đã vào"><span class="${z.statusKey == 'FULL' ? 'is-full' : (z.statusKey == 'NEAR_FULL' ? 'is-near' : '')}" style="width:${z.standingPercent}%"></span></div>
@@ -173,10 +182,10 @@
                                                 </c:forEach>
                                             </div>
                                             <c:if test="${standingUnknown}">
-                                                <p class="ss-hint"><span class="material-symbols-outlined">info</span>
+                                                <p class="ss-hint"><i class="ph ph-info" aria-hidden="true"></i>
                                                     <span>Một số khu đứng dùng chung hạng vé với khu khác (hoặc chưa gắn hạng vé) nên không tách được số vé và số người đã vào riêng từng khu.</span></p>
                                                 </c:if>
-                                            <p class="ss-hint"><span class="material-symbols-outlined">info</span>
+                                            <p class="ss-hint"><i class="ph ph-info" aria-hidden="true"></i>
                                                 <span>Khu đứng chỉ hiển thị số lượng, không có sơ đồ chỗ ngồi riêng lẻ.</span></p>
                                             </c:otherwise>
                                         </c:choose>
@@ -221,7 +230,7 @@
                                 </section>
 
                                 <section class="ss-panel ss-card">
-                                    <h3><span class="material-symbols-outlined">groups</span> Khu vực đứng</h3>
+                                    <h3><i class="ph ph-users-three" aria-hidden="true"></i> Khu vực đứng</h3>
                                     <c:choose>
                                         <c:when test="${hasStanding}">
                                             <div class="ss-table-wrap">
@@ -232,14 +241,14 @@
                                                             <tr>
                                                                 <td><c:out value="${z.zoneName}"/></td>
                                                                 <td class="n"><fmt:formatNumber value="${z.capacity}" pattern="#,##0"/></td>
-                                                                <td class="n"><c:choose><c:when test="${z.ticketsCheckedIn != null}"><fmt:formatNumber value="${z.ticketsCheckedIn}" pattern="#,##0"/></c:when><c:otherwise>—</c:otherwise></c:choose></td>
-                                                                <td class="n"><c:choose><c:when test="${z.remaining != null}"><fmt:formatNumber value="${z.remaining}" pattern="#,##0"/></c:when><c:otherwise>—</c:otherwise></c:choose></td>
+                                                                <td class="n"><c:choose><c:when test="${z.ticketsCheckedIn != null}"><fmt:formatNumber value="${z.ticketsCheckedIn}" pattern="#,##0"/></c:when><c:otherwise>-</c:otherwise></c:choose></td>
+                                                                <td class="n"><c:choose><c:when test="${z.remaining != null}"><fmt:formatNumber value="${z.remaining}" pattern="#,##0"/></c:when><c:otherwise>-</c:otherwise></c:choose></td>
                                                                         <td>
                                                                     <c:choose>
                                                                         <c:when test="${z.statusKey == 'OPEN'}"><span class="ss-badge is-open">Còn chỗ</span></c:when>
                                                                         <c:when test="${z.statusKey == 'NEAR_FULL'}"><span class="ss-badge is-near">Gần đầy</span></c:when>
                                                                         <c:when test="${z.statusKey == 'FULL'}"><span class="ss-badge is-full">Đã đầy</span></c:when>
-                                                                        <c:otherwise><span class="ss-badge is-muted">—</span></c:otherwise>
+                                                                        <c:otherwise><span class="ss-badge is-muted">-</span></c:otherwise>
                                                                     </c:choose>
                                                                 </td>
                                                             </tr>
@@ -247,7 +256,7 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <p class="ss-note"><span class="material-symbols-outlined">info</span> Khu đứng chỉ hiển thị số lượng, không có sơ đồ chỗ ngồi riêng lẻ.</p>
+                                            <p class="ss-note"><i class="ph ph-info" aria-hidden="true"></i> Khu đứng chỉ hiển thị số lượng, không có sơ đồ chỗ ngồi riêng lẻ.</p>
                                         </c:when>
                                         <c:otherwise>
                                             <p class="ss-note">Sự kiện này không có khu vực đứng.</p>
@@ -256,7 +265,7 @@
                                 </section>
 
                                 <section class="ss-panel ss-card ss-info">
-                                    <span class="material-symbols-outlined">lock</span>
+                                    <i class="ph ph-lock" aria-hidden="true"></i>
                                     <p>Chỉ xem được thông tin chỗ ngồi của các sự kiện được phân công cho bạn đang diễn ra trong hôm nay.</p>
                                 </section>
                             </aside>
