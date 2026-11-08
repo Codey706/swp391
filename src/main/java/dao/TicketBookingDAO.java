@@ -91,8 +91,9 @@ public class TicketBookingDAO {
     }
 
     public List<EventSeat> getSeats(int eventId) throws SQLException {
-        String sql = "SELECT event_seat_id, event_id, row_label, seat_number, seat_label, seat_type, status "
-                + "FROM Event_Seats WHERE event_id = ? ORDER BY row_label, seat_number";
+        String sql = "SELECT es.event_seat_id, es.event_id, es.row_label, es.seat_number, es.seat_label, es.seat_type, "
+                + "es.status, z.event_ticket_id FROM Event_Seats es LEFT JOIN Event_Zones z ON z.zone_id = es.zone_id "
+                + "WHERE es.event_id = ? ORDER BY es.row_label, es.seat_number";
         List<EventSeat> seats = new ArrayList<>();
         try (Connection conn = DBContext.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -107,6 +108,8 @@ public class TicketBookingDAO {
                     s.setSeatLabel(rs.getString("seat_label"));
                     s.setSeatType(rs.getString("seat_type"));
                     s.setStatus(rs.getString("status"));
+                    int ticketId = rs.getInt("event_ticket_id");
+                    s.setEventTicketId(rs.wasNull() ? null : ticketId);
                     seats.add(s);
                 }
             }
@@ -274,6 +277,7 @@ public class TicketBookingDAO {
                 }
             }
         }
+        validateSeatTicketTypes(conn, seatIds, quantities);
 
         Integer voucherId = null;
         BigDecimal discount = BigDecimal.ZERO;
@@ -309,6 +313,38 @@ public class TicketBookingDAO {
         return orderId;
     }
 
+    /**
+     * Ghế thuộc khu có hạng vé (Event_Zones.event_ticket_id) chỉ được chọn khi mua đúng hạng vé đó,
+     * và số ghế mỗi hạng không vượt số vé của hạng. Chặn việc mua vé rẻ rồi chọn ghế khu đắt hơn.
+     * Ghế chưa gắn khu/hạng vé (dữ liệu cũ) được dùng cho bất kỳ hạng nào.
+     */
+    private void validateSeatTicketTypes(Connection conn, List<Integer> seatIds, Map<Integer, Integer> quantities)
+            throws SQLException, BookingException {
+        Map<Integer, Integer> seatsPerTicket = new TreeMap<>();
+        for (int seatId : seatIds) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT z.event_ticket_id FROM Event_Seats es "
+                    + "LEFT JOIN Event_Zones z ON z.zone_id = es.zone_id WHERE es.event_seat_id = ?")) {
+                ps.setInt(1, seatId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new BookingException("Ghế đã chọn không hợp lệ.");
+                    }
+                    int ticketId = rs.getInt(1);
+                    if (!rs.wasNull()) {
+                        seatsPerTicket.merge(ticketId, 1, Integer::sum);
+                    }
+                }
+            }
+        }
+        for (Map.Entry<Integer, Integer> entry : seatsPerTicket.entrySet()) {
+            Integer qty = quantities.get(entry.getKey());
+            if (qty == null || entry.getValue() > qty) {
+                throw new BookingException("Ghế đã chọn không thuộc hạng vé bạn mua. Vui lòng chọn ghế đúng khu vực của hạng vé.");
+            }
+        }
+    }
+
     /** Đối chiếu DB (không tin hoàn toàn session): tài khoản Customer đang ACTIVE. */
     private boolean isActiveCustomer(Connection conn, int customerId) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
@@ -336,8 +372,47 @@ public class TicketBookingDAO {
     /** @return {voucherId, discountAmount}; tăng used_count trong cùng transaction. */
     private Object[] applyVoucher(Connection conn, String code, BigDecimal total)
             throws SQLException, BookingException {
+        Object[] applied = calculateVoucher(conn, code, total, true);
+        try (PreparedStatement ps = conn.prepareStatement(
+                "UPDATE Vouchers SET used_count = used_count + 1, updated_at = GETDATE() WHERE voucher_id = ?")) {
+            ps.setInt(1, (Integer) applied[0]);
+            ps.executeUpdate();
+        }
+        return applied;
+    }
+
+    /**
+     * UC-14: xem trước mức giảm cho các vé đang chọn, KHÔNG tăng used_count và không giữ vé.
+     * Cùng quy tắc với lúc tạo đơn (calculateVoucher); khi tạo đơn voucher vẫn được kiểm tra lại.
+     *
+     * @return {tổng tiền, số tiền giảm}
+     */
+    public BigDecimal[] previewVoucher(int eventId, Map<Integer, Integer> quantities, String code)
+            throws SQLException, BookingException {
+        if (quantities == null || quantities.isEmpty()) {
+            throw new BookingException("Vui lòng chọn vé trước khi áp dụng mã giảm giá.");
+        }
+        BigDecimal total = BigDecimal.ZERO;
+        for (EventTicket ticket : getActiveTickets(eventId)) {
+            Integer qty = quantities.get(ticket.getEventTicketId());
+            if (qty != null && qty > 0) {
+                total = total.add(ticket.getPrice().multiply(BigDecimal.valueOf(qty)));
+            }
+        }
+        if (total.signum() <= 0) {
+            throw new BookingException("Vui lòng chọn vé trước khi áp dụng mã giảm giá.");
+        }
+        try (Connection conn = DBContext.getConnection()) {
+            Object[] applied = calculateVoucher(conn, code.trim(), total, false);
+            return new BigDecimal[]{total, (BigDecimal) applied[1]};
+        }
+    }
+
+    /** @param lock true khi tạo đơn (UPDLOCK để đếm lượt dùng chính xác), false khi chỉ xem trước. */
+    private Object[] calculateVoucher(Connection conn, String code, BigDecimal total, boolean lock)
+            throws SQLException, BookingException {
         String sql = "SELECT voucher_id, discount_type, discount_value, min_order_amount, max_discount_amount, "
-                + "usage_limit, used_count FROM Vouchers WITH (UPDLOCK, ROWLOCK) "
+                + "usage_limit, used_count FROM Vouchers" + (lock ? " WITH (UPDLOCK, ROWLOCK)" : "") + " "
                 + "WHERE voucher_code = ? AND status = 'ACTIVE' AND GETDATE() BETWEEN start_time AND end_time";
         int voucherId;
         BigDecimal discount;
@@ -370,11 +445,6 @@ public class TicketBookingDAO {
                     discount = total;
                 }
             }
-        }
-        try (PreparedStatement ps = conn.prepareStatement(
-                "UPDATE Vouchers SET used_count = used_count + 1, updated_at = GETDATE() WHERE voucher_id = ?")) {
-            ps.setInt(1, voucherId);
-            ps.executeUpdate();
         }
         return new Object[]{voucherId, discount};
     }

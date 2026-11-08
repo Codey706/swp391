@@ -10,6 +10,15 @@ public class EventSeat {
     private String seatLabel;
     private String seatType;
     private String status;
+    private Integer eventTicketId; // hạng vé của khu chứa ghế (Event_Zones.event_ticket_id), null nếu chưa gắn
+
+    public Integer getEventTicketId() {
+        return eventTicketId;
+    }
+
+    public void setEventTicketId(Integer eventTicketId) {
+        this.eventTicketId = eventTicketId;
+    }
 
     public int getEventSeatId() {
         return eventSeatId;
