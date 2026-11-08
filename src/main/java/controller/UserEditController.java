@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.User;
+import utils.Constants;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -126,6 +127,17 @@ public class UserEditController extends HttpServlet {
                 }
             }
 
+            fullName = fullName == null ? "" : fullName.trim();
+            if (fullName.length() < Constants.PROFILE_FULL_NAME_MIN_LENGTH
+                    || fullName.length() > Constants.PROFILE_FULL_NAME_MAX_LENGTH) {
+                response.sendError(
+                        HttpServletResponse.SC_BAD_REQUEST,
+                        "Full name must be " + Constants.PROFILE_FULL_NAME_MIN_LENGTH
+                        + "-" + Constants.PROFILE_FULL_NAME_MAX_LENGTH + " characters"
+                );
+                return;
+            }
+
             // Cập nhật thông tin cá nhân
             User user = new User();
             user.setUserId(userId);
@@ -145,8 +157,9 @@ public class UserEditController extends HttpServlet {
 
             /// Cập nhật Role nếu không phải Admin
 if (!isAdmin) {
+                // Lưu đúng dạng role mà toàn hệ thống dùng (Customer/Organizer/Staff)
                 boolean roleUpdated = userDAO.updateUserRole(
-                        userId, role.toUpperCase()
+                        userId, canonicalRole(role)
                 );
 
                 if (!roleUpdated) {
@@ -188,5 +201,15 @@ if (!isAdmin) {
         } catch (SQLException e) {
             throw new ServletException("Cannot update user", e);
         }
+    }
+
+    private static String canonicalRole(String role) {
+        if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(role)) {
+            return Constants.ROLE_ORGANIZER;
+        }
+        if (Constants.ROLE_STAFF.equalsIgnoreCase(role)) {
+            return Constants.ROLE_STAFF;
+        }
+        return Constants.ROLE_CUSTOMER;
     }
 }
