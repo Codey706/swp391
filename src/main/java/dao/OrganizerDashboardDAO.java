@@ -183,4 +183,84 @@ public class OrganizerDashboardDAO {
         }
         return events;
     }
+
+    // ------------------------------------------------------------ UC-24: check-in & báo cáo từng sự kiện
+
+    /** {số vé đã check-in, số vé đã phát hành (không tính vé hủy)} trên mọi sự kiện của organizer. */
+    public int[] getCheckInStats(int organizerId) {
+        String sql = "SELECT ISNULL(SUM(CASE WHEN t.ticket_status = 'CheckedIn' THEN 1 ELSE 0 END), 0), "
+                + "COUNT(*) FROM Tickets t JOIN Events e ON e.event_id = t.event_id "
+                + "WHERE e.organizer_id = ? AND t.ticket_status <> 'Cancelled'";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, organizerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? new int[]{rs.getInt(1), rs.getInt(2)} : new int[]{0, 0};
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new int[]{0, 0};
+        }
+    }
+
+    /**
+     * Báo cáo theo hạng vé của một sự kiện: ticketName, price, quantity, available, held (giữ chỗ
+     * trong đơn Pending), sold (vé trong đơn Paid), revenue (Paid), checkedIn.
+     */
+    public List<Map<String, Object>> getEventTicketReport(int eventId) throws SQLException {
+        String sql = """
+            SELECT et.event_ticket_id, et.ticket_name, et.price, et.quantity, et.available_quantity, et.status,
+                   ISNULL((SELECT SUM(od.quantity) FROM Order_Details od JOIN Orders o ON o.order_id = od.order_id
+                           WHERE od.event_ticket_id = et.event_ticket_id AND o.status = 'Pending'), 0) AS held,
+                   ISNULL((SELECT SUM(od.quantity) FROM Order_Details od JOIN Orders o ON o.order_id = od.order_id
+                           WHERE od.event_ticket_id = et.event_ticket_id AND o.status = 'Paid'), 0) AS sold,
+                   ISNULL((SELECT SUM(od.subtotal) FROM Order_Details od JOIN Orders o ON o.order_id = od.order_id
+                           WHERE od.event_ticket_id = et.event_ticket_id AND o.status = 'Paid'), 0) AS revenue,
+                   (SELECT COUNT(*) FROM Tickets t JOIN Order_Details od ON od.order_detail_id = t.order_detail_id
+                     WHERE od.event_ticket_id = et.event_ticket_id AND t.ticket_status = 'CheckedIn') AS checked_in
+            FROM Event_Tickets et
+            WHERE et.event_id = ?
+            ORDER BY et.price DESC, et.event_ticket_id
+            """;
+        List<Map<String, Object>> rows = new ArrayList<>();
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("ticketName", rs.getString("ticket_name"));
+                    row.put("price", rs.getBigDecimal("price"));
+                    row.put("quantity", rs.getInt("quantity"));
+                    row.put("available", rs.getInt("available_quantity"));
+                    row.put("status", rs.getString("status"));
+                    row.put("held", rs.getInt("held"));
+                    row.put("sold", rs.getInt("sold"));
+                    row.put("revenue", rs.getBigDecimal("revenue"));
+                    row.put("checkedIn", rs.getInt("checked_in"));
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
+    }
+
+    /** Số đơn của sự kiện theo trạng thái (Pending / Paid / Cancelled). */
+    public Map<String, Integer> getEventOrderCounts(int eventId) throws SQLException {
+        String sql = "SELECT o.status, COUNT(DISTINCT o.order_id) FROM Orders o "
+                + "JOIN Order_Details od ON od.order_id = o.order_id "
+                + "JOIN Event_Tickets et ON et.event_ticket_id = od.event_ticket_id "
+                + "WHERE et.event_id = ? GROUP BY o.status";
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        counts.put(Constants.ORDER_PAID, 0);
+        counts.put(Constants.ORDER_PENDING, 0);
+        counts.put(Constants.ORDER_CANCELLED, 0);
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    counts.put(rs.getString(1), rs.getInt(2));
+                }
+            }
+        }
+        return counts;
+    }
 }
