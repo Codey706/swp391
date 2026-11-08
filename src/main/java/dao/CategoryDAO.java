@@ -154,13 +154,37 @@ public class CategoryDAO {
         }
     }
 
-    public boolean deleteCategory(int categoryId) throws SQLException {
-        String sql = "DELETE FROM Categories WHERE category_id = ?";
+    // Danh mục đang được sự kiện sử dụng thì không xóa được (khóa ngoại Events.category_id)
+    public boolean isCategoryUsedByEvents(int categoryId) throws SQLException {
+        String sql = "SELECT 1 FROM Events WHERE category_id = ?";
 
         try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setInt(1, categoryId);
-            return statement.executeUpdate() > 0;
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    // Xóa danh mục kèm các liên kết thể loại chuyên trách của Organizer trong cùng transaction
+    public boolean deleteCategory(int categoryId) throws SQLException {
+        try (Connection connection = DBContext.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement unlink = connection.prepareStatement(
+                    "DELETE FROM Organizer_Categories WHERE category_id = ?"); PreparedStatement delete = connection.prepareStatement(
+                            "DELETE FROM Categories WHERE category_id = ?")) {
+
+                unlink.setInt(1, categoryId);
+                unlink.executeUpdate();
+                delete.setInt(1, categoryId);
+                boolean deleted = delete.executeUpdate() > 0;
+                connection.commit();
+                return deleted;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         }
     }
 }
