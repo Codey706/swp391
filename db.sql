@@ -3,6 +3,12 @@
 -- SCRIPT: CREATE DATABASE & INSERT DEMO DATA (16 TABLES + SEAT MAP + ORGANIZER PROFILE)
 -- =========================================================
 
+-- Bắt buộc cho filtered index (UX_Organizer_Profiles_tax_code). SSMS bật sẵn,
+-- nhưng sqlcmd / một số công cụ khác mặc định tắt QUOTED_IDENTIFIER.
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
 USE master;
 GO
 
@@ -35,6 +41,8 @@ CREATE TABLE Users (
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     failed_attempts INT DEFAULT 0,
     locked_until DATETIME2,
+    must_change_password BIT NOT NULL DEFAULT 0, -- tài khoản Admin tạo với mật khẩu tạm
+    password_set BIT NOT NULL DEFAULT 1, -- 0: tài khoản Google chưa tự đặt mật khẩu (Thiết lập mật khẩu không hỏi mật khẩu cũ)
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE()
 );
@@ -230,11 +238,12 @@ CREATE TABLE Reviews (
     ticket_id INT NOT NULL FOREIGN KEY REFERENCES Tickets(ticket_id),
     rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     comment NVARCHAR(1000),
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CONSTRAINT CK_Reviews_status CHECK (status IN ('ACTIVE', 'HIDDEN')), -- HIDDEN: Admin ẩn
     failed_attempts INT DEFAULT 0,
     locked_until DATETIME2,
     created_at DATETIME2 DEFAULT GETDATE(),
-    updated_at DATETIME2 DEFAULT GETDATE()
+    updated_at DATETIME2 DEFAULT GETDATE(),
+    CONSTRAINT UX_Reviews_customer_event UNIQUE (customer_id, event_id) -- 1 đánh giá / khách / sự kiện
 );
 GO
 
@@ -294,6 +303,14 @@ VALUES
 ('staff01', 'staff1@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn B', '0561434567', N'Cần Thơ', 'Staff', 'ACTIVE'),
 ('customer01', 'customer1@gmail.com', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Nguyễn Văn A', '0912345678', N'Cần Thơ', 'Customer', 'ACTIVE');
 
+-- 1b. Thêm nhân viên soát vé (cùng mật khẩu với staff01) để Organizer có người phân công
+INSERT INTO Users (username, email, password, full_name, phone, address, role, status)
+VALUES
+('staff02', 'staff2@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Trần Thị Mai', '0561434568', N'Cần Thơ', 'Staff', 'ACTIVE'),
+('staff03', 'staff3@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Lê Minh Khoa', '0561434569', N'TP. Hồ Chí Minh', 'Staff', 'ACTIVE'),
+('staff04', 'staff4@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Phạm Thu Hà', '0561434570', N'Hà Nội', 'Staff', 'ACTIVE'),
+('staff05', 'staff5@ltm.vn', '$2a$12$bASvB9btHled4bxAPKOOp.AKEseDaK0qZ0zb2dWuywMednVxhQDjm', N'Võ Quốc Bảo', '0561434571', N'Đà Nẵng', 'Staff', 'ACTIVE');
+
 -- 2. Categories
 INSERT INTO Categories (category_name, description, status)
 VALUES 
@@ -321,14 +338,14 @@ VALUES
 -- 6. Events
 INSERT INTO Events (organizer_id, category_id, venue_id, event_name, description, event_image, start_time, end_time, status)
 VALUES 
-(1, 1, 1, N'Chuyến Bay Hoàng Hôn: Live Concert 2026', N'Concert âm nhạc đỉnh cao', 'sunset_concert.jpg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'ACTIVE'),
-(1, 2, 2, N'Vở Kịch Kinh Điển: Người Tình Mùa Thu', N'Vở kịch sân khấu tâm lý', 'nguoi_tinh_mua_thu.jpg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'ACTIVE');
+(1, 1, 1, N'Chuyến Bay Hoàng Hôn: Live Concert 2026', N'Concert âm nhạc đỉnh cao', 'assets/images/events/chuyen-bay-hoang-hon.svg', '2026-11-15 19:30:00', '2026-11-15 22:30:00', 'ACTIVE'),
+(1, 2, 2, N'Vở Kịch Kinh Điển: Người Tình Mùa Thu', N'Vở kịch sân khấu tâm lý', 'assets/images/events/nguoi-tinh-mua-thu.svg', '2026-12-01 20:00:00', '2026-12-01 22:00:00', 'ACTIVE');
 
 -- 7. Event_Seats
 INSERT INTO Event_Seats (event_id, source_seat_id, row_label, seat_number, seat_label, seat_type, status)
 VALUES 
-(1, 1, 'A', 1, 'VIP-A01', 'VIP', 'Available'),
-(1, 2, 'A', 2, 'VIP-A02', 'VIP', 'Sold');
+(1, 1, 'VIP-A', 1, 'VIP-A01', 'VIP', 'Available'),
+(1, 2, 'VIP-A', 2, 'VIP-A02', 'VIP', 'Sold');
 
 -- 8. Event_Tickets
 INSERT INTO Event_Tickets (event_id, ticket_name, description, price, quantity, available_quantity, status)
@@ -337,10 +354,11 @@ VALUES
 (1, N'Vé GA Phổ Thông', N'Khu đứng tự do', 650000.00, 500, 500, 'ACTIVE');
 
 -- 9. Event_Staff
+-- staff_id phải là tài khoản role Staff (staff01), không phải organizer
 INSERT INTO Event_Staff (event_id, staff_id, status)
-VALUES 
-(1, 1, 'ACTIVE'),
-(2, 1, 'ACTIVE');
+SELECT ev.event_id, u.user_id, 'ACTIVE'
+FROM (VALUES (1), (2)) AS ev(event_id)
+CROSS JOIN Users u WHERE u.username = 'staff01';
 
 -- 10. Vouchers
 INSERT INTO Vouchers (voucher_code, voucher_name, discount_type, discount_value, min_order_amount, max_discount_amount, start_time, end_time, usage_limit, used_count, status)
@@ -349,10 +367,12 @@ VALUES
 ('LTMVIP50K', N'Giảm trực tiếp 50k', 'Fixed', 50000.00, 300000.00, 50000.00, '2026-10-01 00:00:00', '2026-12-31 23:59:59', 200, 0, 'ACTIVE');
 
 -- 11. Orders
+-- customer_id phải là tài khoản role Customer (customer01), không phải admin
+DECLARE @customerId INT = (SELECT user_id FROM Users WHERE username = 'customer01');
 INSERT INTO Orders (customer_id, voucher_id, order_code, total_amount, discount_amount, final_amount, status, hold_started_at, hold_expired_at)
 VALUES 
-(2, 1, 'ORD2026100101', 2800000.00, 200000.00, 2600000.00, 'Paid', '2026-10-01 10:00:00', '2026-10-01 10:15:00'),
-(2, NULL, 'ORD2026100102', 650000.00, 0.00, 650000.00, 'Pending', '2026-10-01 11:00:00', '2026-10-01 11:15:00');
+(@customerId, 1, 'ORD2026100101', 2800000.00, 200000.00, 2600000.00, 'Paid', '2026-10-01 10:00:00', '2026-10-01 10:15:00'),
+(@customerId, NULL, 'ORD2026100102', 650000.00, 0.00, 650000.00, 'Pending', '2026-10-01 11:00:00', '2026-10-01 11:15:00');
 
 -- 12. Order_Details
 INSERT INTO Order_Details (order_id, event_ticket_id, quantity, unit_price, subtotal)
@@ -363,8 +383,7 @@ VALUES
 -- 13. Order_Seats
 INSERT INTO Order_Seats (order_id, event_seat_id)
 VALUES 
-(1, 2),
-(2, 1);
+(1, 2);
 
 -- 14. Payments
 INSERT INTO Payments (order_id, payment_method, transaction_code, amount, payment_status, paid_at)
@@ -376,13 +395,13 @@ VALUES
 INSERT INTO Tickets (order_detail_id, event_id, event_seat_id, ticket_code, qr_code, ticket_status, check_in_time)
 VALUES 
 (1, 1, 2, 'TCK-2026-8801', 'QR_DATA_BASE64_SAMPLE_1', 'Valid', NULL),
-(1, 1, 1, 'TCK-2026-8802', 'QR_DATA_BASE64_SAMPLE_2', 'CheckedIn', '2026-11-15 18:45:00');
+(1, 1, 1, 'TCK-2026-8802', 'QR_DATA_BASE64_SAMPLE_2', 'Cancelled', '2026-11-15 18:45:00');
 
 -- 16. Reviews
 INSERT INTO Reviews (customer_id, event_id, ticket_id, rating, comment, status)
 VALUES 
-(2, 1, 2, 5, N'Sự kiện rất tuyệt vời, âm thanh đỉnh cao!', 'ACTIVE'),
-(2, 2, 1, 4, N'Sân khấu đẹp nhưng ghế ngồi hơi chật.', 'ACTIVE');
+(@customerId, 1, 2, 5, N'Sự kiện rất tuyệt vời, âm thanh đỉnh cao!', 'HIDDEN'),
+(@customerId, 2, 1, 4, N'Sân khấu đẹp nhưng ghế ngồi hơi chật.', 'HIDDEN');
 GO
 
 -- =========================================================
@@ -501,10 +520,50 @@ GO
 IF NOT EXISTS (SELECT 1 FROM Organizer_Profiles WHERE user_id = (SELECT user_id FROM Users WHERE username = 'organizer01'))
 INSERT INTO Organizer_Profiles (user_id, summary, tax_code, legal_representative, website_url,
                                 bank_name, bank_account_number, bank_account_holder,
-                                kyc_level, verification_status)
+                                kyc_level, verification_status, logo_url, cover_url)
 SELECT user_id, N'Đơn vị tổ chức các đêm nhạc acoustic và workshop sáng tạo tại Đà Lạt.',
        '0315894120', N'Nguyễn Minh Anh - Tổng Giám Đốc', 'https://example.com',
        N'Vietcombank - CN Đà Lạt', '0071000882688', N'CONG TY TNHH MAY LANG THANG PRODUCTION',
-       2, 'VERIFIED'
+       2, 'VERIFIED', 'assets/images/events/may-lang-thang-logo.svg', 'assets/images/events/may-lang-thang-cover.svg'
 FROM Users WHERE username = 'organizer01';
+GO
+
+-- =========================================================
+-- 20. SƠ ĐỒ GHẾ SỰ KIỆN 1 (cùng kết quả với db/migrations/006)
+-- Sân khấu, khu ngồi VIP 10 x 10 (VIP-A01..VIP-J10, 2 ghế đầu đã có ở mục 7) và khu đứng GA 500 chỗ.
+-- =========================================================
+DECLARE @vipZone INT;
+
+INSERT INTO Event_Zones (event_id, event_ticket_id, zone_name, zone_type, color, pos_x, pos_y, width, height,
+                         row_count, seats_per_row, capacity, blocked_seats, sort_order)
+VALUES (1, NULL, N'Sân khấu', 'STAGE', '#4B4B52', 400, 30, 400, 90, 0, 0, 0, NULL, 0);
+
+INSERT INTO Event_Zones (event_id, event_ticket_id, zone_name, zone_type, color, pos_x, pos_y, width, height,
+                         row_count, seats_per_row, capacity, blocked_seats, sort_order)
+VALUES (1, 1, N'VIP', 'SEATED', '#FF5B49', 460, 150, 276, 284, 10, 10, 100, NULL, 1);
+SET @vipZone = SCOPE_IDENTITY();
+
+INSERT INTO Event_Zones (event_id, event_ticket_id, zone_name, zone_type, color, pos_x, pos_y, width, height,
+                         row_count, seats_per_row, capacity, blocked_seats, sort_order)
+VALUES (1, 2, N'GA', 'STANDING', '#141414', 300, 470, 600, 260, 0, 0, 500, NULL, 2);
+
+UPDATE Event_Seats SET zone_id = @vipZone WHERE event_id = 1 AND seat_label IN ('VIP-A01', 'VIP-A02');
+
+INSERT INTO Event_Seats (event_id, source_seat_id, zone_id, row_label, seat_number, seat_label, seat_type, status)
+SELECT 1, NULL, @vipZone, g.row_label, g.seat_number,
+       g.row_label + RIGHT('0' + CAST(g.seat_number AS VARCHAR(2)), 2), 'VIP', 'Available'
+FROM (
+    SELECT 'VIP-' + r.letter AS row_label, c.seat_number
+    FROM (VALUES ('A'), ('B'), ('C'), ('D'), ('E'), ('F'), ('G'), ('H'), ('I'), ('J')) r(letter)
+    CROSS JOIN (VALUES (1), (2), (3), (4), (5), (6), (7), (8), (9), (10)) c(seat_number)
+) g
+WHERE NOT EXISTS (SELECT 1 FROM Event_Seats es
+                  WHERE es.event_id = 1
+                    AND es.seat_label = g.row_label + RIGHT('0' + CAST(g.seat_number AS VARCHAR(2)), 2));
+GO
+
+-- Một ghế chỉ có tối đa một vé hiệu lực
+CREATE UNIQUE NONCLUSTERED INDEX UX_Tickets_ActiveSeat
+    ON Tickets (event_seat_id)
+    WHERE event_seat_id IS NOT NULL AND ticket_status IN ('Valid', 'CheckedIn');
 GO
