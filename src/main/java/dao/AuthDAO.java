@@ -10,7 +10,7 @@ import utils.DBContext;
 
 public class AuthDAO {
 
-    private final String SELECT_FIELDS = "SELECT user_id, username, email, password, full_name, phone, address, role, status, failed_attempts, locked_until FROM Users ";
+    private final String SELECT_FIELDS = "SELECT user_id, username, email, password, full_name, phone, address, role, status, failed_attempts, locked_until, must_change_password, password_set FROM Users ";
 
     public Auth findByUsernameOrEmail(String identifier) throws SQLException {
         String sql = SELECT_FIELDS + "WHERE username = ? OR email = ?";
@@ -65,8 +65,8 @@ public class AuthDAO {
     }
 
     public boolean insertCustomer(Auth user) throws SQLException {
-        String sql = "INSERT INTO Users (username, email, password, full_name, phone, address, role, status, failed_attempts) "
-                + "VALUES (?, ?, ?, ?, ?, ?, 'Customer', 'ACTIVE', 0)";
+        String sql = "INSERT INTO Users (username, email, password, full_name, phone, address, role, status, failed_attempts, password_set) "
+                + "VALUES (?, ?, ?, ?, ?, ?, 'Customer', 'ACTIVE', 0, ?)";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
@@ -74,12 +74,31 @@ public class AuthDAO {
             ps.setString(4, user.getFullName());
             ps.setString(5, user.getPhone());
             ps.setString(6, user.getAddress());
+            ps.setBoolean(7, user.isPasswordSet());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * UC-34: Admin tạo tài khoản Organizer/Staff với mật khẩu tạm (đã hash),
+     * bắt buộc đổi mật khẩu ở lần đăng nhập đầu.
+     */
+    public boolean insertStaffAccount(Auth user, String role) throws SQLException {
+        String sql = "INSERT INTO Users (username, email, password, full_name, phone, role, status, failed_attempts, must_change_password) "
+                + "VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE', 0, 1)";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPassword());
+            ps.setString(4, user.getFullName());
+            ps.setString(5, user.getPhone());
+            ps.setString(6, role);
             return ps.executeUpdate() > 0;
         }
     }
 
     public boolean updatePassword(int userId, String password) throws SQLException {
-        String sql = "UPDATE Users SET password = ?, updated_at = GETDATE() WHERE user_id = ?";
+        String sql = "UPDATE Users SET password = ?, must_change_password = 0, password_set = 1, updated_at = GETDATE() WHERE user_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, password);
             ps.setInt(2, userId);
@@ -127,6 +146,8 @@ public class AuthDAO {
         user.setStatus(rs.getString("status"));
         user.setFailedAttempts(rs.getInt("failed_attempts"));
         user.setLockedUntil(rs.getTimestamp("locked_until"));
+        user.setMustChangePassword(rs.getBoolean("must_change_password"));
+        user.setPasswordSet(rs.getBoolean("password_set"));
         return user;
     }
 }

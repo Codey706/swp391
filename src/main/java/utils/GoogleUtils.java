@@ -12,7 +12,15 @@ import java.util.stream.Collectors;
 public class GoogleUtils {
 
     
-    public static final String GOOGLE_CLIENT_ID = "605419551555-3epj9er66p13sl614tn96ii9jhf8g720.apps.googleusercontent.com";
+    // Ghi đè bằng biến môi trường LTM_GOOGLE_CLIENT_ID; mặc định là Client ID dùng chung của nhóm
+    public static final String GOOGLE_CLIENT_ID = clientId();
+
+    private static String clientId() {
+        String value = System.getenv("LTM_GOOGLE_CLIENT_ID");
+        return value == null || value.isBlank()
+                ? "605419551555-3epj9er66p13sl614tn96ii9jhf8g720.apps.googleusercontent.com"
+                : value.trim();
+    }
 
     public static GoogleProfile verifyToken(String credential) {
         try {
@@ -35,7 +43,6 @@ public class GoogleUtils {
             }
             String body = reader.lines().collect(Collectors.joining());
             reader.close();
-            System.out.println("[GoogleUtils] tokeninfo response: " + body);
 
             if (status == 200) {
                 JsonObject json = new Gson().fromJson(body, JsonObject.class);

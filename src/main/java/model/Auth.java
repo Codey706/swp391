@@ -13,6 +13,25 @@ public class Auth {
     private String status;
     private int failedAttempts;
     private java.sql.Timestamp lockedUntil;
+    private boolean mustChangePassword;
+    /** false: tài khoản Google chưa tự đặt mật khẩu (mật khẩu trong DB là chuỗi ngẫu nhiên). */
+    private boolean passwordSet = true;
+
+    public boolean isPasswordSet() {
+        return passwordSet;
+    }
+
+    public void setPasswordSet(boolean passwordSet) {
+        this.passwordSet = passwordSet;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void setMustChangePassword(boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
+    }
 
     public int getUserId() {
         return userId;
