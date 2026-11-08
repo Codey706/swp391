@@ -8,95 +8,24 @@
         return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
     }
 
-    // UC-13: chỉ hiện ghế của hạng vé đang chọn. Hạng có ghế (khu ngồi) phải chọn đúng số ghế bằng số vé,
-    // hạng không có ghế (khu đứng) thì không cần. Server vẫn kiểm tra lại khi tạo đơn.
-    const seatLabels = form ? Array.from(form.querySelectorAll('.ck-seat[data-ticket-id]')) : [];
-    const seatSection = document.getElementById('seatSection');
-    const seatStatus = document.getElementById('seatStatus');
-    const seatSummaryNote = document.getElementById('seatSummaryNote');
-    // Thứ tự khách bấm chọn: giảm số vé thì bỏ các ghế chọn sau cùng trước
-    const seatOrder = seatLabels.map(function (label) { return label.querySelector('input[name="seatIds"]'); })
-        .filter(function (box) { return box && box.checked; });
-    let seatNotice = '';
-
-    function ticketIdOf(input) {
-        return input.name.replace('quantity_', '');
-    }
-
-    function ticketNameOf(input) {
-        const title = input.closest('.ck-ticket').querySelector('h3');
-        return title ? title.textContent.trim() : '';
-    }
-
-    function seatBoxesOf(ticketId) {
-        return seatLabels.filter(function (label) { return label.dataset.ticketId === ticketId; })
-            .map(function (label) { return label.querySelector('input[name="seatIds"]'); });
-    }
-
-    function uncheckSeat(box) {
-        box.checked = false;
-        const index = seatOrder.indexOf(box);
-        if (index !== -1) seatOrder.splice(index, 1);
-    }
-
-    /** Mô tả số ghế còn thiếu của từng hạng khu ngồi đang chọn; mảng rỗng nghĩa là đã đủ. */
-    function missingSeatMessages(inputs) {
-        const messages = [];
+    // UC-13: chỉ hiện ghế thuộc khu của hạng vé đang chọn (ghế chưa gắn hạng vé luôn hiện);
+    // ghế bị ẩn thì bỏ chọn. Server vẫn kiểm tra lại khi tạo đơn.
+    function filterSeatsByTicket(inputs) {
+        const selected = new Set();
         inputs.forEach(function (input) {
-            const qty = Math.max(0, parseInt(input.value, 10) || 0);
-            const boxes = seatBoxesOf(ticketIdOf(input));
-            if (qty < 1 || boxes.length === 0) return;
-            const chosen = boxes.filter(function (box) { return box.checked; }).length;
-            if (chosen < qty) {
-                messages.push('Hạng "' + ticketNameOf(input) + '" còn thiếu ' + (qty - chosen) + ' ghế');
+            if ((parseInt(input.value, 10) || 0) > 0) {
+                selected.add(input.name.replace('quantity_', ''));
             }
         });
-        return messages;
-    }
-
-    function renderLines(node, lines) {
-        if (!node) return;
-        node.replaceChildren.apply(node, lines.map(function (text) {
-            const line = document.createElement('span');
-            line.textContent = text;
-            return line;
-        }));
-        node.hidden = lines.length === 0;
-    }
-
-    function renderSeatStatus(inputs, isError) {
-        const missing = missingSeatMessages(inputs);
-        const anySeatVisible = seatLabels.some(function (label) { return !label.hidden; });
-        const lines = missing.slice();
-        if (seatNotice) lines.unshift(seatNotice);
-        if (lines.length === 0 && anySeatVisible) lines.push('Đã chọn đủ ghế.');
-        renderLines(seatStatus, lines);
-        if (seatStatus) {
-            seatStatus.classList.toggle('is-done', missing.length === 0 && !seatNotice);
-            seatStatus.classList.toggle('is-error', !!isError);
-        }
-        renderLines(seatSummaryNote, missing);
-        if (seatSection) seatSection.hidden = !anySeatVisible;
-    }
-
-    function syncSeats(inputs) {
-        const quantities = new Map();
-        inputs.forEach(function (input) {
-            quantities.set(ticketIdOf(input), Math.max(0, parseInt(input.value, 10) || 0));
-        });
-        seatLabels.forEach(function (label) {
-            const visible = (quantities.get(label.dataset.ticketId) || 0) > 0;
+        form.querySelectorAll('.ck-seat[data-ticket-id]').forEach(function (label) {
+            const ticketId = label.dataset.ticketId;
+            const visible = !ticketId || selected.has(ticketId);
             label.hidden = !visible;
-            const box = label.querySelector('input[name="seatIds"]');
-            if (!visible && box && box.checked) uncheckSeat(box);
+            if (!visible) {
+                const box = label.querySelector('input[name="seatIds"]');
+                if (box) box.checked = false;
+            }
         });
-        // Giảm số vé: giữ các ghế chọn trước, bỏ các ghế chọn sau cùng
-        quantities.forEach(function (qty, ticketId) {
-            const chosen = seatOrder.filter(function (box) { return seatBoxesOf(ticketId).indexOf(box) !== -1; });
-            chosen.slice(qty).forEach(uncheckSeat);
-        });
-        seatNotice = '';
-        renderSeatStatus(inputs, false);
     }
 
     function updateTotals() {
@@ -118,7 +47,7 @@
         // Đổi số vé thì kết quả xem trước voucher không còn đúng
         const discountRow = document.getElementById('discountRow');
         if (discountRow) discountRow.hidden = true;
-        syncSeats(inputs);
+        filterSeatsByTicket(inputs);
         if (grandNode) grandNode.textContent = formatMoney(amount);
         const mobileGrandNode = document.getElementById('mobileGrandTotal');
         if (mobileGrandNode) mobileGrandNode.textContent = formatMoney(amount);
@@ -157,40 +86,11 @@
             const total = Array.from(form.querySelectorAll('[data-qty]')).reduce(function (sum, input) {
                 return sum + (parseInt(input.value, 10) || 0);
             }, 0);
-            if (total < 1 || total > maxTickets) {
+            const selectedSeats = form.querySelectorAll('input[name="seatIds"]:checked').length;
+            if (total < 1 || total > maxTickets || (selectedSeats > 0 && selectedSeats !== total)) {
                 event.preventDefault();
-                window.alert('Vui lòng kiểm tra số vé đã chọn.');
-                return;
+                window.alert('Vui lòng kiểm tra số vé và số ghế đã chọn.');
             }
-            const inputs = Array.from(form.querySelectorAll('[data-qty]'));
-            if (missingSeatMessages(inputs).length > 0) {
-                event.preventDefault();
-                seatNotice = '';
-                renderSeatStatus(inputs, true);
-                if (seatSection) seatSection.scrollIntoView({behavior: 'smooth', block: 'center'});
-            }
-        });
-        form.addEventListener('change', function (event) {
-            if (!event.target.matches('input[name="seatIds"]')) return;
-            const box = event.target;
-            const inputs = Array.from(form.querySelectorAll('[data-qty]'));
-            const label = box.closest('.ck-seat');
-            const input = inputs.find(function (item) { return ticketIdOf(item) === label.dataset.ticketId; });
-            seatNotice = '';
-            if (box.checked) {
-                const qty = input ? Math.max(0, parseInt(input.value, 10) || 0) : 0;
-                const chosen = seatBoxesOf(label.dataset.ticketId).filter(function (item) { return item.checked; }).length;
-                if (chosen > qty) {
-                    box.checked = false;
-                    seatNotice = 'Hạng "' + (input ? ticketNameOf(input) : '') + '" chỉ cần ' + qty
-                        + ' ghế. Bỏ chọn một ghế trước khi chọn ghế khác.';
-                } else {
-                    seatOrder.push(box);
-                }
-            } else {
-                uncheckSeat(box);
-            }
-            renderSeatStatus(inputs, false);
         });
         updateTotals();
 
