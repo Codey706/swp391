@@ -83,14 +83,14 @@
         var g = el('g', {transform: 'translate(' + z.x + ',' + z.y + ')'}, svg);
 
         if (z.type === 'STAGE') {
-            el('rect', {width: z.w, height: z.h, rx: 10, fill: '#334155', stroke: '#0f172a'}, g);
+            el('rect', {width: z.w, height: z.h, rx: 10, fill: '#4b4b52', stroke: '#1f1f22'}, g);
             var st = el('text', {x: z.w / 2, y: z.h / 2 + 5, 'text-anchor': 'middle', fill: '#fff',
                 'font-size': 15, 'font-weight': 800, 'letter-spacing': 1.5}, g);
             st.textContent = truncate((z.name || '').toUpperCase(), Math.max(4, Math.floor(z.w / 11)));
             return;
         }
 
-        var color = /^#[0-9A-Fa-f]{6}$/.test(z.color || '') ? z.color : '#94A3B8';
+        var color = /^#[0-9A-Fa-f]{6}$/.test(z.color || '') ? z.color : '#9A9AA1';
         el('rect', {width: z.w, height: z.h, rx: 10, fill: color, 'fill-opacity': 0.1, stroke: color, 'stroke-width': 1.5}, g);
 
         var counts = [0, 0, 0, 0, 0];
@@ -99,14 +99,14 @@
         });
         var total = (z.seats || []).length;
 
-        var title = el('text', {x: 10, y: 17, fill: '#0f172a', 'font-size': 12, 'font-weight': 800}, g);
+        var title = el('text', {x: 10, y: 17, fill: '#1f1f22', 'font-size': 12, 'font-weight': 800}, g);
         title.textContent = truncate(z.name, Math.max(6, Math.floor((z.w - 100) / 7)));
-        var cap = el('text', {x: z.w - 10, y: 17, 'text-anchor': 'end', fill: '#475569', 'font-size': 10.5, 'font-weight': 600}, g);
+        var cap = el('text', {x: z.w - 10, y: 17, 'text-anchor': 'end', fill: '#55555c', 'font-size': 10.5, 'font-weight': 600}, g);
         cap.textContent = counts[0] + '/' + total + ' trống';
 
         for (var r = 0; r < z.rows; r++) {
             var letter = el('text', {x: PAD + 4, y: HEAD + PAD + r * PITCH + PITCH / 2 + 3, 'text-anchor': 'middle',
-                fill: '#64748b', 'font-size': 9, 'font-weight': 700}, g);
+                fill: '#77777e', 'font-size': 9, 'font-weight': 700}, g);
             letter.textContent = String.fromCharCode(65 + r);
         }
 
@@ -121,7 +121,7 @@
             }, g);
             var tip = el('title', {}, circle);
             tip.textContent = (z.name || '') + ' · Hàng ' + String.fromCharCode(65 + row) + ' · Ghế ' + (col + 1)
-                    + ' — ' + STATUS[status] + (vip ? ' · Ghế VIP' : '');
+                    + ' - ' + STATUS[status] + (vip ? ' · Ghế VIP' : '');
         });
     });
 

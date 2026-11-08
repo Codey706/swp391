@@ -1,0 +1,248 @@
+/* ==========================================================================
+   Light Ticket — shared UI layer
+   Loaded last on every page. Holds the colour/type tokens and the behaviour
+   every clickable element shares (hover, press, focus, loading).
+   Most selectors use :where() so page stylesheets can still override them.
+   ========================================================================== */
+
+:root {
+    --ui-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --ui-ink: #141414;
+    --ui-ink-2: #4b4b52;
+    --ui-muted: #77777e;
+    --ui-paper: #f5f5f6;
+    --ui-surface: #ffffff;
+    --ui-sunken: #efeff1;
+    --ui-line: #e4e4e7;
+    --ui-line-strong: #d4d4d8;
+
+    --ui-brand: #d93a27;
+    --ui-brand-hover: #b42e1d;
+    --ui-brand-deep: #8a2315;
+    --ui-brand-soft: #ffe7e2;
+    --ui-brand-tint: #fafafa;
+    --ui-ring: rgba(217, 58, 39, .28);
+
+    --ui-ok: #13804b;
+    --ui-warn: #8a2315;
+    --ui-danger: #b42e1d;
+
+    --ui-radius: 8px;
+    --ui-ease: cubic-bezier(.2, .7, .3, 1);
+
+    /* Bootstrap hooks so .btn-primary, links, focus rings follow the brand */
+    --bs-primary: #d93a27;
+    --bs-primary-rgb: 217, 58, 39;
+    --bs-link-color: #b42e1d;
+    --bs-link-color-rgb: 169, 56, 33;
+    --bs-link-hover-color: #8a2315;
+    --bs-body-font-family: var(--ui-font);
+    --bs-body-color: #141414;
+    --bs-border-color: #e4e4e7;
+    --bs-secondary-color: #66666d;
+    --bs-focus-ring-color: rgba(217, 58, 39, .25);
+}
+
+/* ---- Base type ---------------------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; }
+body {
+    font-family: var(--ui-font);
+    color: var(--ui-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+:where(button, input, select, textarea, optgroup) { font-family: inherit; }
+:where(h1, h2, h3, h4) { letter-spacing: -0.012em; text-wrap: balance; }
+:where(table, .price, [class*="price"], [class*="amount"], [class*="total"], [class*="count"]) {
+    font-variant-numeric: tabular-nums;
+}
+::selection { background: var(--ui-brand-soft); color: var(--ui-brand-deep); }
+
+/* ---- Icons -------------------------------------------------------------- */
+:where(.ph, .ph-fill) {
+    font-size: 1.2em;
+    line-height: 1;
+    vertical-align: -0.16em;
+    flex-shrink: 0;
+}
+
+/* ---- Clickable elements: shared motion ---------------------------------- */
+/* Element-type guard keeps containers such as .btn-group or .action-buttons still */
+:where(a, button, input, label, summary):where(
+    button, [type="submit"], [type="button"], [type="reset"], [role="button"],
+    .btn, [class*="btn"], [class*="button"], .page-link, .tab-item, [class*="-tab"],
+    .lt-nav-link, .link-orange, .icon-action, .lt-user-btn, .pbtn, .cat-btn) {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition:
+        background-color .18s var(--ui-ease),
+        border-color .18s var(--ui-ease),
+        color .18s var(--ui-ease),
+        box-shadow .18s var(--ui-ease),
+        opacity .18s var(--ui-ease),
+        translate .18s var(--ui-ease),
+        scale .12s var(--ui-ease);
+}
+
+/* `translate` / `scale` compose with any transform a page already uses */
+@media (hover: hover) {
+    :where(a, button, input, label):where(button, [type="submit"], [type="button"], .btn, [class*="btn"], [class*="button"]):not(:disabled, .disabled, [aria-disabled="true"], .btn-close, .active, .dropdown-item, .nav-link):hover {
+        translate: 0 -1px;
+    }
+}
+:where(a, button, input, label, summary):where(button, [type="submit"], [type="button"], [type="reset"], [role="button"], .btn, [class*="btn"], [class*="button"], .page-link, .tab-item, .icon-action, .lt-user-btn):not(:disabled, .disabled, [aria-disabled="true"]):active {
+    translate: 0 0;
+    scale: .97;
+    transition-duration: .06s;
+}
+
+/* Directional icons nudge in the direction they point */
+:where(a, button, .btn) :where(.ph-arrow-right, .ph-caret-right, .ph-arrow-up-right, .ph-arrow-square-out) {
+    transition: translate .2s var(--ui-ease);
+}
+:where(a, button, .btn):hover :where(.ph-arrow-right, .ph-caret-right) { translate: 3px 0; }
+:where(a, button, .btn):hover :where(.ph-arrow-up-right, .ph-arrow-square-out) { translate: 2px -2px; }
+:where(a, button, .btn) :where(.ph-arrow-left, .ph-caret-left) { transition: translate .2s var(--ui-ease); }
+:where(a, button, .btn):hover :where(.ph-arrow-left, .ph-caret-left) { translate: -3px 0; }
+
+:where(a, button, input, label):where(button, .btn, [class*="btn"], [class*="button"]):is(:disabled, .disabled, [aria-disabled="true"]) {
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Keyboard focus: always visible, never on mouse click */
+:where(a, button, [role="button"], [tabindex], summary, .btn, [class*="btn"]):focus-visible {
+    outline: 2px solid var(--ui-brand);
+    outline-offset: 2px;
+    border-radius: inherit;
+}
+:where(a, button, .btn, [class*="btn"]):focus:not(:focus-visible) { outline: none; }
+
+/* Comfortable hit area on touch screens */
+@media (pointer: coarse) {
+    :where(a, button, input):where(button, .btn, [class*="btn"], [class*="button"], .page-link) { min-height: 40px; }
+}
+
+/* ---- Ripple (added by ui.js) ------------------------------------------- */
+.ui-ripple-host {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+}
+.ui-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .22;
+    scale: 0;
+    animation: ui-ripple .55s var(--ui-ease) forwards;
+}
+@keyframes ui-ripple {
+    to { scale: 1; opacity: 0; }
+}
+
+/* ---- Submit loading state (added by ui.js) ----------------------------- */
+.ui-loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+.ui-loading > * { visibility: hidden; }
+.ui-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.05em;
+    height: 1.05em;
+    margin: -.525em 0 0 -.525em;
+    border: 2px solid var(--ui-spin, currentColor);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ui-spin .6s linear infinite;
+}
+@keyframes ui-spin { to { rotate: 360deg; } }
+
+/* ---- Bootstrap buttons follow the brand -------------------------------- */
+.btn { font-weight: 600; border-radius: var(--ui-radius); letter-spacing: 0; }
+.btn-primary {
+    --bs-btn-bg: var(--ui-brand);
+    --bs-btn-border-color: var(--ui-brand);
+    --bs-btn-hover-bg: var(--ui-brand-hover);
+    --bs-btn-hover-border-color: var(--ui-brand-hover);
+    --bs-btn-active-bg: var(--ui-brand-deep);
+    --bs-btn-active-border-color: var(--ui-brand-deep);
+    --bs-btn-disabled-bg: var(--ui-brand);
+    --bs-btn-disabled-border-color: var(--ui-brand);
+    --bs-btn-focus-shadow-rgb: 217, 58, 39;
+}
+.btn-outline-primary {
+    --bs-btn-color: var(--ui-brand);
+    --bs-btn-border-color: var(--ui-brand);
+    --bs-btn-hover-bg: var(--ui-brand);
+    --bs-btn-hover-border-color: var(--ui-brand);
+    --bs-btn-active-bg: var(--ui-brand-hover);
+    --bs-btn-active-border-color: var(--ui-brand-hover);
+}
+.btn-light, .btn-outline-secondary {
+    --bs-btn-bg: var(--ui-surface);
+    --bs-btn-border-color: var(--ui-line-strong);
+    --bs-btn-color: var(--ui-ink);
+    --bs-btn-hover-bg: var(--ui-sunken);
+    --bs-btn-hover-border-color: var(--ui-line-strong);
+    --bs-btn-hover-color: var(--ui-ink);
+    --bs-btn-active-bg: var(--ui-line);
+    --bs-btn-active-color: var(--ui-ink);
+}
+.text-primary { color: var(--ui-brand) !important; }
+.bg-primary { background-color: var(--ui-brand) !important; }
+.border-primary { border-color: var(--ui-brand) !important; }
+
+/* ---- Form controls ------------------------------------------------------ */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), select, textarea) {
+    transition: border-color .15s var(--ui-ease), box-shadow .15s var(--ui-ease), background-color .15s;
+}
+:where(input:not([type="checkbox"], [type="radio"], [type="range"]), select, textarea):focus-visible,
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--ui-brand) !important;
+    box-shadow: 0 0 0 3px var(--ui-ring) !important;
+}
+:where(input, select, textarea)::placeholder { color: var(--ui-muted); opacity: 1; }
+:where(input[type="checkbox"], input[type="radio"], input[type="range"], progress) { accent-color: var(--ui-brand); }
+.form-check-input:checked { background-color: var(--ui-brand); border-color: var(--ui-brand); }
+.form-check-input:focus { border-color: var(--ui-brand); box-shadow: 0 0 0 3px var(--ui-ring); }
+:where(label, .form-label) { color: var(--ui-ink-2); }
+
+/* ---- Pagination, tables, misc ------------------------------------------ */
+.page-link { color: var(--ui-ink); border-color: var(--ui-line); }
+.page-link:hover { color: var(--ui-brand-hover); background: var(--ui-brand-tint); border-color: var(--ui-line); }
+.page-item.active .page-link,
+.active > .page-link { background: var(--ui-ink); border-color: var(--ui-ink); color: #fff; }
+.table > :not(caption) > * > * { border-bottom-color: var(--ui-line); }
+:where(table) tbody tr { transition: background-color .12s; }
+:where(table) tbody tr:hover > * { --bs-table-bg-state: #fafafa; }
+
+/* links inside running text get an underline so they read as links */
+:where(p, li, td, .form-text, small) > a:not([class]) {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    text-underline-offset: 3px;
+}
+:where(p, li, td, .form-text, small) > a:not([class]):hover { text-decoration-color: currentColor; }
+
+/* ---- Motion preference -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .ui-ripple { display: none; }
+}

@@ -338,11 +338,11 @@
     // ------------------------------------------------ tóm tắt ở bước cuối (trang tạo)
     function formatDateTime(value) {
         if (!value) {
-            return '—';
+            return '-';
         }
         var d = new Date(value);
         if (isNaN(d.getTime())) {
-            return '—';
+            return '-';
         }
         function p(n) {
             return n < 10 ? '0' + n : '' + n;
@@ -358,18 +358,18 @@
         targets.forEach(function (target) {
             var key = target.getAttribute('data-summary');
             var el = document.getElementById(key);
-            var text = '—';
+            var text = '-';
             if (!el) {
                 return;
             }
             if (key === 'eventImage') {
                 text = el.files[0] ? el.files[0].name : 'Chưa chọn ảnh';
             } else if (el.tagName === 'SELECT') {
-                text = el.value ? el.options[el.selectedIndex].text.trim() : '—';
+                text = el.value ? el.options[el.selectedIndex].text.trim() : '-';
             } else if (key === 'startTime' || key === 'endTime') {
                 text = formatDateTime(el.value);
             } else {
-                text = el.value.trim() || '—';
+                text = el.value.trim() || '-';
             }
             target.textContent = text;
         });
@@ -446,13 +446,6 @@
         if (!mobile.matches && sidebar.classList.contains('is-open')) {
             setOpen(false);
         }
-    });
-
-    // Mục menu chưa có trang: không nhảy lên đầu trang
-    document.querySelectorAll('[data-soon]').forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-        });
     });
 })();
 
@@ -574,7 +567,7 @@
         var icon = el.querySelector('.ck-ico');
         var status = el.querySelector('.ck-status');
         if (icon) {
-            icon.textContent = done ? 'check_circle' : 'radio_button_unchecked';
+            icon.className = 'ph ck-ico ' + (done ? 'ph-check-circle' : 'ph-circle');
         }
         if (status) {
             status.textContent = text || (done ? 'Hoàn tất' : 'Chưa hoàn tất');
@@ -623,7 +616,7 @@
                 status.textContent = hasFile ? 'Đã chọn ảnh' : 'Không bắt buộc';
             }
             if (icon) {
-                icon.textContent = hasFile ? 'check_circle' : 'image';
+                icon.className = 'ph ck-ico ' + (hasFile ? 'ph-check-circle' : 'ph-image');
             }
         }
     }
@@ -757,7 +750,7 @@
             var icon = ck.querySelector('.ck-ico');
             var status = ck.querySelector('.ck-status');
             if (icon) {
-                icon.textContent = done ? 'check_circle' : 'pending';
+                icon.className = 'ph ck-ico ' + (done ? 'ph-check-circle' : 'ph-clock-countdown');
             }
             if (status) {
                 status.textContent = done ? count + ' hạng vé' : 'Không bắt buộc';

@@ -219,6 +219,23 @@
             });
         });
 
+        // Nút ✕ bỏ tệp tài liệu pháp lý đã chọn (reset input file)
+        var documentInput = field('document');
+        var documentClear = byId('opDocumentClear');
+        if (documentInput && documentClear) {
+            var syncDocumentClear = function () {
+                documentClear.hidden = !(documentInput.files && documentInput.files.length);
+            };
+            documentInput.addEventListener('change', syncDocumentClear);
+            documentClear.addEventListener('click', function () {
+                documentInput.value = '';
+                setError('document', '');
+                syncDocumentClear();
+                documentInput.focus();
+            });
+            syncDocumentClear();
+        }
+
         form.addEventListener('submit', function (event) {
             var firstInvalid = null;
             textFields.forEach(function (name) {
@@ -292,9 +309,27 @@
         function bindImagePreview(inputId, targets) {
             var input = field(inputId);
             var objectUrl = null;
+            // Trạng thái ban đầu (ảnh đang lưu hoặc ô trống) để khôi phục khi bỏ ảnh đã chọn
+            targets.forEach(function (target) {
+                var img = byId(target.img);
+                var empty = byId(target.empty);
+                target.initial = {src: img.getAttribute('src'), hidden: img.hidden, emptyHidden: empty ? empty.hidden : true};
+            });
             input.addEventListener('change', function () {
                 var file = input.files && input.files[0];
-                if (!file || IMAGE_TYPES.indexOf(file.type) === -1 || file.size > MAX_FILE) {
+                if (!file) {
+                    targets.forEach(function (target) {
+                        var img = byId(target.img);
+                        var empty = byId(target.empty);
+                        img.setAttribute('src', target.initial.src);
+                        img.hidden = target.initial.hidden;
+                        if (empty) {
+                            empty.hidden = target.initial.emptyHidden;
+                        }
+                    });
+                    return;
+                }
+                if (IMAGE_TYPES.indexOf(file.type) === -1 || file.size > MAX_FILE) {
                     return;
                 }
                 if (objectUrl) {
@@ -419,6 +454,35 @@
         }
         window.setTimeout(hide, 4000);
     }
+
+    // Ảnh bìa 16:9 và logo 1:1: dùng lại cửa sổ chỉnh khung của trang tạo sự kiện, khoá đúng tỉ lệ.
+    // Gắn ngay khi script chạy (trước DOMContentLoaded) để chặn change của ảnh gốc trước các handler bên dưới.
+    function initCroppers() {
+        if (!window.LTImageCropper) {
+            return;
+        }
+        [{input: 'cover', img: 'opCoverImg', ratioW: 16, ratioH: 9, outMaxW: 1920,
+            title: 'Chỉnh khung ảnh bìa', name: 'cover'},
+            {input: 'logo', img: 'opLogoImg', ratioW: 1, ratioH: 1, outMaxW: 800,
+                title: 'Chỉnh khung logo', name: 'logo'}].forEach(function (cfg) {
+            var input = byId(cfg.input);
+            var img = byId(cfg.img);
+            if (!input) {
+                return;
+            }
+            window.LTImageCropper.attach({
+                input: input,
+                dropZone: input.closest('.op-media-box'),
+                preview: img && !img.hidden ? img : null, // chỉ khi đã có ảnh lưu trên server
+                ratioW: cfg.ratioW,
+                ratioH: cfg.ratioH,
+                outMaxW: cfg.outMaxW,
+                title: cfg.title,
+                defaultName: cfg.name
+            });
+        });
+    }
+    initCroppers();
 
     document.addEventListener('DOMContentLoaded', function () {
         initForm();

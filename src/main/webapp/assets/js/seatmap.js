@@ -19,9 +19,10 @@
 
     // Hình học khu ngồi (khớp hằng số bên server: kích thước tối đa vẫn nằm trong khung)
     var PITCH = 24, PAD = 10, HEAD = 24, LEFT = 16, SEAT_R = 8, SNAP = 10;
-    var PALETTE = ['#FF7043', '#2E86DE', '#27AE60', '#8E44AD', '#F1C40F', '#E84393', '#16A085', '#D35400', '#34495E', '#7F8C8D'];
-    var STAGE_COLOR = '#334155';
-    var NEUTRAL_COLOR = '#94A3B8';
+    // Màu khu/hạng vé: chỉ dùng sắc san hô + xám của bảng màu chủ đạo
+    var PALETTE = ['#FF5B49', '#141414', '#D93A27', '#77777E', '#FF8A7A', '#4B4B52', '#8A2315', '#B4B4BA', '#B42E1D', '#36363B'];
+    var STAGE_COLOR = '#4b4b52';
+    var NEUTRAL_COLOR = '#9A9AA1';
 
     // ------------------------------------------------ trạng thái
     var uidSeq = 0;
@@ -159,11 +160,11 @@
         }
         defs = el('defs', {}, svg);
         var grid = el('pattern', {id: 'smGrid', width: 50, height: 50, patternUnits: 'userSpaceOnUse'}, defs);
-        el('path', {d: 'M 50 0 L 0 0 0 50', fill: 'none', stroke: '#e8edf5', 'stroke-width': 1}, grid);
+        el('path', {d: 'M 50 0 L 0 0 0 50', fill: 'none', stroke: '#efeff1', 'stroke-width': 1}, grid);
         var stripes = el('pattern', {id: 'smStripes', width: 10, height: 10, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'}, defs);
-        el('line', {x1: 0, y1: 0, x2: 0, y2: 10, stroke: '#94a3b8', 'stroke-width': 2, opacity: 0.25}, stripes);
+        el('line', {x1: 0, y1: 0, x2: 0, y2: 10, stroke: '#9a9aa1', 'stroke-width': 2, opacity: 0.25}, stripes);
 
-        gridRect = el('rect', {x: 0, y: 0, width: CANVAS.width, height: CANVAS.height, fill: 'url(#smGrid)', stroke: '#cbd5e1'}, svg);
+        gridRect = el('rect', {x: 0, y: 0, width: CANVAS.width, height: CANVAS.height, fill: 'url(#smGrid)', stroke: '#d4d4d8'}, svg);
         zonesLayer = el('g', {}, svg);
     }
 
@@ -183,25 +184,25 @@
         g.setAttribute('class', 'sm-zone' + (z.uid === selectedUid ? ' is-selected' : ''));
 
         if (z.type === 'STAGE') {
-            el('rect', {'class': 'sm-bg', width: z.w, height: z.h, rx: 10, fill: STAGE_COLOR, stroke: '#0f172a'}, g);
+            el('rect', {'class': 'sm-bg', width: z.w, height: z.h, rx: 10, fill: STAGE_COLOR, stroke: '#1f1f22'}, g);
             var st = el('text', {x: z.w / 2, y: z.h / 2 + 5, 'text-anchor': 'middle', fill: '#fff', 'font-size': 15, 'font-weight': 800, 'letter-spacing': 1.5}, g);
             st.textContent = truncate(z.name.toUpperCase(), Math.max(4, Math.floor(z.w / 11)));
         } else if (z.type === 'STANDING') {
             el('rect', {'class': 'sm-bg', width: z.w, height: z.h, rx: 10, fill: color, 'fill-opacity': 0.16, stroke: color, 'stroke-width': 2, 'stroke-dasharray': '8 5'}, g);
             el('rect', {width: z.w, height: z.h, rx: 10, fill: 'url(#smStripes)', 'pointer-events': 'none'}, g);
-            var t1 = el('text', {x: z.w / 2, y: z.h / 2 - 2, 'text-anchor': 'middle', fill: '#0f172a', 'font-size': 14, 'font-weight': 800}, g);
+            var t1 = el('text', {x: z.w / 2, y: z.h / 2 - 2, 'text-anchor': 'middle', fill: '#1f1f22', 'font-size': 14, 'font-weight': 800}, g);
             t1.textContent = truncate(z.name, Math.max(4, Math.floor(z.w / 9)));
-            var t2 = el('text', {x: z.w / 2, y: z.h / 2 + 16, 'text-anchor': 'middle', fill: '#475569', 'font-size': 12, 'font-weight': 600}, g);
+            var t2 = el('text', {x: z.w / 2, y: z.h / 2 + 16, 'text-anchor': 'middle', fill: '#55555c', 'font-size': 12, 'font-weight': 600}, g);
             t2.textContent = 'Đứng · ' + formatNumber(z.capacity) + ' người';
         } else {
             el('rect', {'class': 'sm-bg', width: z.w, height: z.h, rx: 10, fill: color, 'fill-opacity': 0.12, stroke: color, 'stroke-width': 2}, g);
-            var title = el('text', {x: 10, y: 17, fill: '#0f172a', 'font-size': 12, 'font-weight': 800}, g);
+            var title = el('text', {x: 10, y: 17, fill: '#1f1f22', 'font-size': 12, 'font-weight': 800}, g);
             title.textContent = truncate(z.name, Math.max(6, Math.floor((z.w - 90) / 7)));
-            var cap = el('text', {x: z.w - 10, y: 17, 'text-anchor': 'end', fill: '#475569', 'font-size': 11, 'font-weight': 600}, g);
+            var cap = el('text', {x: z.w - 10, y: 17, 'text-anchor': 'end', fill: '#55555c', 'font-size': 11, 'font-weight': 600}, g);
             cap.textContent = formatNumber(capacityOf(z)) + ' ghế';
 
             for (var r = 0; r < z.rows; r++) {
-                var letter = el('text', {x: PAD + 4, y: HEAD + PAD + r * PITCH + PITCH / 2 + 3, 'text-anchor': 'middle', fill: '#64748b', 'font-size': 9, 'font-weight': 700}, g);
+                var letter = el('text', {x: PAD + 4, y: HEAD + PAD + r * PITCH + PITCH / 2 + 3, 'text-anchor': 'middle', fill: '#77777e', 'font-size': 9, 'font-weight': 700}, g);
                 letter.textContent = String.fromCharCode(65 + r);
                 for (var c = 0; c < z.cols; c++) {
                     var isBlocked = z.blocked.has(r + ':' + c);
@@ -319,7 +320,7 @@
                 del.type = 'button';
                 del.className = 'sm-mini-del';
                 del.title = 'Xóa hạng vé này';
-                del.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+                del.innerHTML = '<i class="ph ph-trash" aria-hidden="true"></i>';
                 del.addEventListener('click', function () {
                     removeTicket(t.id);
                 });
@@ -377,7 +378,7 @@
         select.innerHTML = '';
         var blank = document.createElement('option');
         blank.value = '';
-        blank.textContent = '— Chọn hạng vé —';
+        blank.textContent = '- Chọn hạng vé -';
         select.appendChild(blank);
         tickets.forEach(function (t) {
             var o = document.createElement('option');
@@ -781,12 +782,13 @@
                 makeZone('SEATED', {name: 'Khu B', ticketId: ticketAt(2), rows: 6, cols: 28, x: 250, y: 600})
             ];
         } else {
-            ensureTickets([{name: 'VIP Standing', price: 2000000}, {name: 'GA Standing', price: 900000}, {name: 'Khán đài', price: 600000}]);
+            // Concert sân khấu: mọi khu đều là khu đứng (không có ghế)
+            ensureTickets([{name: 'VIP Standing', price: 2000000}, {name: 'GA Standing', price: 900000}, {name: 'Khu đứng sau', price: 600000}]);
             list = [
                 makeZone('STAGE', {x: 350, y: 30, w: 500, h: 80}),
                 makeZone('STANDING', {name: 'Fanzone VIP', ticketId: ticketAt(0), capacity: 300, x: 400, y: 140, w: 400, h: 130}),
                 makeZone('STANDING', {name: 'Khu GA', ticketId: ticketAt(1), capacity: 800, x: 300, y: 300, w: 600, h: 200}),
-                makeZone('SEATED', {name: 'Khán đài', ticketId: ticketAt(2), rows: 6, cols: 30, x: 222, y: 540})
+                makeZone('STANDING', {name: 'Khu đứng sau', ticketId: ticketAt(2), capacity: 180, x: 222, y: 540, w: 756, h: 160})
             ];
         }
         zones = list;
@@ -1040,6 +1042,84 @@
         $('zoomIn').addEventListener('click', function () { zoom = Math.min(2, zoom + 0.25); applyZoom(); });
         $('zoomOut').addEventListener('click', function () { zoom = Math.max(0.5, zoom - 0.25); applyZoom(); });
         $('zoomFit').addEventListener('click', function () { zoom = 1; applyZoom(); });
+        bindFullscreen();
+    }
+
+    // ------------------------------------------------ toàn màn hình
+    // Fullscreen API cho cả vùng thiết kế (công cụ + khung vẽ + thuộc tính). Thoát bằng chính nút đó
+    // hoặc phím Esc. Trình duyệt không hỗ trợ API (iOS Safari) thì phủ kín cửa sổ bằng CSS.
+    function bindFullscreen() {
+        var btn = $('smFullscreen');
+        var target = btn && btn.closest('.sm-workspace');
+        if (!btn || !target) {
+            return;
+        }
+        var doc = document;
+        var request = target.requestFullscreen || target.webkitRequestFullscreen;
+        var exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+
+        function nativeElement() {
+            return doc.fullscreenElement || doc.webkitFullscreenElement || null;
+        }
+        function isOn() {
+            return nativeElement() === target || target.classList.contains('is-pseudo-fullscreen');
+        }
+        function sync() {
+            var on = isOn();
+            target.classList.toggle('is-fullscreen', on);
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            btn.setAttribute('aria-label', on ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình');
+            btn.title = on ? 'Thoát toàn màn hình (Esc)' : 'Toàn màn hình';
+            var icon = btn.querySelector('.ph');
+            if (icon) {
+                icon.className = 'ph ' + (on ? 'ph-corners-in' : 'ph-corners-out');
+            }
+            document.body.classList.toggle('sm-fs-lock', target.classList.contains('is-pseudo-fullscreen'));
+        }
+        function setPseudo(on) {
+            target.classList.toggle('is-pseudo-fullscreen', on);
+            sync();
+        }
+        function enter() {
+            if (request) {
+                var result;
+                try {
+                    result = request.call(target);
+                } catch (err) {
+                    setPseudo(true);
+                    return;
+                }
+                if (result && typeof result.catch === 'function') {
+                    result.catch(function () { setPseudo(true); });
+                }
+            } else {
+                setPseudo(true);
+            }
+        }
+        function leave() {
+            if (target.classList.contains('is-pseudo-fullscreen')) {
+                setPseudo(false);
+            } else if (nativeElement() && exit) {
+                exit.call(doc);
+            }
+        }
+
+        btn.addEventListener('click', function () {
+            if (isOn()) {
+                leave();
+            } else {
+                enter();
+            }
+        });
+        doc.addEventListener('fullscreenchange', sync);
+        doc.addEventListener('webkitfullscreenchange', sync);
+        // Esc: thường trình duyệt tự thoát chế độ native; nếu phím vẫn tới trang thì tự thoát
+        doc.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isOn()) {
+                leave();
+            }
+        });
+        sync();
     }
 
     // ------------------------------------------------ lưu
@@ -1179,7 +1259,7 @@
                 var icon = ck.querySelector('.ck-ico');
                 var status = ck.querySelector('.ck-status');
                 if (icon) {
-                    icon.textContent = done ? 'check_circle' : 'pending';
+                    icon.className = 'ph ck-ico ' + (done ? 'ph-check-circle' : 'ph-clock-countdown');
                 }
                 if (status) {
                     status.textContent = done ? sellableZones().length + ' khu · ' + formatNumber(totalCapacity()) + ' chỗ' : 'Không bắt buộc';
@@ -1187,7 +1267,7 @@
             }
         } else if (sum) {
             var general = document.getElementById('ticketSummary');
-            sum.textContent = general ? general.textContent : '—';
+            sum.textContent = general ? general.textContent : '-';
         }
     }
 

@@ -7,7 +7,7 @@
 .sc-head h1 {
     margin: 0 0 .35rem;
     font-size: 1.65rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .sc-head p {
@@ -23,9 +23,9 @@
 }
 .sc-panel {
     background: #fff;
-    border: 1px solid #e4eaf7;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(22, 28, 36, .04);
+    border: 1px solid #efeff1;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(20, 20, 20, .04);
     padding: 1.15rem 1.25rem;
     margin-bottom: 1.25rem;
 }
@@ -35,7 +35,7 @@
 .sc-title {
     margin: 0 0 1rem;
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 
@@ -50,7 +50,7 @@
     min-width: 0;
     height: 42px;
     padding: 0 .9rem;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
     color: var(--text-main);
@@ -60,16 +60,16 @@
 .sc-input:focus {
     outline: none;
     border-color: var(--primary-orange);
-    box-shadow: 0 0 0 3px rgba(255, 112, 67, .15);
+    box-shadow: 0 0 0 3px rgba(217, 58, 39, .15);
 }
 .sc-icon-btn {
     width: 42px;
     height: 42px;
     flex-shrink: 0;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
-    color: #64748b;
+    color: #66666d;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -88,10 +88,10 @@
     flex: 1 1 auto;
     text-align: center;
     padding: .5rem .6rem;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
-    color: #44506b;
+    color: #55555c;
     font-size: .78rem;
     font-weight: 700;
     text-decoration: none;
@@ -113,14 +113,14 @@
     padding: .8rem .75rem;
     margin-bottom: .4rem;
     border: 1px solid transparent;
-    border-bottom-color: #eef1f8;
+    border-bottom-color: #efeff1;
     border-radius: 12px;
     color: inherit;
     text-decoration: none;
     transition: background .15s, border-color .15s;
 }
 .sc-row:hover {
-    background: #fffaf8;
+    background: #fafafa;
     color: inherit;
 }
 .sc-row.is-active {
@@ -135,10 +135,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #cbd5e1;
+    background: #d4d4d8;
     color: #fff;
     font-size: .85rem;
-    font-weight: 800;
+    font-weight: 700;
 }
 .sc-avatar.is-ok,
 .sc-avatar.is-partial {
@@ -155,7 +155,7 @@
 }
 .sc-row-name {
     font-size: .9rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -170,14 +170,14 @@
     font-size: .76rem;
     color: var(--text-muted);
 }
-.sc-row-sub .material-symbols-outlined,
-.sc-line .material-symbols-outlined {
+.sc-row-sub .ph,
+.sc-line .ph {
     font-size: 16px;
     vertical-align: -3px;
 }
 .sc-chevron {
     font-size: 20px;
-    color: #94a3b8;
+    color: #9a9aa1;
 }
 
 /* ---------- Badge ---------- */
@@ -190,13 +190,13 @@
     font-weight: 700;
     white-space: nowrap;
 }
-.sc-badge.is-ok { background: #d8f5e2; color: #137a3d; }
-.sc-badge.is-none { background: #e4eaf7; color: #44506b; }
-.sc-badge.is-partial { background: #fff1c7; color: #8a5a00; }
-.sc-badge.is-cancelled { background: #fde4e1; color: #b3261e; }
-.sc-badge.is-live { background: #fff1c7; color: #8a5a00; }
-.sc-badge.is-soon { background: #e8f7ee; color: #1e8e4e; }
-.sc-badge.is-ended { background: #eef1f6; color: #5b6578; }
+.sc-badge.is-ok { background: #e7f6ee; color: #13804b; }
+.sc-badge.is-none { background: #efeff1; color: #55555c; }
+.sc-badge.is-partial { background: #fff4dc; color: #9a5b07; }
+.sc-badge.is-cancelled { background: #ffe7e2; color: #b42e1d; }
+.sc-badge.is-live { background: #fff4dc; color: #9a5b07; }
+.sc-badge.is-soon { background: #e7f6ee; color: #13804b; }
+.sc-badge.is-ended { background: #e4e4e7; color: #55555c; }
 
 /* ---------- Thẻ khách hàng ---------- */
 .sc-profile {
@@ -209,30 +209,30 @@
     margin: 0 .5rem .45rem 0;
     display: inline;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
 }
 .sc-line {
     display: block;
     margin-top: .3rem;
     font-size: .84rem;
-    color: #4b5563;
+    color: #55555c;
     overflow-wrap: anywhere;
 }
-.sc-line .material-symbols-outlined {
+.sc-line .ph {
     margin-right: .35rem;
-    color: #94a3b8;
+    color: #9a9aa1;
 }
 .sc-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     margin-top: 1.1rem;
     padding: 1rem;
-    border-radius: 14px;
+    border-radius: 12px;
     background: var(--primary-light);
 }
 .sc-stat {
     padding: 0 1rem;
-    border-left: 1px solid rgba(255, 112, 67, .25);
+    border-left: 1px solid rgba(217, 58, 39, .25);
 }
 .sc-stat:first-child {
     border-left: 0;
@@ -246,7 +246,7 @@
 }
 .sc-stat b {
     font-size: 1.5rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .sc-note {
@@ -266,9 +266,9 @@
 }
 .sc-event-pill {
     padding: .3rem .8rem;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 9999px;
-    color: #44506b;
+    color: #55555c;
     font-size: .76rem;
     font-weight: 700;
     text-decoration: none;
@@ -295,15 +295,15 @@
 .sc-table th {
     padding: .7rem .75rem;
     background: var(--soft-blue);
-    color: #4b3a34;
+    color: #36363b;
     font-size: .72rem;
-    font-weight: 800;
+    font-weight: 700;
     text-align: left;
     white-space: nowrap;
 }
 .sc-table td {
     padding: .8rem .75rem;
-    border-bottom: 1px solid #eef1f8;
+    border-bottom: 1px solid #efeff1;
     white-space: nowrap;
 }
 .sc-btn {
@@ -349,20 +349,20 @@
     top: 30px;
     bottom: 2px;
     width: 2px;
-    background: #e4eaf7;
+    background: #efeff1;
 }
 .sc-tl-dot {
     width: 28px;
     height: 28px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #22a55a;
+    background: #2e9e63;
     color: #fff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
-.sc-tl-dot .material-symbols-outlined {
+.sc-tl-dot .ph {
     font-size: 18px;
 }
 .sc-tl-body {
@@ -387,7 +387,7 @@
 }
 .sc-tl-time .ok {
     display: block;
-    color: #137a3d;
+    color: #13804b;
     font-weight: 700;
 }
 
@@ -419,7 +419,7 @@
 .sc-event-name {
     margin: .85rem 0 .5rem;
     font-size: 1.05rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--primary-hover);
     overflow-wrap: anywhere;
 }
@@ -430,7 +430,7 @@
     width: 100%;
     margin-bottom: .55rem;
     padding: .75rem .9rem;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
     color: var(--text-main);
@@ -438,13 +438,13 @@
     font-weight: 700;
     text-decoration: none;
 }
-.sc-action .material-symbols-outlined:first-child {
+.sc-action .ph:first-child {
     color: var(--primary-orange);
 }
 .sc-action .go {
     margin-left: auto;
     font-size: 18px;
-    color: #94a3b8;
+    color: #9a9aa1;
 }
 a.sc-action:hover {
     border-color: var(--primary-orange);
@@ -452,12 +452,12 @@ a.sc-action:hover {
     color: var(--primary-hover);
 }
 .sc-action.is-disabled {
-    background: #f8fafc;
-    color: #94a3b8;
+    background: #f5f5f6;
+    color: #9a9aa1;
     cursor: not-allowed;
 }
-.sc-action.is-disabled .material-symbols-outlined:first-child {
-    color: #cbd5e1;
+.sc-action.is-disabled .ph:first-child {
+    color: #d4d4d8;
 }
 .sc-action.is-disabled small {
     margin-left: auto;
@@ -471,10 +471,10 @@ a.sc-action:hover {
     padding: .85rem 1rem;
     border-radius: 12px;
     background: var(--primary-light);
-    color: #4b3a34;
+    color: #36363b;
     font-size: .78rem;
 }
-.sc-warning .material-symbols-outlined {
+.sc-warning .ph {
     color: var(--primary-orange);
 }
 .sc-warning b {
@@ -487,11 +487,11 @@ a.sc-action:hover {
     color: var(--text-muted);
     font-size: .85rem;
 }
-.sc-empty .material-symbols-outlined {
+.sc-empty .ph {
     display: block;
     margin-bottom: .4rem;
     font-size: 40px;
-    color: #c5cbd8;
+    color: #d4d4d8;
 }
 .sc-foot {
     margin-top: .75rem;
@@ -507,7 +507,7 @@ a.sc-action:hover {
     justify-content: space-between;
     gap: 1rem;
     padding: .55rem 0;
-    border-bottom: 1px solid #eef1f8;
+    border-bottom: 1px solid #efeff1;
     font-size: .88rem;
 }
 .sc-modal-row span {
@@ -535,9 +535,15 @@ a.sc-action:hover {
     }
 }
 @media (max-width: 900px) {
+    /* minmax(0, 1fr) thay vì 1fr: nếu không, bảng rộng bên trong kéo cả cột ra 1000px+
+       và các nút "Quét mã QR / Kiểm tra mã vé..." trượt ra ngoài màn hình điện thoại */
     .sc-layout,
     .sc-side {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .sc-layout > *,
+    .sc-side > * {
+        min-width: 0;
     }
     .sc-side {
         grid-column: auto;

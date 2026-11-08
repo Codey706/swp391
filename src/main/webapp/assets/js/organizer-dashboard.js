@@ -15,15 +15,15 @@
             datasets: [{
                 label: 'Doanh thu',
                 data: [],
-                borderColor: '#ff7043',
+                borderColor: '#ff5b49',
                 backgroundColor: function (ctx) {
                     var area = ctx.chart.chartArea;
                     if (!area) {
-                        return 'rgba(255, 112, 67, 0.12)';
+                        return 'rgba(255, 91, 73, 0.12)';
                     }
                     var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-                    g.addColorStop(0, 'rgba(255, 112, 67, 0.28)');
-                    g.addColorStop(1, 'rgba(255, 112, 67, 0)');
+                    g.addColorStop(0, 'rgba(255, 91, 73, 0.28)');
+                    g.addColorStop(1, 'rgba(255, 91, 73, 0)');
                     return g;
                 },
                 fill: true,
@@ -31,7 +31,7 @@
                 borderWidth: 2,
                 pointRadius: 3,
                 pointBackgroundColor: '#fff',
-                pointBorderColor: '#ff7043',
+                pointBorderColor: '#ff5b49',
                 pointBorderWidth: 2
             }]
         },
@@ -49,13 +49,13 @@
                 }
             },
             scales: {
-                x: {grid: {display: false}, border: {display: false}, ticks: {maxTicksLimit: 10, color: '#7a8499'}},
+                x: {grid: {display: false}, border: {display: false}, ticks: {maxTicksLimit: 10, color: '#77777e'}},
                 y: {
                     beginAtZero: true,
                     border: {display: false},
-                    grid: {color: '#eef1f8'},
+                    grid: {color: '#f5f5f6'},
                     ticks: {
-                        color: '#7a8499',
+                        color: '#77777e',
                         callback: function (v) {
                             return v >= 1000000 ? (v / 1000000) + ' tr' : money.format(v);
                         }

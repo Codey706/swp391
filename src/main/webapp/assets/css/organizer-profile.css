@@ -4,8 +4,7 @@
    Font: dùng chung Plus Jakarta Sans (home.css) như Organizer Event List.
    ===================================================================== */
 
-body.op-body .material-symbols-outlined {
-    font-family: 'Material Symbols Outlined';
+body.op-body .ph {
 }
 body.op-body [hidden] {
     display: none !important;
@@ -43,7 +42,7 @@ body.org-body.op-body {
     transition: background 0.2s, box-shadow 0.2s;
     text-decoration: none;
 }
-.op-btn .material-symbols-outlined {
+.op-btn .ph {
     font-size: 18px;
 }
 .op-btn-primary {
@@ -120,7 +119,7 @@ body.org-body.op-body {
     background: var(--st-surface-high);
     color: var(--st-on-surface);
 }
-.op-back .material-symbols-outlined {
+.op-back .ph {
     font-size: 18px;
 }
 .op-toolbar-actions {
@@ -188,7 +187,7 @@ body.org-body.op-body {
     background: var(--st-primary-fixed);
     color: var(--st-primary-container);
 }
-.op-section-ico .material-symbols-outlined {
+.op-section-ico .ph {
     font-size: 20px;
 }
 .op-tag {
@@ -307,7 +306,7 @@ textarea.op-input {
     color: var(--st-primary-container);
 }
 .is-star {
-    color: #f59e0b;
+    color: #e09a1a;
 }
 .op-error {
     min-height: 0;
@@ -366,7 +365,7 @@ textarea.op-input {
     white-space: nowrap;
     flex-shrink: 0;
 }
-.op-pill .material-symbols-outlined {
+.op-pill .ph {
     font-size: 14px;
     color: inherit;
 }
@@ -375,12 +374,12 @@ textarea.op-input {
     color: var(--st-tertiary);
 }
 .op-pill.is-ok-solid {
-    background: #6ffbbe;
-    color: #002113;
+    background: #bfe3cf;
+    color: #0e6b3e;
 }
 .op-pill.is-warn {
-    background: #fff1c7;
-    color: #8a5a00;
+    background: #fff4dc;
+    color: #9a5b07;
 }
 .op-pill.is-error {
     background: var(--st-error-container);
@@ -407,7 +406,7 @@ textarea.op-input {
 }
 .op-check:has(input:checked) {
     background: var(--st-primary-soft);
-    border-color: rgba(255, 87, 34, 0.35);
+    border-color: rgba(217, 58, 39, 0.35);
 }
 .op-check input {
     accent-color: var(--st-primary-container);
@@ -433,7 +432,7 @@ textarea.op-input {
     overflow: hidden;
     border-radius: var(--st-radius-xl);
     background: var(--st-surface-high);
-    box-shadow: inset 0 1px 3px rgba(21, 28, 39, 0.08);
+    box-shadow: inset 0 1px 3px rgba(20, 20, 20, 0.08);
 }
 .op-media-box.is-white {
     background: #fff;
@@ -465,7 +464,7 @@ textarea.op-input {
     font-size: 0.8rem;
     color: var(--st-secondary);
 }
-.op-media-empty .material-symbols-outlined {
+.op-media-empty .ph {
     font-size: 32px;
 }
 .op-media-overlay {
@@ -474,7 +473,7 @@ textarea.op-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(18, 28, 42, 0.5);
+    background: rgba(20, 20, 20, 0.5);
     opacity: 0;
     transition: opacity 0.2s;
     cursor: pointer;
@@ -507,7 +506,7 @@ textarea.op-input {
     height: 32px;
     font-size: 0.69rem;
 }
-.op-media-btn .material-symbols-outlined {
+.op-media-btn .ph {
     font-size: 16px;
 }
 .op-media-badge {
@@ -577,7 +576,7 @@ textarea.op-input {
     border-color: var(--st-primary-container);
     color: var(--st-primary);
 }
-.op-scale-btn .material-symbols-outlined {
+.op-scale-btn .ph {
     font-size: 16px;
 }
 .op-scale-value {
@@ -611,12 +610,12 @@ textarea.op-input {
     font-size: 0.8rem;
     line-height: 1.45;
 }
-.op-notice .material-symbols-outlined {
+.op-notice .ph {
     font-size: 20px;
     flex-shrink: 0;
 }
 .op-notice.is-warn {
-    background: #fff1c7;
+    background: #fff4dc;
     color: #6b4500;
 }
 .op-notice.is-error {
@@ -662,11 +661,11 @@ textarea.op-input {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.op-doc-name .material-symbols-outlined {
+.op-doc-name .ph {
     font-size: 18px;
     color: var(--st-secondary);
 }
-.op-doc-name .material-symbols-outlined.is-ok {
+.op-doc-name .ph.is-ok {
     color: var(--st-tertiary);
 }
 .op-empty {
@@ -714,7 +713,7 @@ textarea.op-input {
     color: #fff;
     box-shadow: var(--st-shadow-sm);
 }
-.op-bank-ico .material-symbols-outlined {
+.op-bank-ico .ph {
     font-size: 26px;
 }
 .op-bank-title {
@@ -758,7 +757,7 @@ textarea.op-input {
     flex-wrap: wrap;
     gap: 0.4rem;
 }
-.op-money .material-symbols-outlined {
+.op-money .ph {
     font-size: 20px;
     color: var(--st-secondary);
 }
@@ -789,7 +788,7 @@ textarea.op-input {
     align-items: center;
     gap: 0.5rem;
 }
-.op-panel-head .material-symbols-outlined {
+.op-panel-head .ph {
     font-size: 20px;
 }
 
@@ -822,7 +821,7 @@ textarea.op-input {
     justify-content: center;
     color: var(--st-secondary);
 }
-.op-card-cover-empty .material-symbols-outlined {
+.op-card-cover-empty .ph {
     font-size: 36px;
 }
 .op-card-tags {
@@ -864,7 +863,7 @@ textarea.op-input {
     font-weight: 700;
     color: var(--st-on-surface);
 }
-.op-card-kyc .material-symbols-outlined {
+.op-card-kyc .ph {
     font-size: 14px;
     color: var(--st-tertiary);
 }
@@ -920,7 +919,7 @@ textarea.op-input {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.op-card-name .material-symbols-outlined {
+.op-card-name .ph {
     font-size: 16px;
     flex-shrink: 0;
 }
@@ -957,7 +956,7 @@ textarea.op-input {
     align-items: center;
     gap: 0.3rem;
 }
-.op-card-stats .material-symbols-outlined {
+.op-card-stats .ph {
     font-size: 16px;
 }
 .op-card-stats small {
@@ -999,11 +998,11 @@ textarea.op-input {
     gap: 0.5rem;
     color: var(--st-on-surface);
 }
-.op-checklist .material-symbols-outlined {
+.op-checklist .ph {
     font-size: 18px;
     color: var(--st-secondary);
 }
-.op-checklist li.is-done .material-symbols-outlined {
+.op-checklist li.is-done .ph {
     color: var(--st-tertiary);
 }
 .op-panel-actions {
@@ -1022,7 +1021,7 @@ textarea.op-input {
     font-size: 0.75rem;
     color: var(--st-secondary);
 }
-.op-support .material-symbols-outlined {
+.op-support .ph {
     font-size: 16px;
 }
 
@@ -1038,7 +1037,7 @@ textarea.op-input {
     padding: var(--st-space-md) var(--st-space-lg);
     background: var(--st-surface-lowest);
     border-radius: var(--st-radius-xl);
-    box-shadow: 0 10px 30px rgba(21, 28, 39, 0.18);
+    box-shadow: 0 10px 30px rgba(20, 20, 20, 0.18);
     transition: opacity 0.3s, transform 0.3s;
 }
 .op-toast.is-hiding {
@@ -1054,10 +1053,10 @@ textarea.op-input {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: #00a572;
+    background: #13804b;
     color: #fff;
 }
-.op-toast-ico .material-symbols-outlined {
+.op-toast-ico .ph {
     font-size: 20px;
 }
 .op-toast-text {
@@ -1089,7 +1088,6 @@ textarea.op-input {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
 }
 .op-modal-dialog {
     position: relative;
@@ -1104,7 +1102,7 @@ textarea.op-input {
 .op-modal-cover {
     position: relative;
     height: 176px;
-    background: linear-gradient(135deg, var(--st-primary-container), #ff9a76);
+    background: #d93a27;
     overflow: hidden;
 }
 .op-modal-cover img {
@@ -1128,7 +1126,7 @@ textarea.op-input {
     color: #fff;
     cursor: pointer;
 }
-.op-modal-close .material-symbols-outlined {
+.op-modal-close .ph {
     font-size: 20px;
 }
 .op-modal-body {
@@ -1178,7 +1176,7 @@ textarea.op-input {
 .op-modal-summary {
     margin: 0;
     font-size: 0.875rem;
-    color: #5b4039;
+    color: #4b4b52;
 }
 .op-modal-stats {
     display: grid;
@@ -1196,7 +1194,7 @@ textarea.op-input {
     color: var(--st-primary-container);
 }
 .op-modal-stats strong.is-star {
-    color: #f59e0b;
+    color: #e09a1a;
 }
 .op-modal-stats span {
     font-size: 0.69rem;
@@ -1311,7 +1309,7 @@ body.org-body.op-body .org-container {
     outline: none;
     background: var(--st-surface-lowest);
     border-color: var(--st-primary-container);
-    box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.10);
+    box-shadow: 0 0 0 2px rgba(217, 58, 39, 0.10);
 }
 
 /* Giữ màu chữ và trạng thái dễ đọc */
@@ -1340,3 +1338,64 @@ body.org-body.op-body .org-container {
 body.org-body.op-body {
     color: var(--st-on-surface);
 }
+
+/* ---- Khối trạng thái KYC: 2 cột nhãn / giá trị ---- */
+.op-kyc {
+    padding: var(--st-space-md) var(--st-space-xl);
+    background: var(--st-surface-lowest);
+    border-radius: var(--st-radius-xl);
+    box-shadow: var(--st-shadow-sm);
+}
+.op-kyc-list { margin: 0; }
+.op-kyc-row {
+    display: grid;
+    grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--st-space-lg);
+    padding: 0.75rem 0;
+}
+.op-kyc-row + .op-kyc-row { border-top: 1px solid var(--st-surface-high); }
+.op-kyc-row dt {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--st-secondary);
+}
+.op-kyc-row dd {
+    margin: 0;
+    min-width: 0;
+    font-size: 0.9rem;
+    color: var(--st-on-surface);
+}
+.op-kyc-row .op-pill { font-size: 0.8rem; padding: 0.25rem 0.7rem; }
+.op-kyc-progress { display: flex; align-items: center; gap: var(--st-space-md); }
+.op-kyc-progress .op-progress { display: block; flex: 1 1 auto; max-width: 320px; }
+.op-kyc-progress strong { font-variant-numeric: tabular-nums; }
+@media (max-width: 575.98px) {
+    .op-kyc { padding: var(--st-space-sm) var(--st-space-md); }
+    .op-kyc-row { grid-template-columns: minmax(0, 1fr); row-gap: 0.4rem; }
+}
+
+/* ---- Ô chọn tài liệu pháp lý + nút ✕ bỏ tệp ---- */
+.op-file-field { position: relative; min-width: 0; }
+.op-file-field .op-input { width: 100%; padding-right: 2.75rem; }
+.op-file-clear {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--st-surface-low);
+    color: var(--st-secondary);
+    cursor: pointer;
+}
+.op-file-clear[hidden] { display: none; }
+.op-file-clear:hover { background: var(--st-error-container); color: var(--st-error); }
+.op-file-clear:focus-visible { outline: 2px solid var(--st-primary-container); outline-offset: 2px; }
+.op-file-clear .ph { font-size: 15px; }

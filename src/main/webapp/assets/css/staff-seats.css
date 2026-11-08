@@ -7,7 +7,7 @@
 .ss-head h1 {
     margin: 0 0 .35rem;
     font-size: 1.65rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .ss-head p {
@@ -22,23 +22,23 @@
     gap: .6rem;
     margin-bottom: 1rem;
     padding: .7rem 1rem;
-    border: 1px solid #ffd2c2;
+    border: 1px solid #ffd6cf;
     border-radius: 12px;
-    background: #fff4ee;
-    color: #c2410c;
+    background: #fafafa;
+    color: #b42e1d;
     font-size: .86rem;
     font-weight: 600;
 }
-.ss-notice .material-symbols-outlined {
+.ss-notice .ph {
     font-size: 20px;
     color: var(--primary-orange);
 }
 
 .ss-panel {
     background: #fff;
-    border: 1px solid #e4eaf7;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(22, 28, 36, .04);
+    border: 1px solid #efeff1;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(20, 20, 20, .04);
     margin-bottom: 1rem;
 }
 
@@ -55,13 +55,13 @@
     height: 100px;
     object-fit: cover;
     border-radius: 12px;
-    background: #f1f5f9;
+    background: #efeff1;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .ss-thumb-empty {
-    color: #94a3b8;
+    color: #9a9aa1;
 }
 .ss-title-row {
     display: flex;
@@ -73,7 +73,7 @@
 .ss-title-row h2 {
     margin: 0;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .ss-meta {
@@ -81,25 +81,25 @@
     align-items: flex-start;
     gap: .5rem;
     font-size: .86rem;
-    color: #475569;
+    color: #55555c;
     margin-top: .3rem;
 }
-.ss-meta .material-symbols-outlined {
+.ss-meta .ph {
     font-size: 18px;
-    color: #94a3b8;
+    color: #9a9aa1;
     flex: none;
 }
 .ss-event-side {
-    border-left: 1px solid #e4eaf7;
+    border-left: 1px solid #efeff1;
     padding-left: 1.25rem;
 }
 .ss-event-side h3 {
     margin: 0 0 .4rem;
     font-size: .8rem;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    color: #64748b;
+    color: #66666d;
 }
 .ss-switch {
     margin-top: .75rem;
@@ -110,13 +110,13 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    color: #64748b;
+    color: #66666d;
     margin-bottom: .3rem;
 }
 .ss-switch select {
     width: 100%;
     padding: .5rem .7rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #d4d4d8;
     border-radius: 10px;
     font-size: .86rem;
     background: #fff;
@@ -138,29 +138,29 @@
     padding: .2rem .65rem;
     border-radius: 999px;
     font-size: .74rem;
-    font-weight: 800;
+    font-weight: 700;
     white-space: nowrap;
 }
 .ss-badge.is-live {
-    background: #fff1ea;
-    color: #c2410c;
-    border: 1px solid #ffd2c2;
+    background: #fff4f2;
+    color: #b42e1d;
+    border: 1px solid #ffd6cf;
 }
 .ss-badge.is-open {
-    background: #e7f7ee;
-    color: #15803d;
+    background: #e7f6ee;
+    color: #13804b;
 }
 .ss-badge.is-near {
-    background: #fff1e0;
-    color: #c2610c;
+    background: #ffe7e2;
+    color: #b42e1d;
 }
 .ss-badge.is-full {
-    background: #fde4e1;
-    color: #b3261e;
+    background: #ffe7e2;
+    color: #b42e1d;
 }
 .ss-badge.is-muted {
-    background: #eef2f7;
-    color: #64748b;
+    background: #efeff1;
+    color: #66666d;
 }
 
 /* ---------- Lưới chính ---------- */
@@ -193,10 +193,10 @@
 }
 .ss-tab {
     padding: .55rem 1.05rem;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
-    color: #44506b;
+    color: #55555c;
     font-size: .84rem;
     font-weight: 700;
     cursor: pointer;
@@ -212,7 +212,7 @@
     color: #fff;
 }
 .ss-tab:focus-visible {
-    outline: 3px solid rgba(255, 112, 67, .35);
+    outline: 3px solid rgba(217, 58, 39, .35);
     outline-offset: 2px;
 }
 .ss-pane[hidden] {
@@ -236,7 +236,7 @@
     padding: 0;
     font-size: .78rem;
     font-weight: 600;
-    color: #334155;
+    color: #36363b;
 }
 .ss-legend i {
     display: inline-block;
@@ -248,29 +248,29 @@
     border: 1.5px solid transparent;
 }
 .ss-legend i.st-0 {
-    background: #5fcf86;
-    border-color: #34a35d;
+    background: #2e9e63;
+    border-color: #2e9e63;
 }
 .ss-legend i.st-1 {
-    background: #c4b5fd;
-    border-color: #7c3aed;
+    background: #d4d4d8;
+    border-color: #9a9aa1;
     border-style: dashed;
 }
 .ss-legend i.st-2 {
-    background: #ef5b4f;
-    border-color: #c73a2f;
+    background: #ff5b49;
+    border-color: #d93a27;
 }
 .ss-legend i.st-3 {
-    background: #f7a23b;
-    border-color: #d97f12;
+    background: #ff5b49;
+    border-color: #d93a27;
 }
 .ss-legend i.st-4 {
-    background: #cbd5e1;
-    border-color: #94a3b8;
+    background: #d4d4d8;
+    border-color: #9a9aa1;
 }
 .ss-legend i.st-vip {
     background: #fff;
-    border: 2.5px solid #2563eb;
+    border: 2.5px solid #77777e;
 }
 .ss-zoom {
     display: flex;
@@ -279,27 +279,27 @@
 .ss-icon-btn {
     width: 30px;
     height: 30px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #d4d4d8;
     background: #fff;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #475569;
+    color: #55555c;
 }
 .ss-icon-btn:hover {
-    background: #f1f5f9;
+    background: #efeff1;
 }
-.ss-icon-btn .material-symbols-outlined {
+.ss-icon-btn .ph {
     font-size: 18px;
 }
 
 .ss-canvas {
     overflow: auto;
-    border: 1px solid #e4eaf7;
-    border-radius: 14px;
-    background: #fafbfd;
+    border: 1px solid #efeff1;
+    border-radius: 12px;
+    background: #fafafa;
     max-height: 72vh;
 }
 #ssSvg {
@@ -309,35 +309,35 @@
     user-select: none;
 }
 #ssSvg text {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     pointer-events: none;
 }
 #ssSvg .ss-seat {
     stroke-width: 1.2;
 }
 #ssSvg .ss-seat.st-0 {
-    fill: #5fcf86;
-    stroke: #34a35d;
+    fill: #2e9e63;
+    stroke: #2e9e63;
 }
 #ssSvg .ss-seat.st-1 {
-    fill: #c4b5fd;
-    stroke: #7c3aed;
+    fill: #d4d4d8;
+    stroke: #9a9aa1;
     stroke-dasharray: 2 2;
 }
 #ssSvg .ss-seat.st-2 {
-    fill: #ef5b4f;
-    stroke: #c73a2f;
+    fill: #ff5b49;
+    stroke: #d93a27;
 }
 #ssSvg .ss-seat.st-3 {
-    fill: #f7a23b;
-    stroke: #d97f12;
+    fill: #ff5b49;
+    stroke: #d93a27;
 }
 #ssSvg .ss-seat.st-4 {
-    fill: #cbd5e1;
-    stroke: #94a3b8;
+    fill: #d4d4d8;
+    stroke: #9a9aa1;
 }
 #ssSvg .ss-seat.is-vip {
-    stroke: #2563eb;
+    stroke: #77777e;
     stroke-width: 2.6;
     stroke-dasharray: none;
 }
@@ -349,8 +349,8 @@
     gap: .9rem;
 }
 .ss-zone-card {
-    border: 1px solid #e4eaf7;
-    border-radius: 14px;
+    border: 1px solid #efeff1;
+    border-radius: 12px;
     padding: 1rem 1.1rem;
     background: #fff;
 }
@@ -364,7 +364,7 @@
 .ss-zone-card h3 {
     margin: 0;
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .ss-stats {
@@ -378,35 +378,35 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    color: #64748b;
+    color: #66666d;
 }
 .ss-stats dd {
     margin: .1rem 0 0;
     font-size: 1.25rem;
-    font-weight: 800;
-    color: #0f172a;
+    font-weight: 700;
+    color: #141414;
 }
 .ss-stats dd.is-strong {
-    color: #15803d;
+    color: #13804b;
 }
 .ss-bar {
     height: 8px;
     border-radius: 4px;
-    background: #e8edf5;
+    background: #efeff1;
     margin-top: .85rem;
     overflow: hidden;
 }
 .ss-bar span {
     display: block;
     height: 100%;
-    background: #27ae60;
+    background: #2e9e63;
     border-radius: 4px;
 }
 .ss-bar span.is-near {
-    background: #f59e0b;
+    background: #e09a1a;
 }
 .ss-bar span.is-full {
-    background: #dc2626;
+    background: #d93a27;
 }
 
 /* ---------- Cột phải ---------- */
@@ -419,10 +419,10 @@
     gap: .45rem;
     margin: 0 0 .7rem;
     font-size: .95rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
-.ss-card h3 .material-symbols-outlined {
+.ss-card h3 .ph {
     font-size: 20px;
     color: var(--primary-orange);
 }
@@ -438,20 +438,20 @@
 .ss-table th {
     position: sticky;
     top: 0;
-    background: #f8fafc;
+    background: #f5f5f6;
     padding: .5rem .5rem;
     text-align: left;
     font-size: .72rem;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .03em;
-    color: #475569;
-    border-bottom: 1px solid #e4eaf7;
+    color: #55555c;
+    border-bottom: 1px solid #efeff1;
 }
 .ss-table td {
     padding: .5rem .5rem;
-    border-bottom: 1px solid #eef2f7;
-    color: #334155;
+    border-bottom: 1px solid #efeff1;
+    color: #36363b;
     vertical-align: top;
 }
 .ss-table .n {
@@ -461,16 +461,16 @@
 .ss-table tfoot th {
     position: static;
     background: #fff;
-    border-top: 2px solid #e4eaf7;
+    border-top: 2px solid #efeff1;
     border-bottom: 0;
-    color: #0f172a;
+    color: #141414;
     text-transform: none;
     font-size: .82rem;
 }
 .ss-sub {
     display: block;
     font-size: .68rem;
-    color: #7c3aed;
+    color: #9a9aa1;
     font-weight: 600;
 }
 .ss-note {
@@ -479,9 +479,9 @@
     gap: .4rem;
     margin: .7rem 0 0;
     font-size: .76rem;
-    color: #64748b;
+    color: #66666d;
 }
-.ss-note .material-symbols-outlined {
+.ss-note .ph {
     font-size: 16px;
     flex: none;
 }
@@ -489,16 +489,16 @@
     display: flex;
     gap: .7rem;
     align-items: flex-start;
-    background: #f5f9ff;
-    border-color: #dbe7fb;
+    background: #fafafa;
+    border-color: #efeff1;
 }
-.ss-info .material-symbols-outlined {
-    color: #2563eb;
+.ss-info .ph {
+    color: #77777e;
 }
 .ss-info p {
     margin: 0;
     font-size: .82rem;
-    color: #334155;
+    color: #36363b;
 }
 .ss-hint {
     display: flex;
@@ -506,9 +506,9 @@
     gap: .4rem;
     margin: .8rem 0 0;
     font-size: .78rem;
-    color: #64748b;
+    color: #66666d;
 }
-.ss-hint .material-symbols-outlined {
+.ss-hint .ph {
     font-size: 16px;
     flex: none;
 }
@@ -521,11 +521,11 @@
     gap: .4rem;
     padding: 3rem 1rem;
     text-align: center;
-    color: #64748b;
+    color: #66666d;
 }
-.ss-empty .material-symbols-outlined {
+.ss-empty .ph {
     font-size: 44px;
-    color: #cbd5e1;
+    color: #d4d4d8;
 }
 .ss-empty p {
     margin: 0;
@@ -548,7 +548,7 @@
     .ss-event-side {
         border-left: 0;
         padding-left: 0;
-        border-top: 1px solid #e4eaf7;
+        border-top: 1px solid #efeff1;
         padding-top: .9rem;
     }
 }

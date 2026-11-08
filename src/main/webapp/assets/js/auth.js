@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     togglePassword.addEventListener('click', function () {
       const isPassword = passwordInput.getAttribute('type') === 'password';
       passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-      eyeIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+      eyeIcon.className = isPassword ? 'ph ph-eye-slash' : 'ph ph-eye';
     });
   }
 
@@ -23,32 +23,32 @@ document.addEventListener('DOMContentLoaded', function () {
       const title = document.querySelector('.auth-title');
       const divider = document.querySelector('.divider-text');
       if (isDark) {
-        modeIcon.className = 'bi bi-moon-stars text-primary';
+        modeIcon.className = 'ph ph-moon-stars text-primary';
         modeText.textContent = 'Chế độ tối';
-        document.body.style.backgroundColor = '#161c24';
+        document.body.style.backgroundColor = '#1f1f22';
         if (card) {
-          card.style.backgroundColor = '#202832';
+          card.style.backgroundColor = '#1f1f22';
           card.style.borderColor = 'rgba(255,255,255,0.1)';
         }
         if (title) title.style.color = '#ffffff';
         document.querySelectorAll('.form-label-custom').forEach(function (l) { l.style.color = '#ffffff'; });
         if (divider) {
-          divider.style.backgroundColor = '#202832';
-          divider.style.color = '#cbd5e1';
+          divider.style.backgroundColor = '#1f1f22';
+          divider.style.color = '#d4d4d8';
         }
       } else {
-        modeIcon.className = 'bi bi-brightness-high text-warning-emphasis';
+        modeIcon.className = 'ph ph-sun text-warning-emphasis';
         modeText.textContent = 'Chế độ sáng';
         document.body.style.backgroundColor = 'var(--bg-canvas)';
         if (card) {
           card.style.backgroundColor = 'var(--card-bg)';
-          card.style.borderColor = 'rgba(224, 191, 182, 0.35)';
+          card.style.borderColor = 'rgba(245, 194, 185, 0.35)';
         }
         if (title) title.style.color = 'var(--text-main)';
         document.querySelectorAll('.form-label-custom').forEach(function (l) { l.style.color = 'var(--text-main)'; });
         if (divider) {
           divider.style.backgroundColor = 'var(--card-bg)';
-          divider.style.color = '#8d7169';
+          divider.style.color = '#77777e';
         }
       }
     });
