@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Logger;
 import model.Payment;
-import model.PaymentResponse;
 import utils.DBContext;
 
 public class PaymentDAO {
