@@ -1,0 +1,72 @@
+/* Light Ticket — header chung các trang công khai (common/site-header.jsp).
+   Bố cục kiểu SeatGeek: logo · ô tìm kiếm dạng viên thuốc chiếm phần giữa · menu chữ đậm · nút Đăng nhập đen.
+   Tự đủ style, không phụ thuộc Bootstrap để hiển thị giống nhau ở mọi trang. */
+.sh-header {
+    position: sticky; top: 0; z-index: 1030;
+    background: #fff;
+    border-bottom: 1px solid var(--sg-line, #e4e4e7);
+    font-family: var(--sg-font, 'Inter', system-ui, sans-serif);
+}
+.sh-inner {
+    display: flex; align-items: center; gap: 24px;
+    max-width: 1280px; height: 72px; margin: 0 auto; padding: 0 24px;
+    box-sizing: border-box;
+}
+.sh-brand {
+    display: inline-flex; align-items: center; gap: 10px; flex: 0 0 auto;
+    color: var(--sg-ink, #141414); text-decoration: none;
+    font-size: 22px; font-weight: 800; letter-spacing: -.035em;
+}
+.sh-brand:hover { color: var(--sg-ink, #141414); }
+.sh-brand img { display: block; width: 30px; height: 30px; }
+
+/* Ô tìm kiếm: phần tử chính của header */
+.sh-search { order: 1; position: relative; flex: 1 1 auto; max-width: 620px; margin: 0; }
+.sh-search .ph {
+    position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+    font-size: 20px; color: var(--sg-ink, #141414); pointer-events: none;
+}
+.sh-search input {
+    width: 100%; height: 48px; box-sizing: border-box; padding: 0 20px 0 50px;
+    background: var(--sg-sunken, #efeff1); border: 2px solid transparent; border-radius: 999px;
+    color: var(--sg-ink, #141414); font: inherit; font-size: 15px; font-weight: 500;
+    transition: background-color .15s, border-color .15s, box-shadow .15s;
+}
+.sh-search input::placeholder { color: var(--sg-muted, #66666d); }
+.sh-search input:hover { background: #e4e4e7; }
+.sh-search input:focus {
+    outline: none; background: #fff;
+    border-color: var(--sg-ink, #141414) !important;
+    box-shadow: 0 6px 20px rgba(20, 20, 20, .1) !important;
+}
+
+.sh-nav { order: 2; display: flex; align-items: center; gap: 2px; flex: 0 0 auto; margin-left: auto; }
+.sh-link {
+    position: relative; padding: 10px 12px; border-radius: 8px;
+    color: var(--sg-ink, #141414); text-decoration: none; font-size: 15px; font-weight: 700; white-space: nowrap;
+}
+.sh-link:hover { color: var(--sg-ink, #141414); background: var(--sg-sunken, #efeff1); }
+.sh-link.is-active::after {
+    content: ""; position: absolute; left: 12px; right: 12px; bottom: -13px; height: 3px;
+    border-radius: 3px 3px 0 0; background: var(--sg-coral, #ff5b49);
+}
+
+.sh-account { order: 3; flex: 0 0 auto; display: flex; align-items: center; }
+.sh-login {
+    display: inline-flex; align-items: center; height: 42px; padding: 0 20px;
+    background: var(--sg-ink, #141414); border-radius: 999px;
+    color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+}
+.sh-login:hover { background: #36363b; color: #fff; }
+
+@media (max-width: 991.98px) {
+    .sh-inner { gap: 12px; padding: 0 16px; height: 64px; }
+    .sh-search { display: none; }
+    .sh-link.is-active::after { bottom: -9px; }
+}
+@media (max-width: 575.98px) {
+    .sh-brand span { display: none; }
+    .sh-link { padding: 8px; font-size: 14px; }
+    .sh-login { padding: 0 16px; }
+}
+@media print { .sh-header { display: none !important; } }

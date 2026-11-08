@@ -1,15 +1,15 @@
 
 :root {
-    --orange: #ff5722;
-    --orange-hover: #e94b19;
-    --green: #007653;
-    --green-bg: #e6f6ef;
-    --page-bg: #f8f8ff;
-    --text: #252641;
-    --muted: #777b95;
-    --border: #e8e9f3;
-    --purple-bg: #f0f1ff;
-    --shadow: 0 5px 20px rgba(41, 43, 72, .07);
+    --orange: #d93a27;
+    --orange-hover: #b42e1d;
+    --green: #0e6b3e;
+    --green-bg: #e7f6ee;
+    --page-bg: #f5f5f6;
+    --text: #141414;
+    --muted: #66666d;
+    --border: #e4e4e7;
+    --purple-bg: #f5f5f6;
+    --shadow: 0 5px 20px rgba(20, 20, 20, .07);
 }
 
 * {
@@ -20,7 +20,7 @@ body {
     margin: 0;
     background: var(--page-bg);
     color: var(--text);
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 14px;
     line-height: 1.6;
 }
@@ -45,9 +45,9 @@ a {
     margin-bottom: 38px;
     padding: 20px 24px;
     background: #fff;
-    border: 1px solid #f0eff7;
+    border: 1px solid #f5f5f6;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(41, 43, 72, .04);
+    box-shadow: 0 2px 8px rgba(20, 20, 20, .04);
 }
 
 .booking-step {
@@ -94,7 +94,7 @@ a {
 
 .booking-step.active .step-icon {
     background: var(--orange);
-    outline: 5px solid #ffe0d5;
+    outline: 5px solid #ffe7e2;
 }
 
 .booking-step.active .step-label,
@@ -131,13 +131,13 @@ a {
     width: 76px;
     height: 76px;
     margin: 0 auto 16px;
-    border: 7px solid #d8f3e7;
+    border: 7px solid #e7f6ee;
     border-radius: 50%;
     background: var(--green);
     color: #fff;
     font-size: 37px;
     font-weight: 700;
-    box-shadow: 0 5px 14px rgba(7, 150, 106, .16);
+    box-shadow: 0 5px 14px rgba(19, 128, 75, .16);
 }
 
 .success-heading h1 {
@@ -159,7 +159,7 @@ a {
     margin-bottom: 22px;
     padding: 26px;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     background: #fff;
     box-shadow: var(--shadow);
 }
@@ -180,7 +180,7 @@ a {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: #fff0e9;
+    background: #fafafa;
     color: var(--orange);
     font-size: 18px;
 }
@@ -188,9 +188,9 @@ a {
 .order-code {
     margin-bottom: 16px;
     padding: 16px 18px;
-    border: 1px dashed #ffb49c;
+    border: 1px dashed #f5c2b9;
     border-radius: 12px;
-    background: #fff7f3;
+    background: #fafafa;
 }
 
 .order-code .label {
@@ -235,7 +235,7 @@ a {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border-radius: 30px;
+    border-radius: 12px;
     background: var(--green-bg);
     color: var(--green);
     font-size: 12px;
@@ -245,7 +245,7 @@ a {
 .total-amount {
     color: var(--orange);
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 /* ===== NÚT ĐIỀU HƯỚNG ===== */
@@ -276,7 +276,7 @@ a {
 .payment-page .btn-primary {
     background: var(--orange);
     color: #fff;
-    box-shadow: 0 4px 10px rgba(255, 87, 34, .18);
+    box-shadow: none;
 }
 
 .payment-page .btn-primary:hover {
@@ -300,8 +300,8 @@ a {
 
 .notice {
     padding: 22px;
-    border: 1px solid #dfe3ff;
-    border-radius: 14px;
+    border: 1px solid #efeff1;
+    border-radius: 12px;
     background: var(--purple-bg);
 }
 
@@ -321,7 +321,7 @@ a {
     position: relative;
     margin: 8px 0;
     padding-left: 18px;
-    color: #626783;
+    color: #66666d;
 }
 
 .notice p::before {
@@ -329,7 +329,7 @@ a {
     left: 0;
     color: var(--orange);
     content: "•";
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .footer-note {
@@ -443,15 +443,15 @@ a {
     width: 100%;
     margin-top: 50px;
     padding: 24px 5%;
-    border-top: 1px solid #e8e9f3;
-    border-bottom: 3px solid #7770ff;
+    border-top: 1px solid #e4e4e7;
+    border-bottom: 3px solid #b4b4ba;
     background: #fff;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
 }
 
 .simple-footer-brand {
     flex-shrink: 0;
-    color: #ff5722;
+    color: #d93a27;
     font-size: 20px;
     font-weight: 750;
     text-decoration: none;
@@ -466,20 +466,20 @@ a {
 }
 
 .simple-footer-nav a {
-    color: #292b48;
+    color: #1f1f22;
     font-size: 14px;
     text-decoration: none;
     transition: color .2s ease;
 }
 
 .simple-footer-nav a:hover {
-    color: #ff5722;
+    color: #d93a27;
 }
 
 .simple-footer-copyright {
     flex-shrink: 0;
     margin: 0;
-    color: #777b95;
+    color: #66666d;
     font-size: 12px;
     text-align: right;
 }

@@ -3,29 +3,29 @@
    ========================================================================== */
 
 :root {
-  --lt-primary: #ff5722;
-  --lt-primary-hover: #fa541c;
-  --lt-primary-active: #e64a19;
-  --lt-primary-fixed: #ffdbd1;
-  --lt-on-primary-fixed: #862200;
+  --lt-primary: #d93a27;
+  --lt-primary-hover: #d93a27;
+  --lt-primary-active: #b42e1d;
+  --lt-primary-fixed: #ffe7e2;
+  --lt-on-primary-fixed: #8a2315;
   --lt-on-primary: #ffffff;
   
-  --lt-surface: #f9f9ff;
+  --lt-surface: #f5f5f6;
   --lt-surface-card: #ffffff;
-  --lt-surface-low: #f0f3ff;
-  --lt-surface-high: #e2e8f8;
-  --lt-surface-border: #e2e8f0;
+  --lt-surface-low: #efeff1;
+  --lt-surface-high: #e4e4e7;
+  --lt-surface-border: #e4e4e7;
   
-  --lt-text-main: #151c27;
-  --lt-text-secondary: #555f6f;
-  --lt-text-muted: #8b95a5;
+  --lt-text-main: #141414;
+  --lt-text-secondary: #4b4b52;
+  --lt-text-muted: #77777e;
   
-  --lt-success: #059669;
-  --lt-success-bg: rgba(16, 185, 129, 0.1);
-  --lt-warning: #d97706;
-  --lt-warning-bg: rgba(245, 158, 11, 0.12);
-  --lt-danger: #ba1a1a;
-  --lt-danger-bg: #ffdad6;
+  --lt-success: #13804b;
+  --lt-success-bg: rgba(46, 158, 99, 0.1);
+  --lt-warning: #b42e1d;
+  --lt-warning-bg: rgba(224, 154, 26, 0.12);
+  --lt-danger: #b42e1d;
+  --lt-danger-bg: #ffd6cf;
   
   --lt-radius-sm: 8px;
   --lt-radius-md: 12px;
@@ -40,7 +40,7 @@
 body.lt-body {
   background-color: var(--lt-surface);
   color: var(--lt-text-main);
-  font-family: 'Plus Jakarta Sans', Arial, -apple-system, sans-serif;
+  font-family: 'Inter', Arial, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -60,7 +60,6 @@ a.lt-link:hover {
    ========================================================================== */
 .lt-navbar {
   background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--lt-surface-border);
   position: sticky;
   top: 0;
@@ -87,7 +86,7 @@ a.lt-link:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(255, 87, 34, 0.3);
+  box-shadow: none;
   transition: transform 0.2s ease;
 }
 .lt-brand-logo:hover .lt-brand-icon {
@@ -138,7 +137,7 @@ a.lt-link:hover {
 .lt-search-box input:focus {
   background-color: #ffffff;
   border-color: var(--lt-primary);
-  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15);
+  box-shadow: 0 0 0 3px rgba(217, 58, 39, 0.15);
 }
 .lt-search-box .search-icon {
   position: absolute;
@@ -172,7 +171,7 @@ a.lt-link:hover {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff7043, #b02f00);
+  background: #d93a27;
   color: #fff;
   display: flex;
   align-items: center;
@@ -259,13 +258,13 @@ a.lt-link:hover {
   justify-content: center;
   gap: 6px;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(255, 87, 34, 0.25);
+  box-shadow: none;
   text-decoration: none;
 }
 .btn-lt-primary:hover, .btn-lt-primary:focus {
   background-color: var(--lt-primary-hover);
   color: #fff;
-  box-shadow: 0 3px 8px rgba(255, 87, 34, 0.35);
+  box-shadow: none;
 }
 .btn-lt-primary:active {
   background-color: var(--lt-primary-active);
@@ -290,7 +289,7 @@ a.lt-link:hover {
 .btn-lt-secondary:hover {
   background-color: var(--lt-surface-high);
   color: var(--lt-text-main);
-  border-color: #cbd5e1;
+  border-color: #d4d4d8;
 }
 
 /* ==========================================================================
@@ -357,8 +356,8 @@ a.lt-link:hover {
   color: var(--lt-warning);
 }
 .lt-pill-cancelled {
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: #efeff1;
+  color: #66666d;
 }
 .lt-pill-vip {
   background-color: var(--lt-primary-fixed);
@@ -398,7 +397,7 @@ a.lt-link:hover {
   color: var(--lt-primary);
 }
 .lt-sidebar-item.active {
-  background-color: rgba(255, 87, 34, 0.1);
+  background-color: rgba(217, 58, 39, 0.1);
   color: var(--lt-primary);
 }
 .lt-sidebar-item .item-left {
@@ -446,7 +445,7 @@ a.lt-link:hover {
   border-right: none;
 }
 .lt-ticket-dashed {
-  border-bottom: 2px dashed #cbd5e1;
+  border-bottom: 2px dashed #d4d4d8;
   margin: 12px 16px;
 }
 

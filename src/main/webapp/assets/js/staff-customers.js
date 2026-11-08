@@ -13,7 +13,7 @@
         fields.forEach(function (name) {
             var el = modal.querySelector('[data-field="' + name + '"]');
             if (el) {
-                el.textContent = btn.getAttribute('data-' + name) || '—';
+                el.textContent = btn.getAttribute('data-' + name) || '-';
             }
         });
     });

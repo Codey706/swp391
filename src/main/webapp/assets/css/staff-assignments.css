@@ -7,7 +7,7 @@
 .sa-head h1 {
     margin: 0 0 .35rem;
     font-size: 1.65rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .sa-head p {
@@ -17,9 +17,9 @@
 }
 .sa-panel {
     background: #fff;
-    border: 1px solid #e4eaf7;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(22, 28, 36, .04);
+    border: 1px solid #efeff1;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(20, 20, 20, .04);
     overflow: hidden;
 }
 
@@ -40,10 +40,10 @@
     display: inline-flex;
     align-items: center;
     padding: .55rem 1.05rem;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
-    color: #44506b;
+    color: #55555c;
     font-size: .84rem;
     font-weight: 700;
     text-decoration: none;
@@ -67,18 +67,18 @@
 .sa-search {
     position: relative;
 }
-.sa-search .material-symbols-outlined {
+.sa-search .ph {
     position: absolute;
     left: .75rem;
     top: 50%;
     transform: translateY(-50%);
     font-size: 20px;
-    color: #94a3b8;
+    color: #9a9aa1;
     pointer-events: none;
 }
 .sa-input {
     height: 42px;
-    border: 1px solid #e4eaf7;
+    border: 1px solid #efeff1;
     border-radius: 10px;
     background: #fff;
     color: var(--text-main);
@@ -101,12 +101,12 @@ select.sa-input {
 .sa-input:focus {
     outline: none;
     border-color: var(--primary-orange);
-    box-shadow: 0 0 0 3px rgba(255, 112, 67, .15);
+    box-shadow: 0 0 0 3px rgba(217, 58, 39, .15);
 }
 
 /* ---------- Danh sách ---------- */
 .sa-list {
-    border-top: 1px solid #eef1f8;
+    border-top: 1px solid #efeff1;
 }
 .sa-item {
     display: grid;
@@ -114,7 +114,7 @@ select.sa-input {
     align-items: center;
     gap: 1.5rem;
     padding: 1.1rem 1.25rem;
-    border-bottom: 1px solid #eef1f8;
+    border-bottom: 1px solid #efeff1;
 }
 .sa-item:last-child {
     border-bottom: 0;
@@ -133,7 +133,7 @@ select.sa-input {
 .sa-name {
     margin: 0 0 .4rem;
     font-size: 1.02rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
     overflow-wrap: anywhere;
 }
@@ -153,16 +153,16 @@ select.sa-input {
     gap: .4rem;
     margin-top: .25rem;
     font-size: .82rem;
-    color: #4b5563;
+    color: #55555c;
 }
-.sa-meta .material-symbols-outlined {
+.sa-meta .ph {
     font-size: 17px;
-    color: #94a3b8;
+    color: #9a9aa1;
 }
 .sa-col {
     align-self: stretch;
     padding-left: 1.5rem;
-    border-left: 1px solid #eef1f8;
+    border-left: 1px solid #efeff1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -188,7 +188,7 @@ select.sa-input {
 }
 .sa-stats .sa-value {
     font-size: .95rem;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 /* ---------- Badge trạng thái ---------- */
@@ -210,10 +210,10 @@ select.sa-input {
     border-radius: 50%;
     background: currentColor;
 }
-.sa-badge.is-upcoming { background: #e8f7ee; color: #1e8e4e; }
-.sa-badge.is-ongoing { background: #c9f0d8; color: #0b6b34; }
-.sa-badge.is-ended { background: #eef1f6; color: #5b6578; }
-.sa-badge.is-cancelled { background: #fdecec; color: #c0201a; }
+.sa-badge.is-upcoming { background: #e7f6ee; color: #13804b; }
+.sa-badge.is-ongoing { background: #bfe3cf; color: #0e6b3e; }
+.sa-badge.is-ended { background: #e4e4e7; color: #55555c; }
+.sa-badge.is-cancelled { background: #fff4f2; color: #b42e1d; }
 
 /* ---------- Nút ---------- */
 .sa-btn {
@@ -237,8 +237,8 @@ select.sa-input {
 }
 .sa-btn.is-outline {
     background: #fff;
-    border: 1px solid #e4eaf7;
-    color: #44506b;
+    border: 1px solid #efeff1;
+    color: #55555c;
 }
 .sa-btn.is-outline:hover {
     border-color: var(--primary-orange);
@@ -252,9 +252,9 @@ select.sa-input {
     text-align: center;
     color: var(--text-muted);
 }
-.sa-empty .material-symbols-outlined {
+.sa-empty .ph {
     font-size: 44px;
-    color: #c5cbd8;
+    color: #d4d4d8;
 }
 .sa-empty p {
     margin: .5rem 0 1rem;
@@ -291,22 +291,22 @@ select.sa-input {
 }
 .sa-stat {
     padding: 1rem 1.15rem;
-    border: 1px solid #e4eaf7;
-    border-radius: 14px;
+    border: 1px solid #efeff1;
+    border-radius: 12px;
     background: #fff;
 }
 .sa-stat b {
     display: block;
     margin-top: .25rem;
     font-size: 1.5rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-main);
 }
 .sa-progress {
     height: 8px;
     margin-top: 1rem;
     border-radius: 9999px;
-    background: #eef1f8;
+    background: #efeff1;
     overflow: hidden;
 }
 .sa-progress span {
@@ -341,7 +341,7 @@ select.sa-input {
         padding-left: 0;
         border-left: 0;
         padding-top: .9rem;
-        border-top: 1px solid #eef1f8;
+        border-top: 1px solid #efeff1;
     }
     .sa-tools, .sa-search, .sa-search .sa-input, select.sa-input {
         width: 100%;
