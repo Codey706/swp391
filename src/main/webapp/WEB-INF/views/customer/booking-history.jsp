@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %><fmt:setLocale value="vi_VN"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <c:set var="user" value="${sessionScope.user}"/>
 <c:set var="userInitial" value="${empty user.fullName ? 'U' : fn:toUpperCase(fn:substring(user.fullName, 0, 1))}"/>
@@ -13,21 +13,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vé của tôi - Lịch sử đơn hàng & Vé điện tử - Light Ticketbox</title>
+    <title>Vé của tôi - Lịch sử đơn hàng & Vé điện tử - Light Ticket</title>
 
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
     <!-- Material Symbols Outlined -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Stitch Design System CSS -->
     <link rel="stylesheet" href="${ctx}/assets/css/stitch-custom.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
 </head>
 
 <body class="lt-body d-flex flex-column min-vh-100">
@@ -35,77 +42,9 @@
     <!-- ======================================================================
          HEADER (STITCH COMPATIBLE)
          ====================================================================== -->
-    <header class="lt-navbar">
-        <div class="container-xl d-flex align-items-center justify-content-between gap-3">
-            <!-- Brand Logo -->
-            <a class="lt-brand-logo" href="${ctx}/">
-                <div class="lt-brand-icon">
-                    <span class="material-symbols-outlined">confirmation_number</span>
-                </div>
-                <span class="lt-brand-title">Light <span>Ticketbox</span></span>
-            </a>
-
-            <!-- Navigation Links -->
-            <nav class="d-none d-lg-flex align-items-center gap-1">
-                <a class="lt-nav-link" href="${ctx}/">Trang chủ</a>
-                <a class="lt-nav-link" href="${ctx}/home#events">Khám phá sự kiện</a>
-                <a class="lt-nav-link active" href="${ctx}/customer/booking-history">Vé của tôi</a>
-            </nav>
-
-            <!-- Search Bar in Header -->
-            <div class="lt-search-box d-none d-md-block">
-                <form method="get" action="${ctx}/customer/booking-history" class="m-0">
-                    <span class="material-symbols-outlined search-icon">search</span>
-                    <input type="search" name="keyword" placeholder="Tìm theo mã đơn hoặc tên sự kiện..." value="<c:out value='${keyword}'/>">
-                    <c:if test="${not empty status}">
-                        <input type="hidden" name="status" value="<c:out value='${status}'/>">
-                    </c:if>
-                </form>
-            </div>
-
-            <!-- User Menu -->
-            <div class="dropdown">
-                <button class="lt-user-btn" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="lt-avatar-round">
-                        <span>${userInitial}</span>
-                    </div>
-                    <div class="lt-user-info-text d-none d-sm-block">
-                        <span class="lt-user-name"><c:out value="${empty user.fullName ? user.username : user.fullName}"/></span>
-                        <span class="lt-user-tier"><c:out value="${empty user.role ? 'Khách hàng' : user.role}"/></span>
-                    </div>
-                    <span class="material-symbols-outlined text-secondary d-none d-sm-inline" style="font-size:18px;">expand_more</span>
-                </button>
-
-                <ul class="dropdown-menu dropdown-menu-end lt-dropdown-menu" aria-labelledby="userMenuDropdown">
-                    <li class="lt-dropdown-header d-sm-none">
-                        <p class="fw-bold mb-0 text-dark small"><c:out value="${user.fullName}"/></p>
-                        <span class="text-secondary small"><c:out value="${user.role}"/></span>
-                    </li>
-                    <li>
-                        <a class="lt-dropdown-item" href="${ctx}/CustomerProfileController">
-                            <span class="material-symbols-outlined text-secondary" style="font-size:18px;">account_circle</span>
-                            Hồ sơ của tôi
-                        </a>
-                    </li>
-                    <li>
-                        <a class="lt-dropdown-item" href="${ctx}/customer/booking-history">
-                            <span class="material-symbols-outlined text-secondary" style="font-size:18px;">local_activity</span>
-                            Vé của tôi
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider my-1"></li>
-                    <li>
-                        <form action="${ctx}/logout" method="POST" class="m-0">
-                            <button type="submit" class="lt-dropdown-item danger border-0 bg-transparent w-100 text-start">
-                                <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
-                                Đăng xuất
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </header>
+    <jsp:include page="/WEB-INF/views/common/site-header.jsp">
+        <jsp:param name="active" value="tickets"/>
+    </jsp:include>
 
     <!-- ======================================================================
          MAIN CONTENT
@@ -115,12 +54,12 @@
         <!-- Breadcrumb Navigation -->
         <nav aria-label="Breadcrumb" class="lt-breadcrumb mb-3">
             <a href="${ctx}/" class="d-inline-flex align-items-center gap-1">
-                <span class="material-symbols-outlined" style="font-size:16px;">home</span>
+                <i class="ph ph-house" style="font-size:16px;" aria-hidden="true"></i>
                 Trang chủ
             </a>
-            <span class="material-symbols-outlined separator">chevron_right</span>
+            <i class="ph ph-caret-right separator" aria-hidden="true"></i>
             <a href="${ctx}/CustomerProfileController">Tài khoản của tôi</a>
-            <span class="material-symbols-outlined separator">chevron_right</span>
+            <i class="ph ph-caret-right separator" aria-hidden="true"></i>
             <span class="active">Vé của tôi</span>
         </nav>
 
@@ -128,7 +67,7 @@
         <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4">
             <div>
                 <div class="d-inline-flex align-items-center gap-1 mb-2 px-2 py-1 rounded-pill" style="background: var(--lt-primary-fixed); color: var(--lt-on-primary-fixed); font-size: 12px; font-weight: 600;">
-                    <span class="material-symbols-outlined" style="font-size:14px;">receipt_long</span>
+                    <i class="ph ph-receipt" style="font-size:14px;" aria-hidden="true"></i>
                     Trung tâm đơn hàng cá nhân
                 </div>
                 <h1 class="h2 fw-bold text-dark mb-1">Vé của tôi - Lịch sử đơn hàng &amp; Vé điện tử</h1>
@@ -141,7 +80,7 @@
             <div class="d-flex flex-wrap align-items-center gap-2 p-2 rounded-3" style="background-color: var(--lt-surface-low);">
                 <div class="d-flex align-items-center gap-2 px-3 py-1 bg-white rounded-3 shadow-sm">
                     <div class="d-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:var(--lt-success-bg);color:var(--lt-success);">
-                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                        <i class="ph ph-check-circle" style="font-size:18px;" aria-hidden="true"></i>
                     </div>
                     <div>
                         <span class="d-block text-muted" style="font-size:11px;">Thành công</span>
@@ -151,7 +90,7 @@
 
                 <div class="d-flex align-items-center gap-2 px-3 py-1 bg-white rounded-3 shadow-sm">
                     <div class="d-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:var(--lt-warning-bg);color:var(--lt-warning);">
-                        <span class="material-symbols-outlined" style="font-size:18px;">pending_actions</span>
+                        <i class="ph ph-hourglass" style="font-size:18px;" aria-hidden="true"></i>
                     </div>
                     <div>
                         <span class="d-block text-muted" style="font-size:11px;">Cần thanh toán</span>
@@ -195,7 +134,7 @@
                     <div class="input-group input-group-sm" style="max-width: 320px;">
                         <input type="text" name="keyword" class="form-control" placeholder="Tìm theo mã đơn hoặc tên..." value="<c:out value='${keyword}'/>">
                         <button class="btn btn-lt-primary" type="submit">
-                            <span class="material-symbols-outlined" style="font-size:16px;">search</span>
+                            <i class="ph ph-magnifying-glass" style="font-size:16px;" aria-hidden="true"></i>
                         </button>
                     </div>
                 </form>
@@ -209,7 +148,7 @@
                     <!-- Empty State -->
                     <div class="lt-card p-5 text-center my-3">
                         <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-4 mb-3" style="background-color: var(--lt-surface-low); color: var(--lt-primary);">
-                            <span class="material-symbols-outlined" style="font-size: 48px;">receipt_long</span>
+                            <i class="ph ph-receipt" style="font-size: 48px;" aria-hidden="true"></i>
                         </div>
                         <h3 class="h5 fw-bold text-dark mb-2">Chưa tìm thấy đơn hàng nào</h3>
                         <p class="text-secondary small mb-3" style="max-width: 400px; margin: 0 auto;">
@@ -247,11 +186,11 @@
                             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--lt-surface-border)!important;">
                                 <div class="d-flex flex-wrap align-items-center gap-3">
                                     <div class="d-flex align-items-center gap-1">
-                                        <span class="material-symbols-outlined text-primary" style="font-size:20px;color:var(--lt-primary)!important;">confirmation_number</span>
+                                        <i class="ph ph-ticket text-primary" style="font-size:20px;color:var(--lt-primary)!important;" aria-hidden="true"></i>
                                         <span class="small fw-bold text-dark">Mã đơn: <span style="color:var(--lt-primary); font-family:monospace; font-size:1rem;">#<c:out value="${booking.orderCode}"/></span></span>
                                     </div>
                                     <div class="d-flex align-items-center gap-1 text-secondary small">
-                                        <span class="material-symbols-outlined" style="font-size:16px;">schedule</span>
+                                        <i class="ph ph-clock" style="font-size:16px;" aria-hidden="true"></i>
                                         <span>Ngày đặt: <c:out value="${createdText}"/></span>
                                     </div>
                                 </div>
@@ -261,19 +200,19 @@
                                     <c:choose>
                                         <c:when test="${booking.status eq 'Paid'}">
                                             <span class="lt-pill lt-pill-paid">
-                                                <span class="material-symbols-outlined" style="font-size:14px;">check_circle</span>
+                                                <i class="ph ph-check-circle" style="font-size:14px;" aria-hidden="true"></i>
                                                 Đã thanh toán thành công
                                             </span>
                                         </c:when>
                                         <c:when test="${booking.status eq 'Pending'}">
                                             <span class="lt-pill lt-pill-pending">
-                                                <span class="material-symbols-outlined" style="font-size:14px;">hourglass_top</span>
+                                                <i class="ph ph-hourglass-high" style="font-size:14px;" aria-hidden="true"></i>
                                                 Chờ thanh toán
                                             </span>
                                         </c:when>
                                         <c:otherwise>
                                             <span class="lt-pill lt-pill-cancelled">
-                                                <span class="material-symbols-outlined" style="font-size:14px;">cancel</span>
+                                                <i class="ph ph-x-circle" style="font-size:14px;" aria-hidden="true"></i>
                                                 Đã hủy
                                             </span>
                                         </c:otherwise>
@@ -288,14 +227,14 @@
                                     <div class="position-relative rounded-3 overflow-hidden" style="aspect-ratio: 16/10; background-color: var(--lt-surface-low);">
                                         <c:choose>
                                             <c:when test="${not empty booking.eventImage and fn:startsWith(booking.eventImage, 'http')}">
-                                                <img src="<c:out value='${booking.eventImage}'/>" alt="Event Poster" class="w-100 h-100 object-fit-cover" onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center w-100 h-100 text-muted\'><span class=\'material-symbols-outlined\'>confirmation_number</span></div>';">
+                                                <img src="<c:out value='${booking.eventImage}'/>" alt="Event Poster" class="w-100 h-100 object-fit-cover" onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center w-100 h-100 text-muted\'><i class=\'ph ph-ticket\'></i></div>';">
                                             </c:when>
                                             <c:when test="${not empty booking.eventImage}">
-                                                <img src="${ctx}/<c:out value='${booking.eventImage}'/>" alt="Event Poster" class="w-100 h-100 object-fit-cover" onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center w-100 h-100 text-muted\'><span class=\'material-symbols-outlined\'>confirmation_number</span></div>';">
+                                                <img src="${ctx}/<c:out value='${booking.eventImage}'/>" alt="Event Poster" class="w-100 h-100 object-fit-cover" onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center w-100 h-100 text-muted\'><i class=\'ph ph-ticket\'></i></div>';">
                                             </c:when>
                                             <c:otherwise>
                                                 <div class="d-flex align-items-center justify-content-center w-100 h-100 text-muted">
-                                                    <span class="material-symbols-outlined" style="font-size:32px;">confirmation_number</span>
+                                                    <i class="ph ph-ticket" style="font-size:32px;" aria-hidden="true"></i>
                                                 </div>
                                             </c:otherwise>
                                         </c:choose>
@@ -315,11 +254,11 @@
                                         </h2>
                                         <div class="d-flex flex-column gap-1 small text-secondary mb-2">
                                             <div class="d-flex align-items-center gap-1">
-                                                <span class="material-symbols-outlined text-primary" style="font-size:16px;color:var(--lt-primary)!important;">event</span>
+                                                <i class="ph ph-calendar-blank text-primary" style="font-size:16px;color:var(--lt-primary)!important;" aria-hidden="true"></i>
                                                 <span><c:out value="${startText}" default="Thời gian chưa cập nhật"/></span>
                                             </div>
                                             <div class="d-flex align-items-center gap-1">
-                                                <span class="material-symbols-outlined text-muted" style="font-size:16px;">location_on</span>
+                                                <i class="ph ph-map-pin text-muted" style="font-size:16px;" aria-hidden="true"></i>
                                                 <span class="text-truncate"><c:out value="${booking.venueName}" default="Địa điểm sự kiện"/></span>
                                             </div>
                                         </div>
@@ -328,7 +267,7 @@
                                     <!-- Ticket Quantity Chip -->
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="px-2 py-1 rounded-2 small" style="background-color: var(--lt-surface-low); border: 1px solid var(--lt-surface-border);">
-                                            <span class="material-symbols-outlined text-success align-middle" style="font-size:15px;">chair</span>
+                                            <i class="ph ph-chair text-success align-middle" style="font-size:15px;" aria-hidden="true"></i>
                                             <c:out value="${booking.ticketQuantity}"/> vé
                                             <c:if test="${not empty booking.ticketName}">· <c:out value="${booking.ticketName}"/></c:if>
                                         </span>
@@ -356,15 +295,15 @@
                                 <div class="d-flex align-items-center gap-1 text-secondary small">
                                     <c:choose>
                                         <c:when test="${booking.status eq 'Paid'}">
-                                            <span class="material-symbols-outlined text-success" style="font-size:16px;">verified_user</span>
+                                            <i class="ph ph-shield-check text-success" style="font-size:16px;" aria-hidden="true"></i>
                                             <span>Vé chính hãng đã kích hoạt mã định danh bảo mật</span>
                                         </c:when>
                                         <c:when test="${booking.status eq 'Pending'}">
-                                            <span class="material-symbols-outlined text-danger" style="font-size:16px;">timer</span>
+                                            <i class="ph ph-timer text-danger" style="font-size:16px;" aria-hidden="true"></i>
                                             <span class="text-danger">Đơn hàng đang giữ vé, vui lòng thanh toán sớm</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">info</span>
+                                            <i class="ph ph-info text-muted" style="font-size:16px;" aria-hidden="true"></i>
                                             <span>Đơn hàng đã hết hạn hoặc bị hủy</span>
                                         </c:otherwise>
                                     </c:choose>
@@ -373,7 +312,7 @@
                                 <div class="d-flex flex-wrap align-items-center gap-2">
                                     <c:if test="${booking.status eq 'Pending'}">
                                         <a href="${ctx}/booking/payment?orderId=${booking.bookingId}" class="btn-lt-primary btn-sm">
-                                            <span class="material-symbols-outlined" style="font-size:16px;">credit_card</span>
+                                            <i class="ph ph-credit-card" style="font-size:16px;" aria-hidden="true"></i>
                                             Thanh toán ngay
                                         </a>
                                     </c:if>
@@ -381,7 +320,7 @@
                                     <!-- CTA Direct into Order Detail Screen (UC-07.1) -->
                                     <a href="${ctx}/customer/booking-detail?orderId=${booking.bookingId}" class="btn-lt-secondary btn-sm">
                                         Xem chi tiết đơn
-                                        <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+                                        <i class="ph ph-arrow-right" style="font-size:16px;" aria-hidden="true"></i>
                                     </a>
                                 </div>
                             </div>
@@ -420,22 +359,7 @@
     <!-- ======================================================================
          FOOTER
          ====================================================================== -->
-    <footer class="lt-footer">
-        <div class="container-xl d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <div class="lt-brand-icon" style="width:30px;height:30px;border-radius:8px;">
-                    <span class="material-symbols-outlined" style="font-size:18px;">confirmation_number</span>
-                </div>
-                <span class="fw-bold text-dark">Light Ticketbox</span>
-            </div>
-            <div class="d-flex align-items-center gap-4 small">
-                <a href="${ctx}/">Trang chủ</a>
-                <a href="${ctx}/customer/booking-history">Vé của tôi</a>
-                <a href="${ctx}/CustomerProfileController">Hồ sơ cá nhân</a>
-            </div>
-            <span class="text-secondary small">© 2026 Light Ticket. All rights reserved.</span>
-        </div>
-    </footer>
+    <jsp:include page="/WEB-INF/views/common/site-footer.jsp"/>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
