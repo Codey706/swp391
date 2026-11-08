@@ -12,7 +12,16 @@
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/seatmap.css">
         <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
-    </head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="events"/>
@@ -26,29 +35,29 @@
             <section class="org-card ce-toolbar">
                 <div class="ce-toolbar-title">
                     <a class="ce-back" href="${ctx}/organizer/event/list" aria-label="Quay lại danh sách sự kiện">
-                        <span class="material-symbols-outlined">arrow_back</span>
+                        <i class="ph ph-arrow-left" aria-hidden="true"></i>
                     </a>
                     <h1>Tạo sự kiện mới</h1>
                     <span class="ce-pill">Lưu nháp hoặc gửi Admin duyệt ở bước cuối</span>
                 </div>
                 <div class="ce-toolbar-actions">
                     <button type="submit" form="create-event-form" name="submitAction" value="draft" class="btn-soft">
-                        <span class="material-symbols-outlined">save</span> Lưu bản nháp
+                        <i class="ph ph-floppy-disk" aria-hidden="true"></i> Lưu bản nháp
                     </button>
                     <button type="button" class="btn-soft btn-preview" id="scrollPreviewBtn">
-                        <span class="material-symbols-outlined">visibility</span> Xem trước
+                        <i class="ph ph-eye" aria-hidden="true"></i> Xem trước
                     </button>
                     <button type="button" class="btn-cta" data-step-nav="next-header">
-                        <span class="material-symbols-outlined">rocket_launch</span> Hoàn tất &amp; tạo sự kiện
+                        <i class="ph ph-rocket-launch" aria-hidden="true"></i> Hoàn tất &amp; tạo sự kiện
                     </button>
                 </div>
             </section>
 
             <c:if test="${not empty successMessage}">
-                <div class="lt-alert success"><span class="material-symbols-outlined">check_circle</span><span><c:out value="${successMessage}"/></span></div>
+                <div class="lt-alert success"><i class="ph ph-check-circle" aria-hidden="true"></i><span><c:out value="${successMessage}"/></span></div>
             </c:if>
             <c:if test="${not empty errors.general}">
-                <div class="lt-alert error"><span class="material-symbols-outlined">error</span><span><c:out value="${errors.general}"/></span></div>
+                <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errors.general}"/></span></div>
             </c:if>
 
             <%-- Các bước --%>
@@ -80,7 +89,7 @@
                         <%-- ============ BƯỚC 1 ============ --%>
                         <section class="org-card form-card active" data-step-pane="1">
                             <div class="form-card-head">
-                                <span class="ico"><span class="material-symbols-outlined">info</span></span>
+                                <span class="ico"><i class="ph ph-info" aria-hidden="true"></i></span>
                                 <div>
                                     <h2>1. Thông tin chung sự kiện</h2>
                                 </div>
@@ -122,7 +131,7 @@
                                             <span class="av"><c:out value="${orgInitial}"/></span>
                                             <strong><c:out value="${orgName}"/></strong>
                                         </span>
-                                        <span class="ok"><span class="material-symbols-outlined">verified</span>Đã xác minh</span>
+                                        <span class="ok"><i class="ph ph-seal-check" aria-hidden="true"></i>Đã xác minh</span>
                                     </div>
                                 </div>
 
@@ -134,7 +143,7 @@
                                     <label class="drop-zone" id="dropZone" for="eventImage">
                                         <img alt="Xem trước poster" id="posterPreview">
                                         <span class="dz-overlay">
-                                            <span class="material-symbols-outlined">cloud_upload</span>
+                                            <i class="ph ph-cloud-arrow-up" aria-hidden="true"></i>
                                             <strong>Kéo thả ảnh hoặc nhấn để chọn poster bìa</strong>
                                             <span>Định dạng JPG, PNG, WEBP tối đa 5MB · chỉnh khung 16:9 sau khi chọn</span>
                                         </span>
@@ -158,7 +167,7 @@
                         <%-- ============ BƯỚC 2 ============ --%>
                         <section class="org-card form-card" data-step-pane="2">
                             <div class="form-card-head">
-                                <span class="ico"><span class="material-symbols-outlined">calendar_today</span></span>
+                                <span class="ico"><i class="ph ph-calendar-blank" aria-hidden="true"></i></span>
                                 <div>
                                     <h2>2. Thời gian &amp; Địa điểm tổ chức</h2>
                                 </div>
@@ -168,7 +177,7 @@
                                 <div class="lt-field">
                                     <label for="startTime" class="lt-label">Thời gian bắt đầu <span class="req">*</span></label>
                                     <div class="lt-icon-wrap">
-                                        <span class="material-symbols-outlined">calendar_month</span>
+                                        <i class="ph ph-calendar" aria-hidden="true"></i>
                                         <input type="datetime-local" id="startTime" name="startTime"
                                                class="lt-input ${not empty errors.startTime ? 'is-invalid' : ''}"
                                                value="${fn:substring(event.startTime, 0, 16)}">
@@ -178,7 +187,7 @@
                                 <div class="lt-field">
                                     <label for="endTime" class="lt-label">Thời gian kết thúc <span class="req">*</span></label>
                                     <div class="lt-icon-wrap">
-                                        <span class="material-symbols-outlined">schedule</span>
+                                        <i class="ph ph-clock" aria-hidden="true"></i>
                                         <input type="datetime-local" id="endTime" name="endTime"
                                                class="lt-input ${not empty errors.endTime ? 'is-invalid' : ''}"
                                                value="${fn:substring(event.endTime, 0, 16)}">
@@ -188,7 +197,7 @@
                                 <div class="lt-field full mb-0">
                                     <label for="venueId" class="lt-label">Địa điểm tổ chức <span class="req">*</span></label>
                                     <div class="lt-icon-wrap accent">
-                                        <span class="material-symbols-outlined">location_on</span>
+                                        <i class="ph ph-map-pin" aria-hidden="true"></i>
                                         <select id="venueId" name="venueId"
                                                 class="lt-input ${not empty errors.venueId ? 'is-invalid' : ''}">
                                             <option value="">-- Chọn địa điểm --</option>
@@ -208,7 +217,7 @@
                         <%-- ============ BƯỚC 3 ============ --%>
                         <section class="org-card form-card" data-step-pane="3">
                             <div class="form-card-head">
-                                <span class="ico"><span class="material-symbols-outlined">confirmation_number</span></span>
+                                <span class="ico"><i class="ph ph-ticket" aria-hidden="true"></i></span>
                                 <div>
                                     <h2>3. Hạng vé &amp; Sơ đồ ghế</h2>
                                     <p>Chọn cách bán vé cho sự kiện, có thể bổ sung sau khi lưu nháp</p>
@@ -216,32 +225,32 @@
                             </div>
 
                             <c:if test="${not empty errors.tickets}">
-                                <div class="lt-alert error"><span class="material-symbols-outlined">error</span><span><c:out value="${errors.tickets}"/></span></div>
+                                <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errors.tickets}"/></span></div>
                             </c:if>
                             <c:if test="${not empty seatErrors}">
                                 <div class="lt-alert error">
-                                    <span class="material-symbols-outlined">error</span>
+                                    <i class="ph ph-warning-circle" aria-hidden="true"></i>
                                     <ul class="sm-server-errors">
                                         <c:forEach var="msg" items="${seatErrors}"><li><c:out value="${msg}"/></li></c:forEach>
                                     </ul>
                                 </div>
                             </c:if>
                             <div class="lt-alert error" id="seatStepAlert" hidden>
-                                <span class="material-symbols-outlined">error</span><span id="seatStepAlertText"></span>
+                                <i class="ph ph-warning-circle" aria-hidden="true"></i><span id="seatStepAlertText"></span>
                             </div>
 
                             <div class="sale-modes" role="radiogroup" aria-label="Hình thức bán vé">
                                 <label class="mode-card" data-mode-card>
                                     <input type="radio" name="ticketMode" value="GENERAL" ${ticketMode != 'SEATED' ? 'checked' : ''}>
-                                    <span class="material-symbols-outlined">confirmation_number</span>
+                                    <i class="ph ph-ticket" aria-hidden="true"></i>
                                     <span><strong>Vé theo số lượng</strong>
                                         <small>Không chọn chỗ ngồi. Khán giả mua theo hạng vé, phù hợp sự kiện đứng hoặc tự do.</small></span>
                                 </label>
                                 <label class="mode-card" data-mode-card>
                                     <input type="radio" name="ticketMode" value="SEATED" ${ticketMode == 'SEATED' ? 'checked' : ''}>
-                                    <span class="material-symbols-outlined">event_seat</span>
+                                    <i class="ph ph-armchair" aria-hidden="true"></i>
                                     <span><strong>Vé theo sơ đồ ghế</strong>
-                                        <small>Vẽ sơ đồ sân khấu, khu ngồi, khu đứng; mỗi khu một hạng vé và giá, giống Ticketbox.</small></span>
+                                        <small>Vẽ sơ đồ sân khấu, khu ngồi, khu đứng; mỗi khu một hạng vé và giá.</small></span>
                                 </label>
                             </div>
 
@@ -249,11 +258,11 @@
                             <div id="modeGeneral">
                                 <div class="tk-block" id="ticketBlock" data-max-types="10">
                                     <div class="tk-head">
-                                        <h3><span class="material-symbols-outlined">confirmation_number</span> Thiết lập các hạng vé (Ticket Classes)</h3>
+                                        <h3><i class="ph ph-ticket" aria-hidden="true"></i> Thiết lập các hạng vé (Ticket Classes)</h3>
                                     </div>
                                     <p class="tk-note">Không bắt buộc khi lưu nháp. Cần ít nhất một hạng vé khi gửi Admin duyệt. Tổng số vé không vượt quá sức chứa của địa điểm.</p>
                                     <div class="lt-alert error" id="ticketAlert" style="display:none">
-                                        <span class="material-symbols-outlined">error</span><span id="ticketAlertText"></span>
+                                        <i class="ph ph-warning-circle" aria-hidden="true"></i><span id="ticketAlertText"></span>
                                     </div>
                                     <div class="tk-list" id="ticketList">
                                         <c:forEach var="t" items="${tickets}">
@@ -264,7 +273,7 @@
                                     <div class="tk-empty" id="ticketEmpty">Chưa có hạng vé nào. Nhấn “Thêm hạng vé mới” để bắt đầu.</div>
                                     <div class="tk-actions">
                                         <button type="button" class="btn-soft" id="addTicketBtn">
-                                            <span class="material-symbols-outlined" style="font-size:18px">add_circle</span> Thêm hạng vé mới
+                                            <i class="ph ph-plus-circle" style="font-size:18px" aria-hidden="true"></i> Thêm hạng vé mới
                                         </button>
                                         <span class="tk-summary">Tổng số vé: <b id="tkTotalQty">0</b> &nbsp;·&nbsp; Doanh thu kỳ vọng: <b id="tkTotalRevenue">0 đ</b></span>
                                     </div>
@@ -287,37 +296,37 @@
                         <%-- ============ BƯỚC 4 ============ --%>
                         <section class="org-card form-card" data-step-pane="4">
                             <div class="form-card-head">
-                                <span class="ico"><span class="material-symbols-outlined">rocket_launch</span></span>
+                                <span class="ico"><i class="ph ph-rocket-launch" aria-hidden="true"></i></span>
                                 <div>
                                     <h2>4. Xác nhận &amp; Hoàn tất</h2>
                                     <p>Kiểm tra lại thông tin rồi chọn lưu nháp hoặc gửi Admin duyệt</p>
                                 </div>
                             </div>
                             <dl class="summary-list mb-4">
-                                <dt>Tên sự kiện</dt><dd data-summary="eventName">—</dd>
-                                <dt>Thể loại</dt><dd data-summary="categoryId">—</dd>
-                                <dt>Địa điểm</dt><dd data-summary="venueId">—</dd>
-                                <dt>Bắt đầu</dt><dd data-summary="startTime">—</dd>
-                                <dt>Kết thúc</dt><dd data-summary="endTime">—</dd>
+                                <dt>Tên sự kiện</dt><dd data-summary="eventName">-</dd>
+                                <dt>Thể loại</dt><dd data-summary="categoryId">-</dd>
+                                <dt>Địa điểm</dt><dd data-summary="venueId">-</dd>
+                                <dt>Bắt đầu</dt><dd data-summary="startTime">-</dd>
+                                <dt>Kết thúc</dt><dd data-summary="endTime">-</dd>
                                 <dt>Poster</dt><dd data-summary="eventImage">Chưa chọn ảnh</dd>
-                                <dt>Hạng vé</dt><dd id="sumTickets">—</dd>
+                                <dt>Hạng vé</dt><dd id="sumTickets">-</dd>
                             </dl>
                             <div class="publish-choice" role="radiogroup" aria-label="Cách hoàn tất">
                                 <label class="mode-card">
                                     <input type="radio" name="publishChoice" value="draft" ${publishChoice != 'submit' ? 'checked' : ''}>
-                                    <span class="material-symbols-outlined">draft</span>
+                                    <i class="ph ph-file-dashed" aria-hidden="true"></i>
                                     <span><strong>Lưu bản nháp</strong>
                                         <small>Chưa hiển thị với khán giả và chưa gửi Admin. Bạn có thể chỉnh sửa rồi gửi duyệt sau.</small></span>
                                 </label>
                                 <label class="mode-card">
                                     <input type="radio" name="publishChoice" value="submit" ${publishChoice == 'submit' ? 'checked' : ''}>
-                                    <span class="material-symbols-outlined">send</span>
+                                    <i class="ph ph-paper-plane-tilt" aria-hidden="true"></i>
                                     <span><strong>Gửi Admin duyệt</strong>
                                         <small>Sự kiện chuyển sang “Chờ duyệt”; trong lúc chờ bạn không sửa hoặc xóa được. Cần có ảnh poster và ít nhất một hạng vé.</small></span>
                                 </label>
                             </div>
                             <div class="note-box">
-                                <span class="ico"><span class="material-symbols-outlined">verified_user</span></span>
+                                <span class="ico"><i class="ph ph-shield-check" aria-hidden="true"></i></span>
                                 <div>
                                     <h3>Sự kiện chỉ được công khai sau khi Admin duyệt</h3>
                                     <p>Dù chọn cách nào, sự kiện mới chưa bán vé ngay. Sau khi được duyệt, sự kiện sẽ chuyển sang “Đang mở bán”.</p>
@@ -330,14 +339,14 @@
                             <div class="group">
                                 <a class="btn-ghost" href="${ctx}/organizer/event/list">Hủy bỏ &amp; Thoát</a>
                                 <button type="button" class="btn-soft" data-step-nav="prev">
-                                    <span class="material-symbols-outlined">arrow_back</span> Bước trước
+                                    <i class="ph ph-arrow-left" aria-hidden="true"></i> Bước trước
                                 </button>
                             </div>
                             <div class="group">
                                 <button type="submit" name="submitAction" value="draft" class="btn-soft">Lưu tạm bản thảo</button>
                                 <button type="button" class="btn-cta" data-step-nav="next" id="nextBtn">
                                     <span id="nextLabel">Tiếp tục sang bước tiếp theo</span>
-                                    <span class="material-symbols-outlined">arrow_forward</span>
+                                    <i class="ph ph-arrow-right" aria-hidden="true"></i>
                                 </button>
                             </div>
                         </div>
@@ -348,12 +357,12 @@
                 <aside class="ce-aside" id="livePreview" aria-label="Xem trước hiển thị trực tiếp">
                     <section class="org-card pv-card">
                         <div class="pv-head">
-                            <h3><span class="material-symbols-outlined">preview</span> Xem trước hiển thị trực tiếp</h3>
+                            <h3><i class="ph ph-eye" aria-hidden="true"></i> Xem trước hiển thị trực tiếp</h3>
                         </div>
 
                         <div class="pv-event">
                             <div class="pv-media" id="pvMedia">
-                                <span class="material-symbols-outlined ph">image</span>
+                                <i class="ph ph-image ph" aria-hidden="true"></i>
                                 <img alt="" id="pvImg">
                                 <div class="pv-chips"><span class="pv-chip is-empty" id="pvCategory"></span></div>
                             </div>
@@ -361,21 +370,21 @@
                                 <h4 class="pv-title is-empty" id="pvTitle">Tên sự kiện của bạn sẽ hiển thị tại đây</h4>
                                 <div class="pv-by">
                                     <span>Bởi:</span><b><c:out value="${orgName}"/></b>
-                                    <span class="material-symbols-outlined">verified</span>
+                                    <i class="ph ph-seal-check" aria-hidden="true"></i>
                                 </div>
                                 <div class="pv-meta">
                                     <div class="d">
-                                        <span class="material-symbols-outlined">calendar_month</span>
+                                        <i class="ph ph-calendar" aria-hidden="true"></i>
                                         <span class="is-empty" id="pvDate">Chưa chọn thời gian</span>
                                     </div>
                                     <div class="v">
-                                        <span class="material-symbols-outlined">stadium</span>
+                                        <i class="ph ph-buildings" aria-hidden="true"></i>
                                         <span id="pvVenue">Chưa chọn địa điểm</span>
                                     </div>
                                 </div>
                                 <div class="pv-price">
                                     <div class="p"><small id="pvPriceLabel">Giá vé</small><strong id="pvPrice">Chưa cấu hình</strong></div>
-                                    <span class="pv-buy" aria-hidden="true">Mua vé <span class="material-symbols-outlined">arrow_forward</span></span>
+                                    <span class="pv-buy" aria-hidden="true">Mua vé <i class="ph ph-arrow-right" aria-hidden="true"></i></span>
                                 </div>
                             </div>
                         </div>
@@ -383,42 +392,42 @@
 
                     <section class="org-card ck-card">
                         <div class="ck-head">
-                            <h3><span class="material-symbols-outlined">checklist</span> Độ sẵn sàng xuất bản</h3>
+                            <h3><i class="ph ph-list-checks" aria-hidden="true"></i> Độ sẵn sàng xuất bản</h3>
                             <span class="ck-pct" id="ckPct">0%</span>
                         </div>
                         <div class="ck-bar"><span id="ckBar"></span></div>
                         <div class="ck-list">
                             <div class="ck-item" data-ck="name">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">radio_button_unchecked</span><span>Tên sự kiện</span></span>
+                                <span class="l"><i class="ph ph-circle ck-ico" aria-hidden="true"></i><span>Tên sự kiện</span></span>
                                 <span class="ck-status">Chưa hoàn tất</span>
                             </div>
                             <div class="ck-item" data-ck="category">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">radio_button_unchecked</span><span>Thể loại</span></span>
+                                <span class="l"><i class="ph ph-circle ck-ico" aria-hidden="true"></i><span>Thể loại</span></span>
                                 <span class="ck-status">Chưa hoàn tất</span>
                             </div>
                             <div class="ck-item" data-ck="description">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">radio_button_unchecked</span><span>Mô tả chi tiết</span></span>
+                                <span class="l"><i class="ph ph-circle ck-ico" aria-hidden="true"></i><span>Mô tả chi tiết</span></span>
                                 <span class="ck-status">Chưa hoàn tất</span>
                             </div>
                             <div class="ck-item" data-ck="time">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">radio_button_unchecked</span><span>Thời gian tổ chức</span></span>
+                                <span class="l"><i class="ph ph-circle ck-ico" aria-hidden="true"></i><span>Thời gian tổ chức</span></span>
                                 <span class="ck-status">Chưa hoàn tất</span>
                             </div>
                             <div class="ck-item" data-ck="venue">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">radio_button_unchecked</span><span>Địa điểm</span></span>
+                                <span class="l"><i class="ph ph-circle ck-ico" aria-hidden="true"></i><span>Địa điểm</span></span>
                                 <span class="ck-status">Chưa hoàn tất</span>
                             </div>
                             <div class="ck-item" data-ck="image">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">image</span><span>Ảnh poster</span></span>
+                                <span class="l"><i class="ph ph-image ck-ico" aria-hidden="true"></i><span>Ảnh poster</span></span>
                                 <span class="ck-status">Cần khi gửi duyệt</span>
                             </div>
                             <div class="ck-item is-info" data-ck="tickets">
-                                <span class="l"><span class="material-symbols-outlined ck-ico">pending</span><span>Hạng vé &amp; giá</span></span>
+                                <span class="l"><i class="ph ph-clock-countdown ck-ico" aria-hidden="true"></i><span>Hạng vé &amp; giá</span></span>
                                 <span class="ck-status">Không bắt buộc</span>
                             </div>
                         </div>
                         <div class="ck-help">
-                            <span class="material-symbols-outlined">help</span>
+                            <i class="ph ph-question" aria-hidden="true"></i>
                             <span>Cần hỗ trợ? Hotline BTC: 1900 xxxx</span>
                         </div>
                     </section>

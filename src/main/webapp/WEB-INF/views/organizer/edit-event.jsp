@@ -15,7 +15,16 @@
         <title>Cập nhật sự kiện - Light Ticket Organizer Portal</title>
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
-    </head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="events"/>
@@ -28,7 +37,7 @@
             <section class="org-card ce-toolbar">
                 <div class="ce-toolbar-title">
                     <a class="ce-back" href="${ctx}/organizer/event/list" aria-label="Quay lại danh sách sự kiện">
-                        <span class="material-symbols-outlined">arrow_back</span>
+                        <i class="ph ph-arrow-left" aria-hidden="true"></i>
                     </a>
                     <div>
                         <h1 style="max-width:640px;"><c:out value="${event.eventName}"/></h1>
@@ -43,26 +52,26 @@
                 </div>
                 <div class="ce-toolbar-actions">
                     <a class="btn-soft" href="${ctx}/organizer/event/seatmap?eventId=${event.eventId}">
-                        <span class="material-symbols-outlined">event_seat</span> Sơ đồ ghế
+                        <i class="ph ph-armchair" aria-hidden="true"></i> Sơ đồ ghế
                     </a>
                     <a class="btn-soft" href="${ctx}/organizer/event/list">
-                        <span class="material-symbols-outlined">undo</span> Hủy thay đổi
+                        <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i> Hủy thay đổi
                     </a>
                     <button type="submit" form="edit-event-form" class="btn-cta">
-                        <span class="material-symbols-outlined">save</span> Lưu cập nhật
+                        <i class="ph ph-floppy-disk" aria-hidden="true"></i> Lưu cập nhật
                     </button>
                 </div>
             </section>
 
             <c:if test="${not empty errors.general}">
-                <div class="lt-alert error"><span class="material-symbols-outlined">error</span><span><c:out value="${errors.general}"/></span></div>
+                <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errors.general}"/></span></div>
             </c:if>
 
             <%-- Banner lưu ý --%>
             <c:choose>
                 <c:when test="${event.status == 'REJECTED'}">
                     <div class="note-box danger mb-4">
-                        <span class="ico"><span class="material-symbols-outlined">report</span></span>
+                        <span class="ico"><i class="ph ph-warning-octagon" aria-hidden="true"></i></span>
                         <div>
                             <h3>Sự kiện đã bị từ chối</h3>
                             <p>
@@ -77,7 +86,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="note-box mb-4">
-                        <span class="ico"><span class="material-symbols-outlined">edit_note</span></span>
+                        <span class="ico"><i class="ph ph-note-pencil" aria-hidden="true"></i></span>
                         <div>
                             <h3>Đang chỉnh sửa bản nháp</h3>
                             <p>Sự kiện chưa được công khai nên mọi thay đổi chỉ áp dụng nội bộ. Chỉ sự kiện <em>Nháp</em> hoặc <em>Bị từ chối</em> mới được sửa hoặc xóa.</p>
@@ -88,10 +97,10 @@
 
             <%-- Tabs --%>
             <div class="org-card tabs-bar" id="stepper">
-                <button type="button" class="tab-item active" data-step-target="1"><span class="material-symbols-outlined">dashboard</span> 1. Thông tin sự kiện</button>
-                <button type="button" class="tab-item" data-step-target="2"><span class="material-symbols-outlined">calendar_month</span> 2. Lịch trình &amp; Địa điểm</button>
-                <button type="button" class="tab-item" data-step-target="3"><span class="material-symbols-outlined">confirmation_number</span> 3. Quản lý hạng vé &amp; Giá <span class="count">${event.ticketTotal > 0 ? event.ticketTotal : 0} vé</span></button>
-                <button type="button" class="tab-item" data-step-target="4"><span class="material-symbols-outlined">tune</span> 4. Cài đặt bán vé &amp; Quy định</button>
+                <button type="button" class="tab-item active" data-step-target="1"><i class="ph ph-squares-four" aria-hidden="true"></i> 1. Thông tin sự kiện</button>
+                <button type="button" class="tab-item" data-step-target="2"><i class="ph ph-calendar" aria-hidden="true"></i> 2. Lịch trình &amp; Địa điểm</button>
+                <button type="button" class="tab-item" data-step-target="3"><i class="ph ph-ticket" aria-hidden="true"></i> 3. Quản lý hạng vé &amp; Giá <span class="count">${event.ticketTotal > 0 ? event.ticketTotal : 0} vé</span></button>
+                <button type="button" class="tab-item" data-step-target="4"><i class="ph ph-sliders-horizontal" aria-hidden="true"></i> 4. Cài đặt bán vé &amp; Quy định</button>
             </div>
 
             <form id="edit-event-form" method="post" enctype="multipart/form-data" novalidate
@@ -104,7 +113,7 @@
                         <div>
                             <section class="org-card form-card">
                                 <div class="form-card-head">
-                                    <span class="ico"><span class="material-symbols-outlined">info</span></span>
+                                    <span class="ico"><i class="ph ph-info" aria-hidden="true"></i></span>
                                     <div><h2>Thông tin định danh sự kiện</h2></div>
                                 </div>
 
@@ -150,7 +159,7 @@
                                     <img alt="Poster sự kiện" id="posterPreview"
                                          <c:if test="${not empty event.eventImage}">src="${ctx}/<c:out value='${event.eventImage}'/>"</c:if>>
                                          <span class="dz-overlay">
-                                             <span class="material-symbols-outlined">add_photo_alternate</span>
+                                             <i class="ph ph-image-square" aria-hidden="true"></i>
                                              <strong>Thay đổi poster</strong>
                                              <span>JPG, PNG, WEBP · tối đa 5MB</span>
                                          </span>
@@ -176,7 +185,7 @@
                 <div data-step-pane="2">
                     <section class="org-card form-card">
                         <div class="form-card-head">
-                            <span class="ico"><span class="material-symbols-outlined">event</span></span>
+                            <span class="ico"><i class="ph ph-calendar-blank" aria-hidden="true"></i></span>
                             <div><h2>Lịch trình &amp; Địa điểm</h2></div>
                         </div>
                         <div class="form-grid">
@@ -216,7 +225,7 @@
                 <div data-step-pane="3">
                     <section class="org-card form-card">
                         <div class="form-card-head">
-                            <span class="ico"><span class="material-symbols-outlined">confirmation_number</span></span>
+                            <span class="ico"><i class="ph ph-ticket" aria-hidden="true"></i></span>
                             <div><h2>Quản lý hạng vé &amp; Giá</h2></div>
                         </div>
                         <dl class="summary-list mb-4">
@@ -225,7 +234,7 @@
                             <dt>Doanh thu tạm tính</dt><dd><fmt:formatNumber value="${event.revenue}" pattern="#,##0"/> đ</dd>
                         </dl>
                         <div class="note-box blue">
-                            <span class="ico"><span class="material-symbols-outlined">lightbulb</span></span>
+                            <span class="ico"><i class="ph ph-lightbulb" aria-hidden="true"></i></span>
                             <div>
                                 <h3>Cấu hình hạng vé</h3>
                                 <p>Việc thêm / sửa hạng vé và giá bán được thực hiện ở mục quản lý hạng vé, không nằm trong biểu mẫu này.</p>
@@ -238,11 +247,11 @@
                 <div data-step-pane="4">
                     <section class="org-card form-card">
                         <div class="form-card-head">
-                            <span class="ico"><span class="material-symbols-outlined">tune</span></span>
+                            <span class="ico"><i class="ph ph-sliders-horizontal" aria-hidden="true"></i></span>
                             <div><h2>Cài đặt bán vé &amp; Quy định</h2></div>
                         </div>
                         <div class="note-box">
-                            <span class="ico"><span class="material-symbols-outlined">verified_user</span></span>
+                            <span class="ico"><i class="ph ph-shield-check" aria-hidden="true"></i></span>
                             <div>
                                 <h3>Quy định chỉnh sửa</h3>
                                 <p>Sự kiện chỉ được sửa hoặc xóa khi ở trạng thái Nháp hoặc Bị từ chối. Sự kiện đã phát sinh đơn hàng, vé hoặc đánh giá sẽ không thể xóa.</p>
@@ -254,21 +263,9 @@
 
             <%-- ============ DANGER ZONE ============ --%>
             <section class="danger-zone">
-                <h2><span class="material-symbols-outlined">warning</span> Khu vực nguy hiểm (Danger Zone)</h2>
+                <h2><i class="ph ph-warning" aria-hidden="true"></i> Khu vực nguy hiểm (Danger Zone)</h2>
                 <p>Các hành động tại khu vực này có thể ảnh hưởng trực tiếp đến người đã mua vé hoặc xóa vĩnh viễn dữ liệu của ban tổ chức.</p>
                 <div class="danger-grid">
-                    <div class="danger-item">
-                        <h4>Tạm dừng nhận đơn hàng mới</h4>
-                        <p>Đóng trang mua vé tạm thời, các đơn đã giữ chỗ vẫn thanh toán bình thường.</p>
-                        <button type="button" class="btn-block outline" disabled>Chỉ khả dụng khi sự kiện đang mở bán</button>
-                    </div>
-                    <div class="danger-item">
-                        <h4 class="red">Hủy sự kiện (Cancel Event)</h4>
-                        <p>Kích hoạt quy trình thông báo và hoàn tiền tự động đến khán giả đã mua vé.</p>
-                        <button type="button" class="btn-block outline" disabled>
-                            <span class="material-symbols-outlined" style="font-size:18px">event_busy</span> Chỉ khả dụng khi sự kiện đã công khai
-                        </button>
-                    </div>
                     <div class="danger-item">
                         <h4 class="red">Xóa sự kiện này khỏi hệ thống</h4>
                         <p>Xóa hoàn toàn sự kiện và lưu trữ hồ sơ. Không thể hoàn tác; sự kiện đã có đơn hàng/vé sẽ không xóa được.</p>
@@ -276,7 +273,7 @@
                               data-event-name="<c:out value='${event.eventName}'/>">
                             <input type="hidden" name="eventId" value="${event.eventId}">
                             <button type="submit" class="btn-block solid">
-                                <span class="material-symbols-outlined" style="font-size:18px">delete</span> Xóa sự kiện
+                                <i class="ph ph-trash" style="font-size:18px" aria-hidden="true"></i> Xóa sự kiện
                             </button>
                         </form>
                     </div>

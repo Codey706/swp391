@@ -5,7 +5,7 @@
     <div class="tk-row-head">
         <span class="tk-badge" data-ticket-badge>Hạng vé</span>
         <button type="button" class="tk-remove" data-ticket-remove aria-label="Xóa hạng vé">
-            <span class="material-symbols-outlined">delete</span>
+            <i class="ph ph-trash" aria-hidden="true"></i>
         </button>
     </div>
     <div class="tk-fields">
