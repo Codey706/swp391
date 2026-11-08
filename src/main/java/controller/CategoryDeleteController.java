@@ -35,6 +35,14 @@ public class CategoryDeleteController extends HttpServlet {
                 return;
             }
 
+            if (categoryDAO.isCategoryUsedByEvents(id)) {
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/admin/categories?deleted=in_use"
+                );
+                return;
+            }
+
             boolean deleted = categoryDAO.deleteCategory(id);
 
             if (deleted) {
