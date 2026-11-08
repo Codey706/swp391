@@ -49,444 +49,444 @@
                     = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         %>
 
-    <c:set var="ctx" value="${pageContext.request.contextPath}"/>
-    <c:set var="adminName" value="${not empty sessionScope.user && not empty sessionScope.user.fullName ? sessionScope.user.fullName : 'Admin'}"/>
-    <c:set var="adminInitial" value="${fn:toUpperCase(fn:substring(adminName, 0, 1))}"/>
+        <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+        <c:set var="adminName" value="${not empty sessionScope.user && not empty sessionScope.user.fullName ? sessionScope.user.fullName : 'Admin'}"/>
+        <c:set var="adminInitial" value="${fn:toUpperCase(fn:substring(adminName, 0, 1))}"/>
 
-    <!-- Lớp nền khi mở sidebar trên màn hình nhỏ -->
-    <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
+        <!-- Lớp nền khi mở sidebar trên màn hình nhỏ -->
+        <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar" id="adminSidebar" aria-label="Điều hướng Admin Portal">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Điều hướng Admin Portal">
 
-        <div class="admin-sidebar-top">
+            <div class="admin-sidebar-top">
 
-            <div class="admin-brand-row">
-                <a class="admin-brand" href="${ctx}/admin">
-                    <span class="admin-brand-logo">
+                <div class="admin-brand-row">
+                    <a class="admin-brand" href="${ctx}/admin">
+                        <span class="admin-brand-logo">
+                            <span class="material-symbols-outlined">confirmation_number</span>
+                        </span>
+
+                        <span class="admin-brand-text">
+                            <span class="admin-brand-name">
+                                <span>Light</span>
+                                <span class="admin-brand-accent">Ticket</span>
+                            </span>
+                            <small>Admin Portal</small>
+                        </span>
+                    </a>
+
+                    <button type="button"
+                            class="admin-sidebar-close"
+                            id="adminSidebarClose"
+                            aria-label="Đóng menu">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="admin-nav-label">WORKSPACE</div>
+
+                <nav class="admin-nav">
+
+                    <a href="${ctx}/admin">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a href="${ctx}/admin/users">
+                        <span class="material-symbols-outlined">group</span>
+                        <span>Manage Users</span>
+                    </a>
+
+                    <a href="${ctx}/admin/events">
+                        <span class="material-symbols-outlined">event</span>
+                        <span>Manage Events</span>
+                    </a>
+
+                    <a href="${ctx}/admin/categories">
+                        <span class="material-symbols-outlined">category</span>
+                        <span>Manage Categories</span>
+                    </a>
+
+                    <a href="${ctx}/admin/venues">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <span>Manage Venues</span>
+                    </a>
+
+                    <a href="${ctx}/admin/vouchers" class="is-active" aria-current="page">
                         <span class="material-symbols-outlined">confirmation_number</span>
-                    </span>
+                        <span>Manage Vouchers</span>
+                    </a>
 
-                    <span class="admin-brand-text">
-                        <span class="admin-brand-name">
-                            <span>Light</span>
-                            <span class="admin-brand-accent">Ticket</span>
-                        </span>
-                        <small>Admin Portal</small>
-                    </span>
-                </a>
+                    <a href="${pageContext.request.contextPath}/admin/reviews">
+                        <span class="material-symbols-outlined">star</span>
+                        <span>Manage Reviews</span>
+                    </a>
 
-                <button type="button"
-                        class="admin-sidebar-close"
-                        id="adminSidebarClose"
-                        aria-label="Đóng menu">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
+                    <a href="${ctx}/admin/profile">
+                        <span class="material-symbols-outlined">account_circle</span>
+                        <span>Manage Profile</span>
+                    </a>
+
+                </nav>
             </div>
 
-            <div class="admin-nav-label">WORKSPACE</div>
+            <!-- Tài khoản ở cuối sidebar -->
+            <div class="admin-sidebar-bottom">
 
-            <nav class="admin-nav">
-
-                <a href="${ctx}/admin">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    <span>Dashboard</span>
-                </a>
-
-                <a href="${ctx}/admin/users">
-                    <span class="material-symbols-outlined">group</span>
-                    <span>Manage Users</span>
-                </a>
-
-                <a href="${ctx}/admin/events">
-                    <span class="material-symbols-outlined">event</span>
-                    <span>Manage Events</span>
-                </a>
-
-                <a href="${ctx}/admin/categories">
-                    <span class="material-symbols-outlined">category</span>
-                    <span>Manage Categories</span>
-                </a>
-
-                <a href="${ctx}/admin/venues">
-                    <span class="material-symbols-outlined">location_on</span>
-                    <span>Manage Venues</span>
-                </a>
-
-                <a href="${ctx}/admin/vouchers" class="is-active" aria-current="page">
-                    <span class="material-symbols-outlined">confirmation_number</span>
-                    <span>Manage Vouchers</span>
-                </a>
-
-               <a href="${pageContext.request.contextPath}/admin/reviews">
-                    <span class="material-symbols-outlined">star</span>
-                    <span>Manage Reviews</span>
-                </a>
-
-                <a href="${ctx}/admin/profile">
-                    <span class="material-symbols-outlined">account_circle</span>
-                    <span>Manage Profile</span>
-                </a>
-
-            </nav>
-        </div>
-
-        <!-- Tài khoản ở cuối sidebar -->
-        <div class="admin-sidebar-bottom">
-
-            <div class="admin-sidebar-user">
-                <span class="admin-sidebar-user-avatar">
-                    <c:out value="${adminInitial}"/>
-                </span>
-
-                <span class="admin-sidebar-user-meta">
-                    <span class="admin-sidebar-user-name">
-                        <c:out value="${adminName}"/>
+                <div class="admin-sidebar-user">
+                    <span class="admin-sidebar-user-avatar">
+                        <c:out value="${adminInitial}"/>
                     </span>
-                    <small>Administrator</small>
-                </span>
-            </div>
 
-            <form method="post" action="${ctx}/logout" class="m-0">
-                <button type="submit" class="admin-sidebar-logout">
-                    <span class="material-symbols-outlined">logout</span>
-                    Đăng xuất
-                </button>
-            </form>
-
-        </div>
-    </aside>
-
-    <!-- Main -->
-    <div class="admin-shell" id="adminShell">
-
-        <!-- Topbar -->
-        <header class="admin-topbar">
-
-            <button type="button"
-                    class="admin-hamburger"
-                    id="adminSidebarOpen"
-                    aria-label="Mở menu"
-                    aria-controls="adminSidebar"
-                    aria-expanded="false">
-                <span class="material-symbols-outlined">menu</span>
-            </button>
-
-            <div class="admin-top-actions">
-
-                <button type="button"
-                        class="admin-top-button admin-help-button"
-                        aria-label="Hỗ trợ"
-                        title="Hỗ trợ">
-                    <span class="material-symbols-outlined">help_outline</span>
-                </button>
-
-                <button type="button"
-                        class="admin-top-button"
-                        aria-label="Thông báo"
-                        title="Thông báo">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span class="admin-notification-dot"></span>
-                </button>
-
-                <!-- Dropdown tài khoản -->
-                <div class="dropdown admin-account-dropdown">
-
-                    <button class="admin-account-toggle"
-                            type="button"
-                            id="adminAccountDropdown"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                            title="Tài khoản Admin">
-
-                        <span class="admin-account-avatar">
-                            <c:out value="${adminInitial}"/>
-                        </span>
-
-                        <span class="admin-account-name">
+                    <span class="admin-sidebar-user-meta">
+                        <span class="admin-sidebar-user-name">
                             <c:out value="${adminName}"/>
                         </span>
+                        <small>Administrator</small>
+                    </span>
+                </div>
 
-                        <span class="material-symbols-outlined admin-account-chevron">
-                            keyboard_arrow_down
-                        </span>
+                <form method="post" action="${ctx}/logout" class="m-0">
+                    <button type="submit" class="admin-sidebar-logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        Đăng xuất
+                    </button>
+                </form>
+
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="admin-shell" id="adminShell">
+
+            <!-- Topbar -->
+            <header class="admin-topbar">
+
+                <button type="button"
+                        class="admin-hamburger"
+                        id="adminSidebarOpen"
+                        aria-label="Mở menu"
+                        aria-controls="adminSidebar"
+                        aria-expanded="false">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+
+                <div class="admin-top-actions">
+
+                    <button type="button"
+                            class="admin-top-button admin-help-button"
+                            aria-label="Hỗ trợ"
+                            title="Hỗ trợ">
+                        <span class="material-symbols-outlined">help_outline</span>
                     </button>
 
-                    <ul class="dropdown-menu dropdown-menu-end admin-account-menu shadow-sm"
-                        aria-labelledby="adminAccountDropdown">
+                    <button type="button"
+                            class="admin-top-button"
+                            aria-label="Thông báo"
+                            title="Thông báo">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="admin-notification-dot"></span>
+                    </button>
 
-                        <li class="admin-account-heading">
-                            <span class="admin-account-heading-name">
+                    <!-- Dropdown tài khoản -->
+                    <div class="dropdown admin-account-dropdown">
+
+                        <button class="admin-account-toggle"
+                                type="button"
+                                id="adminAccountDropdown"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                title="Tài khoản Admin">
+
+                            <span class="admin-account-avatar">
+                                <c:out value="${adminInitial}"/>
+                            </span>
+
+                            <span class="admin-account-name">
                                 <c:out value="${adminName}"/>
                             </span>
-                            <small>Administrator</small>
-                        </li>
 
-                        <li>
-                            <a class="dropdown-item" href="${ctx}/admin/profile">
-                                <span class="material-symbols-outlined">account_circle</span>
-                                Hồ sơ của tôi
-                            </a>
-                        </li>
+                            <span class="material-symbols-outlined admin-account-chevron">
+                                keyboard_arrow_down
+                            </span>
+                        </button>
 
-                        <li>
-                            <a class="dropdown-item" href="${ctx}/home">
-                                <span class="material-symbols-outlined">home</span>
-                                Về trang chủ
-                            </a>
-                        </li>
+                        <ul class="dropdown-menu dropdown-menu-end admin-account-menu shadow-sm"
+                            aria-labelledby="adminAccountDropdown">
 
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                            <li class="admin-account-heading">
+                                <span class="admin-account-heading-name">
+                                    <c:out value="${adminName}"/>
+                                </span>
+                                <small>Administrator</small>
+                            </li>
 
-                        <li>
-                            <form action="${ctx}/logout" method="post" class="m-0">
-                                <button type="submit" class="dropdown-item admin-dropdown-logout">
-                                    <span class="material-symbols-outlined">logout</span>
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        </li>
+                            <li>
+                                <a class="dropdown-item" href="${ctx}/admin/profile">
+                                    <span class="material-symbols-outlined">account_circle</span>
+                                    Hồ sơ của tôi
+                                </a>
+                            </li>
 
-                    </ul>
-                </div>
-            </div>
-        </header>
+                            <li>
+                                <a class="dropdown-item" href="${ctx}/home">
+                                    <span class="material-symbols-outlined">home</span>
+                                    Về trang chủ
+                                </a>
+                            </li>
 
-        <!-- Breadcrumb -->
-        <div class="admin-subbar">
-            <div class="admin-breadcrumbs">
-                <span class="material-symbols-outlined">home</span>
-                <a href="${ctx}/admin">Admin Portal</a>
-                <span class="material-symbols-outlined">chevron_right</span>
-                <span class="admin-breadcrumb-current">Manage Vouchers</span>
-            </div>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
-            <div class="admin-system-label">
-                <span class="admin-system-dot"></span>
-                Light Ticket Management System
-            </div>
-        </div>
+                            <li>
+                                <form action="${ctx}/logout" method="post" class="m-0">
+                                    <button type="submit" class="dropdown-item admin-dropdown-logout">
+                                        <span class="material-symbols-outlined">logout</span>
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
 
-        <!-- Page Content -->
-        <main class="admin-content">
-            <section class="content">
-
-                <!-- Page Heading -->
-                <div class="page-heading">
-                    <div>
-                        <h1>Voucher Management</h1>
-                        <p>
-                            Quản lý mã giảm giá trong hệ thống Light Ticket
-                        </p>
+                        </ul>
                     </div>
                 </div>
+            </header>
 
-                <!-- Statistics -->
-                <div class="stats">
-
-                    <div class="stat-card total">
-                        <p>Total Vouchers</p>
-                        <h2><%= totalVouchers%></h2>
-                    </div>
-
-                    <div class="stat-card active">
-                        <p>Active Vouchers</p>
-                        <h2><%= activeVouchers%></h2>
-                    </div>
-
-                    <div class="stat-card inactive">
-                        <p>Inactive Vouchers</p>
-                        <h2><%= inactiveVouchers%></h2>
-                    </div>
-
+            <!-- Breadcrumb -->
+            <div class="admin-subbar">
+                <div class="admin-breadcrumbs">
+                    <span class="material-symbols-outlined">home</span>
+                    <a href="${ctx}/admin">Admin Portal</a>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                    <span class="admin-breadcrumb-current">Manage Vouchers</span>
                 </div>
 
-                <!-- Voucher List -->
-                <div class="user-panel">
+                <div class="admin-system-label">
+                    <span class="admin-system-dot"></span>
+                    Light Ticket Management System
+                </div>
+            </div>
 
-                    <div class="panel-heading">
+            <!-- Page Content -->
+            <main class="admin-content">
+                <section class="content">
+
+                    <!-- Page Heading -->
+                    <div class="page-heading">
                         <div>
-                            <h2>Vouchers List</h2>
+                            <h1>Voucher Management</h1>
                             <p>
-                                Danh sách tất cả mã giảm giá trong hệ thống
+                                Quản lý mã giảm giá trong hệ thống Light Ticket
                             </p>
                         </div>
-
-                        <button class="add-button"
-                                type="button"
-                                onclick="window.location.href = '${ctx}/admin/vouchers?action=create'">
-                            Add New Voucher
-                        </button>
                     </div>
 
-                    <!-- Table -->
-                    <div class="table-wrapper">
+                    <!-- Statistics -->
+                    <div class="stats">
 
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Voucher Code</th>
-                                    <th>Voucher Name</th>
-                                    <th>Discount</th>
-                                    <th>Min Order</th>
-                                    <th>Max Discount</th>
-                                    <th>Validity Period</th>
-                                    <th>Usage</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
+                        <div class="stat-card total">
+                            <p>Total Vouchers</p>
+                            <h2><%= totalVouchers%></h2>
+                        </div>
 
-                            <tbody>
+                        <div class="stat-card active">
+                            <p>Active Vouchers</p>
+                            <h2><%= activeVouchers%></h2>
+                        </div>
 
-                                <%
-                                    if (vouchers != null && !vouchers.isEmpty()) {
-                                        for (Voucher voucher : vouchers) {
-
-                                            String discount = "";
-
-                                            if ("Percentage".equalsIgnoreCase(voucher.getDiscountType())) {
-                                                discount = voucher.getDiscountValue() != null
-                                                        ? voucher.getDiscountValue()
-                                                                .stripTrailingZeros().toPlainString() + "%"
-                                                        : "0%";
-                                            } else {
-                                                discount = voucher.getDiscountValue() != null
-                                                        ? voucher.getDiscountValue()
-                                                                .stripTrailingZeros().toPlainString() + " VND"
-                                                        : "0 VND";
-                                            }
-
-                                            String startTime = voucher.getStartTime() != null
-                                                    ? voucher.getStartTime().format(formatter) : "";
-
-                                            String endTime = voucher.getEndTime() != null
-                                                    ? voucher.getEndTime().format(formatter) : "";
-
-                                            String status = voucher.getStatus() != null
-                                                    ? voucher.getStatus() : "";
-
-                                            String statusClass = status.toLowerCase();
-                                %>
-
-                                <tr>
-                                    <td><%= voucher.getVoucherId()%></td>
-
-                                    <td>
-                                        <strong><%= voucher.getVoucherCode() != null
-                                                    ? voucher.getVoucherCode() : ""%></strong>
-                                    </td>
-
-                                    <td>
-                                        <%= voucher.getVoucherName() != null
-                                                    ? voucher.getVoucherName() : ""%>
-                                    </td>
-
-                                    <td><%= discount%></td>
-
-                                    <td>
-                                        <%= voucher.getMinOrderAmount() != null
-                                                    ? voucher.getMinOrderAmount().toPlainString() + " VND" : "-"%>
-                                    </td>
-
-                                    <td>
-                                        <%= voucher.getMaxDiscountAmount() != null
-                                                    ? voucher.getMaxDiscountAmount().toPlainString() + " VND" : "-"%>
-                                    </td>
-
-                                    <td>
-                                        <%= startTime%>
-                                        <br>
-                                        <span>to</span>
-                                        <br>
-                                        <%= endTime%>
-                                    </td>
-
-                                    <td>
-                                        <%= voucher.getUsedCount()%>
-                                        /
-                                        <%= voucher.getUsageLimit()%>
-                                    </td>
-
-                                    <td>
-                                        <span class="status <%= statusClass%>">
-                                            <%= status%>
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <a class="view-button"
-                                           href="${ctx}/admin/voucher-detail?id=<%= voucher.getVoucherId()%>">
-                                            View
-                                        </a>
-                                    </td>
-                                </tr>
-
-                                <%
-                                    }
-                                } else {
-                                %>
-
-                                <tr>
-                                    <td colspan="10" class="empty">
-                                        No vouchers found.
-                                    </td>
-                                </tr>
-
-                                <%
-                                    }
-                                %>
-
-                            </tbody>
-                        </table>
+                        <div class="stat-card inactive">
+                            <p>Inactive Vouchers</p>
+                            <h2><%= inactiveVouchers%></h2>
+                        </div>
 
                     </div>
-                </div>
-            </section>
 
-            <footer class="admin-page-footer">
-                © 2026 Light Ticket Platform JSC. All rights reserved.
-            </footer>
-        </main>
-    </div>
+                    <!-- Voucher List -->
+                    <div class="user-panel">
 
-    <!-- Bootstrap JS cho dropdown -->
-    <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Vouchers List</h2>
+                                <p>
+                                    Danh sách tất cả mã giảm giá trong hệ thống
+                                </p>
+                            </div>
 
-    <!-- Điều khiển sidebar trên màn hình nhỏ -->
-    <script>
-                                    (function () {
-                                        const sidebar = document.getElementById('adminSidebar');
-                                        const backdrop = document.getElementById('adminSidebarBackdrop');
-                                        const openButton = document.getElementById('adminSidebarOpen');
-                                        const closeButton = document.getElementById('adminSidebarClose');
+                            <button class="add-button"
+                                    type="button"
+                                    onclick="window.location.href = '${ctx}/admin/vouchers?action=create'">
+                                Add New Voucher
+                            </button>
+                        </div>
 
-                                        function openSidebar() {
-                                            sidebar.classList.add('is-open');
-                                            backdrop.classList.add('is-visible');
-                                            openButton.setAttribute('aria-expanded', 'true');
+                        <!-- Table -->
+                        <div class="table-wrapper">
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Voucher Code</th>
+                                        <th>Voucher Name</th>
+                                        <th>Discount</th>
+                                        <th>Min Order</th>
+                                        <th>Max Discount</th>
+                                        <th>Validity Period</th>
+                                        <th>Usage</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    <%
+                                        if (vouchers != null && !vouchers.isEmpty()) {
+                                            for (Voucher voucher : vouchers) {
+
+                                                String discount = "";
+
+                                                if ("Percentage".equalsIgnoreCase(voucher.getDiscountType())) {
+                                                    discount = voucher.getDiscountValue() != null
+                                                            ? voucher.getDiscountValue()
+                                                                    .stripTrailingZeros().toPlainString() + "%"
+                                                            : "0%";
+                                                } else {
+                                                    discount = voucher.getDiscountValue() != null
+                                                            ? voucher.getDiscountValue()
+                                                                    .stripTrailingZeros().toPlainString() + " VND"
+                                                            : "0 VND";
+                                                }
+
+                                                String startTime = voucher.getStartTime() != null
+                                                        ? voucher.getStartTime().format(formatter) : "";
+
+                                                String endTime = voucher.getEndTime() != null
+                                                        ? voucher.getEndTime().format(formatter) : "";
+
+                                                String status = voucher.getStatus() != null
+                                                        ? voucher.getStatus() : "";
+
+                                                String statusClass = status.toLowerCase();
+                                    %>
+
+                                    <tr>
+                                        <td><%= voucher.getVoucherId()%></td>
+
+                                        <td>
+                                                <strong><%= voucher.getVoucherCode() != null
+                                                ? voucher.getVoucherCode() : ""%></strong>
+                                        </td>
+
+                                        <td>
+                                            <%= voucher.getVoucherName() != null
+                                                ? voucher.getVoucherName() : ""%>
+                                        </td>
+
+                                        <td><%= discount%></td>
+
+                                        <td>
+                                            <%= voucher.getMinOrderAmount() != null
+                                                ? voucher.getMinOrderAmount().toPlainString() + " VND" : "-"%>
+                                        </td>
+
+                                        <td>
+                                            <%= voucher.getMaxDiscountAmount() != null
+                                                ? voucher.getMaxDiscountAmount().toPlainString() + " VND" : "-"%>
+                                        </td>
+
+                                        <td>
+                                            <%= startTime%>
+                                            <br>
+                                            <span>to</span>
+                                            <br>
+                                            <%= endTime%>
+                                        </td>
+
+                                        <td>
+                                            <%= voucher.getUsedCount()%>
+                                            /
+                                            <%= voucher.getUsageLimit()%>
+                                        </td>
+
+                                        <td>
+                                            <span class="status <%= statusClass%>">
+                                                <%= status%>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <a class="view-button"
+                                               href="${ctx}/admin/voucher-detail?id=<%= voucher.getVoucherId()%>">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <%
                                         }
+                                    } else {
+                                    %>
 
-                                        function closeSidebar() {
-                                            sidebar.classList.remove('is-open');
-                                            backdrop.classList.remove('is-visible');
-                                            openButton.setAttribute('aria-expanded', 'false');
+                                    <tr>
+                                        <td colspan="10" class="empty">
+                                            No vouchers found.
+                                        </td>
+                                    </tr>
+
+                                    <%
                                         }
+                                    %>
 
-                                        openButton.addEventListener('click', openSidebar);
-                                        closeButton.addEventListener('click', closeSidebar);
-                                        backdrop.addEventListener('click', closeSidebar);
+                                </tbody>
+                            </table>
 
-                                        document.addEventListener('keydown', function (event) {
-                                            if (event.key === 'Escape') {
-                                                closeSidebar();
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="admin-page-footer">
+                    © 2026 Light Ticket Platform JSC. All rights reserved.
+                </footer>
+            </main>
+        </div>
+
+        <!-- Bootstrap JS cho dropdown -->
+        <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>
+
+        <!-- Điều khiển sidebar trên màn hình nhỏ -->
+        <script>
+                                        (function () {
+                                            const sidebar = document.getElementById('adminSidebar');
+                                            const backdrop = document.getElementById('adminSidebarBackdrop');
+                                            const openButton = document.getElementById('adminSidebarOpen');
+                                            const closeButton = document.getElementById('adminSidebarClose');
+
+                                            function openSidebar() {
+                                                sidebar.classList.add('is-open');
+                                                backdrop.classList.add('is-visible');
+                                                openButton.setAttribute('aria-expanded', 'true');
                                             }
-                                        });
-                                    })();
-    </script>
 
-</body>
+                                            function closeSidebar() {
+                                                sidebar.classList.remove('is-open');
+                                                backdrop.classList.remove('is-visible');
+                                                openButton.setAttribute('aria-expanded', 'false');
+                                            }
+
+                                            openButton.addEventListener('click', openSidebar);
+                                            closeButton.addEventListener('click', closeSidebar);
+                                            backdrop.addEventListener('click', closeSidebar);
+
+                                            document.addEventListener('keydown', function (event) {
+                                                if (event.key === 'Escape') {
+                                                    closeSidebar();
+                                                }
+                                            });
+                                        })();
+        </script>
+
+    </body>
 </html>
