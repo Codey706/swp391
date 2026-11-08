@@ -14,8 +14,8 @@ import utils.DBContext;
 
 /**
  * UC-19 Review Event (Customer) và UC-33 Moderate Reviews (Admin).
- * Reviews.status: ACTIVE hiển thị công khai, HIDDEN bị Admin ẩn. Mỗi khách 1
- * đánh giá / sự kiện (UNIQUE customer_id, event_id).
+ * Reviews.status: ACTIVE hiển thị công khai, HIDDEN bị Admin ẩn.
+ * Mỗi khách 1 đánh giá / sự kiện (UNIQUE customer_id, event_id).
  */
 public class ReviewDAO {
 
@@ -27,10 +27,7 @@ public class ReviewDAO {
             + "r.created_at, u.full_name, u.username, e.event_name "
             + "FROM Reviews r JOIN Users u ON u.user_id = r.customer_id JOIN Events e ON e.event_id = r.event_id ";
 
-    /**
-     * Vé đã check-in (đơn Paid) của khách cho sự kiện, dùng làm
-     * Reviews.ticket_id; -1 nếu không có.
-     */
+    /** Vé đã check-in (đơn Paid) của khách cho sự kiện, dùng làm Reviews.ticket_id; -1 nếu không có. */
     public int findCheckedInTicket(int customerId, int eventId) throws SQLException {
         String sql = "SELECT TOP 1 t.ticket_id FROM Tickets t "
                 + "JOIN Order_Details od ON od.order_detail_id = t.order_detail_id "
@@ -46,9 +43,7 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Đánh giá của khách cho sự kiện (bất kể trạng thái), null nếu chưa có.
-     */
+    /** Đánh giá của khách cho sự kiện (bất kể trạng thái), null nếu chưa có. */
     public Map<String, Object> findByCustomerAndEvent(int customerId, int eventId) throws SQLException {
         List<Map<String, Object>> list = query(SELECT + "WHERE r.customer_id = ? AND r.event_id = ?", customerId, eventId);
         return list.isEmpty() ? null : list.get(0);
@@ -78,17 +73,13 @@ public class ReviewDAO {
         }
     }
 
-    /**
-     * Đánh giá công khai (ACTIVE) của sự kiện, mới nhất trước.
-     */
+    /** Đánh giá công khai (ACTIVE) của sự kiện, mới nhất trước. */
     public List<Map<String, Object>> findPublic(int eventId, int limit) throws SQLException {
         return query(SELECT.replace("SELECT ", "SELECT TOP (" + Math.max(1, limit) + ") ")
                 + "WHERE r.event_id = ? AND r.status = 'ACTIVE' ORDER BY r.created_at DESC, r.review_id DESC", eventId);
     }
 
-    /**
-     * {điểm trung bình, số đánh giá} của các đánh giá công khai.
-     */
+    /** {điểm trung bình, số đánh giá} của các đánh giá công khai. */
     public double[] summary(int eventId) throws SQLException {
         String sql = "SELECT ISNULL(AVG(CAST(rating AS FLOAT)), 0), COUNT(*) FROM Reviews WHERE event_id = ? AND status = 'ACTIVE'";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -101,6 +92,7 @@ public class ReviewDAO {
     }
 
     // ------------------------------------------------------------ UC-33 (Admin)
+
     public int countForAdmin(String status, Integer rating, String keyword) throws SQLException {
         List<Object> params = new ArrayList<>();
         String where = adminWhere(status, rating, keyword, params);
@@ -126,8 +118,9 @@ public class ReviewDAO {
     }
 
     public boolean setStatus(int reviewId, String status) throws SQLException {
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(
-                "UPDATE Reviews SET status = ?, updated_at = GETDATE() WHERE review_id = ?")) {
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        "UPDATE Reviews SET status = ?, updated_at = GETDATE() WHERE review_id = ?")) {
             ps.setString(1, status);
             ps.setInt(2, reviewId);
             return ps.executeUpdate() > 0;
