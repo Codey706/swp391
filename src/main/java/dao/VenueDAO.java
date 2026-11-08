@@ -78,6 +78,85 @@ public class VenueDAO {
         return null;
     }
 
+    // ------------------------------------------------------------ UC-31: thêm / sửa / ngừng / xóa
+    public int createVenue(Venue venue) throws SQLException {
+        String sql = "INSERT INTO Venues (venue_name, address, description, capacity, status) VALUES (?, ?, ?, ?, ?)";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            bindVenue(statement, venue);
+            statement.setString(5, venue.getStatus());
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                return keys.next() ? keys.getInt(1) : -1;
+            }
+        }
+    }
+
+    public boolean updateVenue(Venue venue) throws SQLException {
+        String sql = "UPDATE Venues SET venue_name = ?, address = ?, description = ?, capacity = ?, "
+                + "updated_at = GETDATE() WHERE venue_id = ?";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            bindVenue(statement, venue);
+            statement.setInt(5, venue.getVenueId());
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateStatus(int venueId, String status) throws SQLException {
+        String sql = "UPDATE Venues SET status = ?, updated_at = GETDATE() WHERE venue_id = ?";
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, status);
+            statement.setInt(2, venueId);
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteVenue(int venueId) throws SQLException {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement("DELETE FROM Venues WHERE venue_id = ?")) {
+            statement.setInt(1, venueId);
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Số sự kiện dùng venue; activeOnly = chỉ đếm sự kiện ACTIVE /
+     * PENDING_APPROVAL.
+     */
+    public int countEvents(int venueId, boolean activeOnly) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Events WHERE venue_id = ?"
+                + (activeOnly ? " AND UPPER(status) IN ('ACTIVE', 'PENDING_APPROVAL')" : "");
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, venueId);
+            try (ResultSet rs = statement.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    /**
+     * Seat_Maps / Seats cũ (mẫu theo địa điểm, không còn dùng) vẫn tham chiếu
+     * khóa ngoại.
+     */
+    public boolean hasLegacySeatMaps(int venueId) throws SQLException {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM Seat_Maps WHERE venue_id = ?")) {
+            statement.setInt(1, venueId);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private void bindVenue(PreparedStatement statement, Venue venue) throws SQLException {
+        statement.setString(1, venue.getVenueName());
+        statement.setString(2, venue.getAddress());
+        if (venue.getDescription() == null || venue.getDescription().isEmpty()) {
+            statement.setNull(3, java.sql.Types.NVARCHAR);
+        } else {
+            statement.setString(3, venue.getDescription());
+        }
+        statement.setInt(4, venue.getCapacity());
+    }
+
     private Venue mapVenue(ResultSet resultSet) throws SQLException {
 
         Venue venue = new Venue();
