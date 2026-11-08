@@ -15,15 +15,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Manage Events - Light Ticket</title>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet">
 
         <link rel="stylesheet" href="${ctx}/assets/css/bootstrap.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-        <link rel="stylesheet" href="${ctx}/css/admin.css?v=6">
+        <link rel="stylesheet" href="${ctx}/css/admin.css?v=7">
 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
     </head>
 
     <body class="admin-portal-page">
@@ -39,7 +43,7 @@
                 <div class="admin-brand-row">
                     <a class="admin-brand" href="${ctx}/admin">
                         <span class="admin-brand-logo">
-                            <span class="material-symbols-outlined">confirmation_number</span>
+                            <i class="ph ph-ticket" aria-hidden="true"></i>
                         </span>
 
                         <span class="admin-brand-text">
@@ -55,7 +59,7 @@
                             class="admin-sidebar-close"
                             id="adminSidebarClose"
                             aria-label="Đóng menu">
-                        <span class="material-symbols-outlined">close</span>
+                        <i class="ph ph-x" aria-hidden="true"></i>
                     </button>
                 </div>
 
@@ -64,44 +68,44 @@
                 <nav class="admin-nav">
 
                     <a href="${ctx}/admin">
-                        <span class="material-symbols-outlined">dashboard</span>
+                        <i class="ph ph-squares-four" aria-hidden="true"></i>
                         <span>Dashboard</span>
                     </a>
 
                     <a href="${ctx}/admin/users">
-                        <span class="material-symbols-outlined">group</span>
+                        <i class="ph ph-users" aria-hidden="true"></i>
                         <span>Manage Users</span>
                     </a>
 
                     <a href="${ctx}/admin/events"
                        class="is-active"
                        aria-current="page">
-                        <span class="material-symbols-outlined">event</span>
+                        <i class="ph ph-calendar-blank" aria-hidden="true"></i>
                         <span>Manage Events</span>
                     </a>
 
                     <a href="${ctx}/admin/categories">
-                        <span class="material-symbols-outlined">category</span>
+                        <i class="ph ph-tag" aria-hidden="true"></i>
                         <span>Manage Categories</span>
                     </a>
 
                     <a href="${ctx}/admin/venues">
-                        <span class="material-symbols-outlined">location_on</span>
+                        <i class="ph ph-map-pin" aria-hidden="true"></i>
                         <span>Manage Venues</span>
                     </a>
 
                     <a href="${ctx}/admin/vouchers">
-                        <span class="material-symbols-outlined">confirmation_number</span>
+                        <i class="ph ph-ticket" aria-hidden="true"></i>
                         <span>Manage Vouchers</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/admin/reviews">
-                        <span class="material-symbols-outlined">star</span>
+                    <a href="${ctx}/admin/reviews">
+                        <i class="ph ph-star" aria-hidden="true"></i>
                         <span>Manage Reviews</span>
                     </a>
 
                     <a href="${ctx}/admin/profile">
-                        <span class="material-symbols-outlined">account_circle</span>
+                        <i class="ph ph-user-circle" aria-hidden="true"></i>
                         <span>Manage Profile</span>
                     </a>
 
@@ -126,7 +130,7 @@
 
                 <form method="post" action="${ctx}/logout" class="m-0">
                     <button type="submit" class="admin-sidebar-logout">
-                        <span class="material-symbols-outlined">logout</span>
+                        <i class="ph ph-sign-out" aria-hidden="true"></i>
                         Đăng xuất
                     </button>
                 </form>
@@ -146,97 +150,22 @@
                         aria-label="Mở menu"
                         aria-controls="adminSidebar"
                         aria-expanded="false">
-                    <span class="material-symbols-outlined">menu</span>
+                    <i class="ph ph-list" aria-hidden="true"></i>
                 </button>
 
                 <div class="admin-top-actions">
 
-                    <button type="button"
-                            class="admin-top-button admin-help-button"
-                            aria-label="Hỗ trợ"
-                            title="Hỗ trợ">
-                        <span class="material-symbols-outlined">help_outline</span>
-                    </button>
-
-                    <button type="button"
-                            class="admin-top-button"
-                            aria-label="Thông báo"
-                            title="Thông báo">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span class="admin-notification-dot"></span>
-                    </button>
-
                     <!-- Avatar và dropdown -->
-                    <div class="dropdown admin-account-dropdown">
-
-                        <button class="admin-account-toggle"
-                                type="button"
-                                id="adminAccountDropdown"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                title="Tài khoản Admin">
-
-                            <span class="admin-account-avatar">
-                                <c:out value="${adminInitial}"/>
-                            </span>
-
-                            <span class="admin-account-name">
-                                <c:out value="${adminName}"/>
-                            </span>
-
-                            <span class="material-symbols-outlined admin-account-chevron">
-                                keyboard_arrow_down
-                            </span>
-                        </button>
-
-                        <ul class="dropdown-menu dropdown-menu-end admin-account-menu shadow-sm"
-                            aria-labelledby="adminAccountDropdown">
-
-                            <li class="admin-account-heading">
-                                <span class="admin-account-heading-name">
-                                    <c:out value="${adminName}"/>
-                                </span>
-                                <small>Administrator</small>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item" href="${ctx}/admin/profile">
-                                    <span class="material-symbols-outlined">account_circle</span>
-                                    Hồ sơ của tôi
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item" href="${ctx}/home">
-                                    <span class="material-symbols-outlined">home</span>
-                                    Về trang chủ
-                                </a>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <li>
-                                <form action="${ctx}/logout" method="post" class="m-0">
-                                    <button type="submit" class="dropdown-item admin-dropdown-logout">
-                                        <span class="material-symbols-outlined">logout</span>
-                                        Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-
-                        </ul>
-                    </div>
+                    <jsp:include page="/WEB-INF/views/common/user-menu.jsp"/>
                 </div>
             </header>
 
             <!-- Breadcrumb -->
             <div class="admin-subbar">
                 <div class="admin-breadcrumbs">
-                    <span class="material-symbols-outlined">home</span>
+                    <i class="ph ph-house" aria-hidden="true"></i>
                     <a href="${ctx}/admin">Admin Portal</a>
-                    <span class="material-symbols-outlined">chevron_right</span>
+                    <i class="ph ph-caret-right" aria-hidden="true"></i>
                     <span class="admin-breadcrumb-current">Manage Events</span>
                 </div>
 
@@ -257,7 +186,7 @@
                         </div>
 
                         <div class="event-count">
-                            <span class="material-symbols-outlined">pending_actions</span>
+                            <i class="ph ph-hourglass" aria-hidden="true"></i>
                             <span>${totalEvents} Pending Approval</span>
                         </div>
                     </div>
@@ -265,14 +194,14 @@
                     <!-- Thông báo thành công -->
                     <c:if test="${param.success == 'approved'}">
                         <div class="event-alert event-alert-success" role="status">
-                            <span class="material-symbols-outlined" style="vertical-align: middle;">check_circle</span>
+                            <i class="ph ph-check-circle" style="vertical-align: middle;" aria-hidden="true"></i>
                             Sự kiện đã được duyệt thành công.
                         </div>
                     </c:if>
 
                     <c:if test="${param.success == 'rejected'}">
                         <div class="event-alert event-alert-success" role="status">
-                            <span class="material-symbols-outlined" style="vertical-align: middle;">check_circle</span>
+                            <i class="ph ph-check-circle" style="vertical-align: middle;" aria-hidden="true"></i>
                             Sự kiện đã bị từ chối và lý do đã được lưu.
                         </div>
                     </c:if>
@@ -302,7 +231,7 @@
                         <c:choose>
                             <c:when test="${empty events}">
                                 <div class="event-empty">
-                                    <span class="material-symbols-outlined">event_available</span>
+                                    <i class="ph ph-calendar-check" aria-hidden="true"></i>
                                     <h3>Không có sự kiện chờ duyệt</h3>
                                     <p>Các sự kiện Organizer gửi lên sẽ xuất hiện tại đây.</p>
                                 </div>
@@ -317,8 +246,7 @@
                                                 <th>Organizer ID</th>
                                                 <th>Category</th>
                                                 <th>Venue</th>
-                                                <th>Start Time</th>
-                                                <th>End Time</th>
+                                                <th>Time</th>
                                                 <th>Tickets</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
@@ -328,7 +256,7 @@
                                         <tbody>
                                             <c:forEach var="event" items="${events}">
                                                 <tr>
-                                                    <td>
+                                                    <td data-label="Event">
                                                         <div class="event-id">
                                                             ID: #<c:out value="${event.eventId}"/>
                                                         </div>
@@ -337,85 +265,58 @@
                                                         </div>
                                                     </td>
 
-                                                    <td>
+                                                    <td data-label="Organizer ID">
                                                         #<c:out value="${event.organizerId}"/>
                                                     </td>
 
-                                                    <td>
+                                                    <td data-label="Category">
                                                         <c:out value="${event.categoryName}"/>
                                                     </td>
 
-                                                    <td>
+                                                    <td data-label="Venue">
                                                         <c:out value="${event.venueName}"/>
                                                     </td>
 
-                                                    <td>
-                                                        <c:out value="${event.startTime}"/>
+                                                    <td data-label="Time" class="event-time">
+                                                        <span><small>Start</small><c:out value="${fn:replace(event.startTime, 'T', ' ')}"/></span>
+                                                        <span><small>End</small><c:out value="${fn:replace(event.endTime, 'T', ' ')}"/></span>
                                                     </td>
 
-                                                    <td>
-                                                        <c:out value="${event.endTime}"/>
-                                                    </td>
-
-                                                    <td>
+                                                    <td data-label="Tickets">
                                                         <c:out value="${event.ticketTotal}"/>
                                                     </td>
 
-                                                    <td>
+                                                    <td data-label="Status">
                                                         <span class="event-status">
                                                             <c:out value="${event.status}"/>
                                                         </span>
                                                     </td>
 
-                                                    <td class="event-actions">
-                                                        <div class="event-action-form">
+                                                    <td data-label="Actions" class="event-actions">
+                                                        <div class="event-action-buttons">
 
                                                             <!-- Duyệt sự kiện -->
                                                             <form action="${ctx}/admin/events"
                                                                   method="post"
-                                                                  onsubmit="return confirm('Bà có chắc muốn duyệt sự kiện này không?');">
-
-                                                                <input type="hidden"
-                                                                       name="action"
-                                                                       value="approve">
-
-                                                                <input type="hidden"
-                                                                       name="eventId"
-                                                                       value="${event.eventId}">
-
+                                                                  onsubmit="return confirm('Bạn có chắc muốn duyệt sự kiện này không?');">
+                                                                <input type="hidden" name="action" value="approve">
+                                                                <input type="hidden" name="eventId" value="${event.eventId}">
                                                                 <button type="submit"
                                                                         class="event-btn event-btn-approve">
-                                                                    <span class="material-symbols-outlined">check_circle</span>
+                                                                    <i class="ph ph-check-circle" aria-hidden="true"></i>
                                                                     Approve
                                                                 </button>
                                                             </form>
 
-                                                            <!-- Từ chối sự kiện -->
-                                                            <form action="${ctx}/admin/events"
-                                                                  method="post"
-                                                                  onsubmit="return confirm('Bà có chắc muốn từ chối sự kiện này không?');">
-
-                                                                <input type="hidden"
-                                                                       name="action"
-                                                                       value="reject">
-
-                                                                <input type="hidden"
-                                                                       name="eventId"
-                                                                       value="${event.eventId}">
-
-                                                                <input type="text"
-                                                                       name="reason"
-                                                                       class="event-reason-input"
-                                                                       maxlength="1000"
-                                                                       placeholder="Nhập lý do từ chối..."
-                                                                       required>
-
-                                                                <button type="submit"
-                                                                        class="event-btn event-btn-reject">
-                                                                    <span class="material-symbols-outlined">cancel</span>
-                                                                    Reject
-                                                                </button>
-                                                            </form>
+                                                            <!-- Từ chối: mở modal nhập lý do -->
+                                                            <button type="button"
+                                                                    class="event-btn event-btn-reject"
+                                                                    data-reject-event
+                                                                    data-event-id="${event.eventId}"
+                                                                    data-event-name="<c:out value='${event.eventName}'/>">
+                                                                <i class="ph ph-x-circle" aria-hidden="true"></i>
+                                                                Reject
+                                                            </button>
 
                                                         </div>
                                                     </td>
@@ -441,7 +342,7 @@
                                             <a href="${ctx}/admin/events?page=${currentPage - 1}"
                                                class="event-page-link ${currentPage <= 1 ? 'is-disabled' : ''}"
                                                aria-label="Trang trước">
-                                                <span class="material-symbols-outlined">chevron_left</span>
+                                                <i class="ph ph-caret-left" aria-hidden="true"></i>
                                             </a>
 
                                             <c:forEach var="p" begin="1" end="${totalPages}">
@@ -455,7 +356,7 @@
                                             <a href="${ctx}/admin/events?page=${currentPage + 1}"
                                                class="event-page-link ${currentPage >= totalPages ? 'is-disabled' : ''}"
                                                aria-label="Trang sau">
-                                                <span class="material-symbols-outlined">chevron_right</span>
+                                                <i class="ph ph-caret-right" aria-hidden="true"></i>
                                             </a>
 
                                         </div>
@@ -467,6 +368,44 @@
                     </div>
                 </section>
 
+                <!-- Modal nhập lý do từ chối (bắt buộc, tối đa 1000 ký tự) -->
+                <div class="event-modal" id="rejectModal" role="dialog" aria-modal="true" aria-labelledby="rejectModalTitle" hidden>
+                    <div class="event-modal-backdrop" data-reject-close></div>
+                    <form class="event-modal-dialog" action="${ctx}/admin/events" method="post" id="rejectForm" novalidate>
+                        <input type="hidden" name="action" value="reject">
+                        <input type="hidden" name="eventId" id="rejectEventId" value="">
+
+                        <div class="event-modal-head">
+                            <div>
+                                <h2 id="rejectModalTitle">Từ chối sự kiện</h2>
+                                <p id="rejectEventName"></p>
+                            </div>
+                            <button type="button" class="event-modal-close" data-reject-close aria-label="Đóng">
+                                <i class="ph ph-x" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <label class="event-modal-label" for="rejectReason">
+                            Lý do từ chối <span class="event-req">*</span>
+                        </label>
+                        <textarea id="rejectReason" name="reason" rows="5" maxlength="1000" required
+                                  aria-describedby="rejectReasonHelp rejectReasonError"
+                                  placeholder="Nêu rõ lý do để Organizer chỉnh sửa và gửi duyệt lại..."></textarea>
+                        <div class="event-modal-help">
+                            <span id="rejectReasonError" class="event-modal-error" role="alert"></span>
+                            <span id="rejectReasonHelp"><span id="rejectReasonCount">0</span>/1000 ký tự</span>
+                        </div>
+
+                        <div class="event-modal-actions">
+                            <button type="button" class="event-btn event-btn-ghost" data-reject-close>Hủy</button>
+                            <button type="submit" class="event-btn event-btn-reject-solid">
+                                <i class="ph ph-x-circle" aria-hidden="true"></i>
+                                Xác nhận từ chối
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <footer class="admin-page-footer">
                     © 2026 Light Ticket Platform JSC. All rights reserved.
                 </footer>
@@ -476,36 +415,112 @@
         <!-- Bootstrap JS dùng cho dropdown -->
         <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
 
-        <!-- Điều khiển sidebar trên màn hình nhỏ -->
+        <!-- Modal từ chối sự kiện -->
         <script>
                                                                       (function () {
-                                                                          const sidebar = document.getElementById('adminSidebar');
-                                                                          const backdrop = document.getElementById('adminSidebarBackdrop');
-                                                                          const openButton = document.getElementById('adminSidebarOpen');
-                                                                          const closeButton = document.getElementById('adminSidebarClose');
+                                                                          var modal = document.getElementById('rejectModal');
+                                                                          if (!modal) {
+                                                                              return;
+                                                                          }
+                                                                          var form = document.getElementById('rejectForm');
+                                                                          var reason = document.getElementById('rejectReason');
+                                                                          var count = document.getElementById('rejectReasonCount');
+                                                                          var error = document.getElementById('rejectReasonError');
+                                                                          var MAX = 1000;
+                                                                          var opener = null;
 
-                                                                          function openSidebar() {
-                                                                              sidebar.classList.add('is-open');
-                                                                              backdrop.classList.add('is-visible');
-                                                                              openButton.setAttribute('aria-expanded', 'true');
+                                                                          function setError(message) {
+                                                                              error.textContent = message || '';
+                                                                              reason.classList.toggle('is-invalid', !!message);
+                                                                              reason.setAttribute('aria-invalid', message ? 'true' : 'false');
+                                                                          }
+                                                                          function updateCount() {
+                                                                              count.textContent = reason.value.length;
+                                                                          }
+                                                                          function open(button) {
+                                                                              opener = button;
+                                                                              document.getElementById('rejectEventId').value = button.getAttribute('data-event-id');
+                                                                              document.getElementById('rejectEventName').textContent =
+                                                                                      '#' + button.getAttribute('data-event-id') + ' · ' + (button.getAttribute('data-event-name') || '');
+                                                                              reason.value = '';
+                                                                              setError('');
+                                                                              updateCount();
+                                                                              modal.hidden = false;
+                                                                              document.body.classList.add('event-modal-open');
+                                                                              reason.focus();
+                                                                          }
+                                                                          function close() {
+                                                                              modal.hidden = true;
+                                                                              document.body.classList.remove('event-modal-open');
+                                                                              if (opener) {
+                                                                                  opener.focus();
+                                                                              }
                                                                           }
 
-                                                                          function closeSidebar() {
-                                                                              sidebar.classList.remove('is-open');
-                                                                              backdrop.classList.remove('is-visible');
-                                                                              openButton.setAttribute('aria-expanded', 'false');
-                                                                          }
-
-                                                                          openButton.addEventListener('click', openSidebar);
-                                                                          closeButton.addEventListener('click', closeSidebar);
-                                                                          backdrop.addEventListener('click', closeSidebar);
-
-                                                                          document.addEventListener('keydown', function (event) {
-                                                                              if (event.key === 'Escape') {
-                                                                                  closeSidebar();
+                                                                          document.querySelectorAll('[data-reject-event]').forEach(function (button) {
+                                                                              button.addEventListener('click', function () {
+                                                                                  open(button);
+                                                                              });
+                                                                          });
+                                                                          modal.querySelectorAll('[data-reject-close]').forEach(function (el) {
+                                                                              el.addEventListener('click', close);
+                                                                          });
+                                                                          document.addEventListener('keydown', function (e) {
+                                                                              if (e.key === 'Escape' && !modal.hidden) {
+                                                                                  close();
+                                                                              }
+                                                                          });
+                                                                          reason.addEventListener('input', function () {
+                                                                              updateCount();
+                                                                              if (error.textContent) {
+                                                                                  setError('');
+                                                                              }
+                                                                          });
+                                                                          form.addEventListener('submit', function (e) {
+                                                                              var value = reason.value.trim();
+                                                                              if (!value) {
+                                                                                  e.preventDefault();
+                                                                                  setError('Vui lòng nhập lý do từ chối sự kiện.');
+                                                                                  reason.focus();
+                                                                              } else if (value.length > MAX) {
+                                                                                  e.preventDefault();
+                                                                                  setError('Lý do từ chối không được vượt quá 1000 ký tự.');
+                                                                                  reason.focus();
                                                                               }
                                                                           });
                                                                       })();
+        </script>
+
+        <!-- Điều khiển sidebar trên màn hình nhỏ -->
+        <script>
+            (function () {
+                const sidebar = document.getElementById('adminSidebar');
+                const backdrop = document.getElementById('adminSidebarBackdrop');
+                const openButton = document.getElementById('adminSidebarOpen');
+                const closeButton = document.getElementById('adminSidebarClose');
+
+                function openSidebar() {
+                    sidebar.classList.add('is-open');
+                    backdrop.classList.add('is-visible');
+                    openButton.setAttribute('aria-expanded', 'true');
+                }
+
+                function closeSidebar() {
+                    sidebar.classList.remove('is-open');
+                    backdrop.classList.remove('is-visible');
+                    openButton.setAttribute('aria-expanded', 'false');
+                }
+
+                openButton.addEventListener('click', openSidebar);
+                closeButton.addEventListener('click', closeSidebar);
+                backdrop.addEventListener('click', closeSidebar);
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeSidebar();
+                    }
+                });
+            })();
         </script>
 
     </body>

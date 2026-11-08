@@ -10,6 +10,7 @@ import model.OrganizerDocument;
 import model.OrganizerProfile;
 import model.User;
 import utils.Constants;
+import utils.PrivateDocuments;
 import utils.ValidationUtils;
 
 import jakarta.servlet.ServletException;
@@ -738,7 +739,7 @@ public class OrganizerProfileController extends HttpServlet {
     }
 
     private Path getPrivateDocumentDir() {
-        return Paths.get(System.getProperty("user.home"), Constants.PRIVATE_DOC_DIR_NAME.split("/")).toAbsolutePath().normalize();
+        return PrivateDocuments.directory();
     }
 
     /**
@@ -808,27 +809,7 @@ public class OrganizerProfileController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            Path directory = getPrivateDocumentDir();
-            Path file = directory.resolve(Paths.get(document.getFileName()).getFileName().toString()).normalize();
-            if (!file.startsWith(directory) || !Files.isRegularFile(file)) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-            String extension = getExtension(file.getFileName().toString());
-            String contentType = "application/octet-stream";
-            if ("pdf".equals(extension)) {
-                contentType = "application/pdf";
-            } else if ("png".equals(extension)) {
-                contentType = "image/png";
-            } else if ("jpg".equals(extension) || "jpeg".equals(extension)) {
-                contentType = "image/jpeg";
-            }
-            response.setContentType(contentType);
-            response.setContentLengthLong(Files.size(file));
-            response.setHeader("Content-Disposition", "inline; filename=\"organizer-document." + extension + "\"");
-            response.setHeader("X-Content-Type-Options", "nosniff");
-            response.setHeader("Cache-Control", "private, no-store");
-            Files.copy(file, response.getOutputStream());
+            PrivateDocuments.serve(response, document.getFileName());
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Cannot load organizer document, userId=" + organizer.getUserId(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);

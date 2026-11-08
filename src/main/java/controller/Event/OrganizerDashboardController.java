@@ -50,6 +50,9 @@ public class OrganizerDashboardController extends EventController {
         int[] orderCounts = dashboardDAO.getOrderCounts(organizerId);
         request.setAttribute("orderTotal", orderCounts[0]);
         request.setAttribute("orderPending", orderCounts[1]);
+        int[] checkIn = dashboardDAO.getCheckInStats(organizerId);
+        request.setAttribute("checkedInTotal", checkIn[0]);
+        request.setAttribute("issuedTotal", checkIn[1]);
 
         Map<String, BigDecimal> period = dashboardDAO.getPeriodComparison(organizerId);
         request.setAttribute("revenueChange", percentChange(period.get("revenueCurrent"), period.get("revenuePrevious")));
@@ -79,7 +82,10 @@ public class OrganizerDashboardController extends EventController {
         request.getRequestDispatcher(DASHBOARD_VIEW).forward(request, response);
     }
 
-    /** % thay đổi so với kỳ trước; null nếu kỳ trước = 0 (không có cơ sở so sánh). */
+    /**
+     * % thay đổi so với kỳ trước; null nếu kỳ trước = 0 (không có cơ sở so
+     * sánh).
+     */
     private static Double percentChange(BigDecimal current, BigDecimal previous) {
         if (previous == null || previous.signum() <= 0) {
             return null;

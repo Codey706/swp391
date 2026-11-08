@@ -3,6 +3,7 @@ package controller;
 import dao.EventDAO;
 import model.Auth;
 import utils.Constants;
+import utils.EmailService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -144,6 +145,7 @@ public class AdminEventController extends HttpServlet {
             boolean success = eventDAO.approveEvent(eventId);
 
             if (success) {
+                notifyOrganizer(eventId, true, null);
                 response.sendRedirect(
                         request.getContextPath()
                         + "/admin/events?success=approved"
@@ -182,6 +184,7 @@ public class AdminEventController extends HttpServlet {
             boolean success = eventDAO.rejectEvent(eventId, reason);
 
             if (success) {
+                notifyOrganizer(eventId, false, reason);
                 response.sendRedirect(
                         request.getContextPath()
                         + "/admin/events?success=rejected"
@@ -200,5 +203,21 @@ public class AdminEventController extends HttpServlet {
                 HttpServletResponse.SC_BAD_REQUEST,
                 "Invalid action."
         );
+    }
+
+    // UC-29: gửi email kết quả duyệt cho Organizer (chạy nền, lỗi gửi mail không ảnh hưởng việc duyệt)
+    private void notifyOrganizer(int eventId, boolean approved, String reason) {
+        String[] contact = eventDAO.getOrganizerContact(eventId);
+        if (contact == null || contact[0] == null) {
+            return;
+        }
+        String subject = (approved ? "Sự kiện đã được duyệt: " : "Sự kiện bị từ chối: ") + contact[2];
+        String body = "Xin chào " + contact[1] + ",\n\n"
+                + (approved
+                        ? "Sự kiện \"" + contact[2] + "\" đã được quản trị viên phê duyệt và đang mở bán trên Light Ticket."
+                        : "Sự kiện \"" + contact[2] + "\" chưa được phê duyệt.\nLý do: " + reason
+                        + "\n\nBạn có thể chỉnh sửa sự kiện và gửi duyệt lại.")
+                + "\n\nLight Ticket";
+        EmailService.sendAsync(() -> EmailService.sendText(contact[0], subject, body));
     }
 }

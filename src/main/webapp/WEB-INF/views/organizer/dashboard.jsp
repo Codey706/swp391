@@ -21,6 +21,15 @@
         <title>Tổng quan - Light Ticket Organizer Portal</title>
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/organizer-dashboard.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
     </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
@@ -33,7 +42,7 @@
             <%-- Banner chào mừng --%>
             <section class="org-card org-page-head dash-welcome">
                 <div class="d-flex align-items-center gap-3">
-                    <span class="dash-welcome-icon"><span class="material-symbols-outlined">event_available</span></span>
+                    <span class="dash-welcome-icon"><i class="ph ph-calendar-check" aria-hidden="true"></i></span>
                     <div>
                         <h1 class="org-title">Chào mừng trở lại, <c:out value="${orgName}"/>!</h1>
                         <p class="text-secondary small mb-0">Theo dõi hiệu quả và quản lý các sự kiện của bạn tại đây.</p>
@@ -41,7 +50,7 @@
                 </div>
                 <div class="org-head-actions">
                     <a class="btn-cta" href="${ctx}/organizer/event/create">
-                        <span class="material-symbols-outlined">add_circle</span> Tạo sự kiện mới
+                        <i class="ph ph-plus-circle" aria-hidden="true"></i> Tạo sự kiện mới
                     </a>
                 </div>
             </section>
@@ -53,7 +62,7 @@
                     <div class="dash-stat">
                         <div class="dash-stat-top">
                             <span class="dash-stat-label">Tổng doanh thu</span>
-                            <span class="dash-stat-icon"><span class="material-symbols-outlined">payments</span></span>
+                            <span class="dash-stat-icon"><i class="ph ph-money" aria-hidden="true"></i></span>
                         </div>
                         <div class="dash-stat-value"><fmt:formatNumber value="${empty salesSummary ? 0 : salesSummary.revenue}" pattern="#,##0"/> đ</div>
                         <div class="dash-stat-foot">
@@ -61,7 +70,7 @@
                                 <c:when test="${revenueChange == null}">Chưa có dữ liệu kỳ trước</c:when>
                                 <c:otherwise>
                                     <span class="dash-trend ${revenueChange >= 0 ? 'up' : 'down'}">
-                                        <span class="material-symbols-outlined">${revenueChange >= 0 ? 'arrow_drop_up' : 'arrow_drop_down'}</span><fmt:formatNumber value="${revenueChange < 0 ? -revenueChange : revenueChange}" pattern="0.#"/>%
+                                        <i class="ph ${revenueChange >= 0 ? 'ph-caret-up' : 'ph-caret-down'}" aria-hidden="true"></i><fmt:formatNumber value="${revenueChange < 0 ? -revenueChange : revenueChange}" pattern="0.#"/>%
                                     </span>
                                     so với ${periodDays} ngày trước
                                 </c:otherwise>
@@ -74,7 +83,7 @@
                     <div class="dash-stat">
                         <div class="dash-stat-top">
                             <span class="dash-stat-label">Vé đã bán</span>
-                            <span class="dash-stat-icon"><span class="material-symbols-outlined">confirmation_number</span></span>
+                            <span class="dash-stat-icon"><i class="ph ph-ticket" aria-hidden="true"></i></span>
                         </div>
                         <div class="dash-stat-value"><fmt:formatNumber value="${sumSold}" pattern="#,##0"/></div>
                         <div class="dash-stat-foot">
@@ -82,7 +91,7 @@
                                 <c:when test="${soldChange == null}">Chưa có dữ liệu kỳ trước</c:when>
                                 <c:otherwise>
                                     <span class="dash-trend ${soldChange >= 0 ? 'up' : 'down'}">
-                                        <span class="material-symbols-outlined">${soldChange >= 0 ? 'arrow_drop_up' : 'arrow_drop_down'}</span><fmt:formatNumber value="${soldChange < 0 ? -soldChange : soldChange}" pattern="0.#"/>%
+                                        <i class="ph ${soldChange >= 0 ? 'ph-caret-up' : 'ph-caret-down'}" aria-hidden="true"></i><fmt:formatNumber value="${soldChange < 0 ? -soldChange : soldChange}" pattern="0.#"/>%
                                     </span>
                                     so với ${periodDays} ngày trước
                                 </c:otherwise>
@@ -95,7 +104,7 @@
                     <a class="dash-stat is-link" href="${ctx}/organizer/event/list">
                         <div class="dash-stat-top">
                             <span class="dash-stat-label">Sự kiện của tôi</span>
-                            <span class="dash-stat-icon"><span class="material-symbols-outlined">calendar_month</span></span>
+                            <span class="dash-stat-icon"><i class="ph ph-calendar" aria-hidden="true"></i></span>
                         </div>
                         <div class="dash-stat-value"><fmt:formatNumber value="${allEvents}" pattern="#,##0"/></div>
                         <div class="dash-stat-foot"><fmt:formatNumber value="${activeCount}" pattern="#,##0"/> sự kiện đang mở bán</div>
@@ -106,10 +115,20 @@
                     <div class="dash-stat">
                         <div class="dash-stat-top">
                             <span class="dash-stat-label">Đơn hàng</span>
-                            <span class="dash-stat-icon"><span class="material-symbols-outlined">shopping_bag</span></span>
+                            <span class="dash-stat-icon"><i class="ph ph-shopping-bag" aria-hidden="true"></i></span>
                         </div>
                         <div class="dash-stat-value"><fmt:formatNumber value="${orderTotal}" pattern="#,##0"/></div>
                         <div class="dash-stat-foot"><fmt:formatNumber value="${orderPending}" pattern="#,##0"/> đơn đang chờ xử lý</div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="dash-stat">
+                        <div class="dash-stat-top">
+                            <span class="dash-stat-label">Check-in</span>
+                            <span class="dash-stat-icon"><i class="ph ph-scan" aria-hidden="true"></i></span>
+                        </div>
+                        <div class="dash-stat-value"><fmt:formatNumber value="${checkedInTotal}" pattern="#,##0"/></div>
+                        <div class="dash-stat-foot">trên <fmt:formatNumber value="${issuedTotal}" pattern="#,##0"/> vé đã phát hành</div>
                     </div>
                 </div>
             </section>
@@ -150,9 +169,9 @@
                             </div>
                         </div>
                         <ul class="dash-legend">
-                            <li><span><span class="dash-dot" style="background:#c5cbd8"></span>Tổng số vé</span><b><fmt:formatNumber value="${sumTotal}" pattern="#,##0"/></b></li>
+                            <li><span><span class="dash-dot" style="background:#d4d4d8"></span>Tổng số vé</span><b><fmt:formatNumber value="${sumTotal}" pattern="#,##0"/></b></li>
                             <li><span><span class="dash-dot" style="background:var(--primary-orange)"></span>Đã bán</span><b><fmt:formatNumber value="${sumSold}" pattern="#,##0"/></b></li>
-                            <li><span><span class="dash-dot" style="background:#eef1f8"></span>Còn lại</span><b><fmt:formatNumber value="${sumLeft}" pattern="#,##0"/></b></li>
+                            <li><span><span class="dash-dot" style="background:#efeff1"></span>Còn lại</span><b><fmt:formatNumber value="${sumLeft}" pattern="#,##0"/></b></li>
                         </ul>
                     </section>
                 </div>
@@ -190,9 +209,9 @@
                                                             <img class="ev-thumb" alt="" src="${ctx}/<c:out value='${e.eventImage}'/>">
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <span class="ev-thumb"><span class="material-symbols-outlined">image</span></span>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                            <span class="ev-thumb"><i class="ph ph-image" aria-hidden="true"></i></span>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     <div>
                                                         <p class="ev-name"><c:out value="${e.eventName}"/></p>
                                                         <span class="ev-cat"><c:out value="${e.categoryName}"/></span>
@@ -227,7 +246,7 @@
                                             <td>
                                                 <div class="row-actions">
                                                     <a class="icon-action" title="Sơ đồ ghế" href="${ctx}/organizer/event/seatmap?eventId=${e.eventId}">
-                                                        <span class="material-symbols-outlined">event_seat</span>
+                                                        <i class="ph ph-armchair" aria-hidden="true"></i>
                                                     </a>
                                                 </div>
                                             </td>
@@ -237,10 +256,10 @@
                                         <tr>
                                             <td colspan="6">
                                                 <div class="empty-state">
-                                                    <span class="material-symbols-outlined">event_busy</span>
+                                                    <i class="ph ph-calendar-x" aria-hidden="true"></i>
                                                     <p class="mb-1 fw-bold text-dark">Chưa có sự kiện nào</p>
                                                     <p class="mb-3 small">Hãy tạo sự kiện đầu tiên để bắt đầu mở bán vé.</p>
-                                                    <a class="btn-cta" href="${ctx}/organizer/event/create"><span class="material-symbols-outlined">add_circle</span> Tạo sự kiện mới</a>
+                                                    <a class="btn-cta" href="${ctx}/organizer/event/create"><i class="ph ph-plus-circle" aria-hidden="true"></i> Tạo sự kiện mới</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -260,14 +279,7 @@
                             <c:set var="ut" value="${a.updatedAt}"/>
                             <div class="dash-tl-item">
                                 <span class="dash-activity-icon">
-                                    <span class="material-symbols-outlined">
-                                        <c:choose>
-                                            <c:when test="${a.status == 'ACTIVE'}">verified</c:when>
-                                            <c:when test="${a.status == 'PENDING_APPROVAL'}">hourglass_top</c:when>
-                                            <c:when test="${a.status == 'DRAFT'}">edit_note</c:when>
-                                            <c:otherwise>event_busy</c:otherwise>
-                                        </c:choose>
-                                    </span>
+                                    <i class="ph ${a.status == 'ACTIVE' ? 'ph-seal-check' : a.status == 'PENDING_APPROVAL' ? 'ph-hourglass-high' : a.status == 'DRAFT' ? 'ph-note-pencil' : 'ph-calendar-x'}" aria-hidden="true"></i>
                                 </span>
                                 <div>
                                     <div class="dash-tl-text">
@@ -334,7 +346,7 @@
                                 <tr>
                                     <td colspan="7">
                                         <div class="empty-state">
-                                            <span class="material-symbols-outlined">receipt_long</span>
+                                            <i class="ph ph-receipt" aria-hidden="true"></i>
                                             <p class="mb-0 fw-bold text-dark">Chưa có đơn hàng nào</p>
                                         </div>
                                     </td>
