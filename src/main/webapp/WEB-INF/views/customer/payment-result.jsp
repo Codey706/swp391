@@ -5,21 +5,34 @@
 --%>
 
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %><fmt:setLocale value="vi_VN"/>
+<c:set var="ok" value="${paymentSuccess eq true}"/>
 
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Đặt vé thành công | Light Ticketbox</title>
+        <title>${ok ? 'Đặt vé thành công' : 'Thanh toán chưa thành công'} | Light Ticket</title>
 
 
         <link rel="stylesheet"
               href="${pageContext.request.contextPath}/assets/css/payment-result.css">
 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
     </head>
 
     <body>
+        <jsp:include page="/WEB-INF/views/common/site-header.jsp"/>
         <main class="payment-page">
 
             <!-- Thanh tiến trình -->
@@ -57,11 +70,19 @@
                 </div>
             </section>
 
-            <!-- Thông báo thành công -->
+            <!-- Kết quả thanh toán: đọc từ VNPayReturnServlet (paymentSuccess / paymentMessage) -->
             <section class="success-heading">
-                <div class="success-icon">✓</div>
-                <h1>Đặt vé thành công!</h1>
-                <p>Cảm ơn bạn đã đặt vé. Chúc bạn có trải nghiệm tuyệt vời.</p>
+                <c:choose>
+                    <c:when test="${ok}">
+                        <div class="success-icon">✓</div>
+                        <h1>Đặt vé thành công!</h1>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="success-icon" style="background:#d93a27;border-color:#ffe7e2;box-shadow:0 5px 14px rgba(217, 58, 39,.18);">✕</div>
+                        <h1>Thanh toán chưa thành công</h1>
+                    </c:otherwise>
+                </c:choose>
+                <p><c:out value="${not empty paymentMessage ? paymentMessage : 'Cảm ơn bạn đã đặt vé.'}"/></p>
             </section>
 
             <!-- Thông tin đơn hàng -->
@@ -73,42 +94,53 @@
 
                 <div class="order-code">
                     <span class="label">Mã đơn hàng</span>
-                    <strong>
-                        <%= request.getAttribute("orderCode") != null
-                                ? request.getAttribute("orderCode") : "Đang cập nhật"%>
-                    </strong>
+                    <strong><c:out value="${orderCode}" default="Không tìm thấy"/></strong>
                 </div>
 
                 <div class="info-row">
                     <span class="label">Trạng thái thanh toán</span>
                     <span class="value">
-                        <span class="status-success">✓ Thanh toán thành công</span>
+                        <c:choose>
+                            <c:when test="${ok}"><span class="status-success">✓ Thanh toán thành công</span></c:when>
+                            <c:otherwise><span class="status-success" style="background:#fafafa;color:#b42e1d;">✕ Chưa thanh toán</span></c:otherwise>
+                        </c:choose>
                     </span>
                 </div>
 
                 <div class="info-row">
                     <span class="label">Mã giao dịch VNPay</span>
                     <span class="value">
-                        <%= request.getAttribute("transactionCode") != null
-                                ? request.getAttribute("transactionCode") : "Không có thông tin"%>
-                    </span>
-                </div>
+                        <c:out value="${transactionCode}" default="Không có"/><c:if test="${not empty transactionCode and not empty bankCode}"> (<c:out value="${bankCode}"/>)</c:if>
+                        </span>
+                    </div>
 
-                <div class="info-row">
-                    <span class="label">Tổng thanh toán</span>
+                    <div class="info-row">
+                        <span class="label">${ok ? 'Tổng thanh toán' : 'Giá trị đơn hàng'}</span>
                     <span class="value total-amount">
-                        <%= request.getAttribute("finalAmount") != null
-                                ? request.getAttribute("finalAmount") : "0"%> VNĐ
+                        <c:choose>
+                            <c:when test="${not empty finalAmount}"><fmt:formatNumber value="${finalAmount}" pattern="#,##0"/> đ</c:when>
+                            <c:otherwise>-</c:otherwise>
+                        </c:choose>
                     </span>
                 </div>
             </section>
 
             <!-- Các nút điều hướng -->
             <div class="payment-actions">
-                <a class="btn btn-primary"
-                   href="${pageContext.request.contextPath}/customer/booking-history">
-                    Vé của tôi <span aria-hidden="true">→</span>
-                </a>
+                <c:choose>
+                    <c:when test="${not empty orderId}">
+                        <a class="btn btn-primary"
+                           href="${pageContext.request.contextPath}/customer/booking-detail?orderId=${orderId}">
+                            ${ok ? 'Xem vé điện tử' : 'Xem đơn hàng'} <span aria-hidden="true">→</span>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="btn btn-primary"
+                           href="${pageContext.request.contextPath}/customer/booking-history">
+                            Vé của tôi <span aria-hidden="true">→</span>
+                        </a>
+                    </c:otherwise>
+                </c:choose>
 
                 <a class="btn btn-outline"
                    href="${pageContext.request.contextPath}/">
@@ -120,16 +152,25 @@
             <section class="notice">
                 <h2>
                     <span class="notice-icon">ⓘ</span>
-                    Lưu ý sau khi đặt vé
+                    ${ok ? 'Lưu ý sau khi đặt vé' : 'Lưu ý'}
                 </h2>
 
-                <p>Vui lòng kiểm tra thông tin đơn hàng và email xác nhận.</p>
-                <p>Hãy lưu mã đơn hàng để tiện tra cứu khi cần hỗ trợ.</p>
-                <p>Vui lòng chuẩn bị vé điện tử khi tham gia sự kiện.</p>
+                <c:choose>
+                    <c:when test="${ok}">
+                        <p>Vui lòng kiểm tra thông tin đơn hàng và email xác nhận.</p>
+                        <p>Hãy lưu mã đơn hàng để tiện tra cứu khi cần hỗ trợ.</p>
+                        <p>Vui lòng chuẩn bị vé điện tử khi tham gia sự kiện.</p>
+                    </c:when>
+                    <c:otherwise>
+                        <p>Bạn chưa bị trừ tiền cho đơn này (trừ khi có thông báo hoàn tiền ở trên).</p>
+                        <p>Nếu đơn còn trong thời gian giữ vé, bạn có thể vào "Xem đơn hàng" để thanh toán lại.</p>
+                        <p>Hết thời gian giữ vé, đơn sẽ tự động hủy và vé được trả lại.</p>
+                    </c:otherwise>
+                </c:choose>
             </section>
 
             <div class="footer-note">
-                Light Ticketbox — Chúc bạn có một trải nghiệm âm nhạc tuyệt vời!
+                Light Ticket - Chúc bạn có một trải nghiệm âm nhạc tuyệt vời!
             </div>
 
         </main>
@@ -137,28 +178,7 @@
 
     </div>
 
-    <footer class="simple-footer">
-        <a class="simple-footer-brand"
-           href="${pageContext.request.contextPath}/">
-            Light Ticketbox
-        </a>
-
-        <nav class="simple-footer-nav">
-            <a href="${pageContext.request.contextPath}/">Trang chủ</a>
-
-            <a href="${pageContext.request.contextPath}/customer/booking-history">
-                Vé của tôi
-            </a>
-
-            <a href="${pageContext.request.contextPath}/customer/profile">
-                Hồ sơ cá nhân
-            </a>
-        </nav>
-
-        <p class="simple-footer-copyright">
-            © 2026 Light Ticket. All rights reserved.
-        </p>
-    </footer>
+    <jsp:include page="/WEB-INF/views/common/site-footer.jsp"/>
 
 
 </body>

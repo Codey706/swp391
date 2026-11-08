@@ -1,25 +1,27 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
 import dao.PaymentDAO;
-import java.math.BigDecimal;
-import model.Payment;
-import model.PaymentResponse;
-import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
+import model.Payment;
+import utils.Constants;
 
 /**
+ * Tạo URL thanh toán VNPay cho một đơn Pending. Kết quả thanh toán được xử lý
+ * ở VNPayReturnServlet (/vnpay-return) và VNPayIpnServlet (/vnpay-ipn), cùng
+ * dùng PaymentDAO.applyVnPayResult().
  *
  * @author BT
  */
 public class PaymentController {
+
+    private static final DateTimeFormatter VNP_DATE = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private final PaymentDAO paymentDAO;
 
@@ -27,62 +29,13 @@ public class PaymentController {
         paymentDAO = new PaymentDAO();
     }
 
-    public boolean createPayment(int orderId, BigDecimal amount) {
-
-        // 1. Validate payment request
-        boolean valid = paymentDAO.validatePaymentRequest(orderId, amount);
-
-        if (!valid) {
-            return false;
-        }
-
-        // 2. Create payment
-        Payment payment = new Payment();
-
-        payment.setOrderId(orderId);
-        payment.setPaymentMethod("VNPAY");
-        payment.setTransactionCode(
-                "LT" + UUID.randomUUID().toString().replace("-", "")
-        );
-        payment.setAmount(amount);
-        payment.setPaymentStatus("Pending");
-        payment.setPaidAt(null);
-
-        return paymentDAO.createPayment(payment);
-    }
-
-    public boolean processPaymentResponse(PaymentResponse response) {
-
-        // 1. Verify payment result
-        boolean valid = paymentDAO.verifyPaymentResult(response);
-
-        if (!valid) {
-            return false;
-        }
-
-        // 2. Process valid payment response
-        return paymentDAO.processPaymentResponse(response);
-    }
-
-    public model.Payment getPaymentByTransactionCode(String transactionCode) {
-        if (transactionCode == null || transactionCode.isBlank()) {
-            return null;
-        }
-
-        return paymentDAO.getPaymentByTransactionCode(transactionCode);
-    }
-
-    public model.Payment getPendingPaymentForOrder(int orderId) {
-        if (orderId <= 0) {
-            return null;
-        }
-
-        return paymentDAO.getPendingPaymentForOrder(orderId);
-    }
-
+    /**
+     * @param holdExpiredAt Orders.hold_expired_at; link VNPay hết hạn đúng lúc hết giữ chỗ
+     */
     public String createVNPayUrl(
             int orderId,
             BigDecimal amount,
+            LocalDateTime holdExpiredAt,
             HttpServletRequest request) {
 
         if (!paymentDAO.validatePaymentRequest(orderId, amount)) {
@@ -91,39 +44,10 @@ public class PaymentController {
             );
         }
 
-        // Tái sử dụng giao dịch Pending nếu đã tồn tại.
-        Payment payment = paymentDAO.getPendingPaymentForOrder(orderId);
-
-        if (payment == null) {
-            Payment newPayment = new Payment();
-            newPayment.setOrderId(orderId);
-            newPayment.setPaymentMethod("VNPAY");
-
-            // VNPay TxnRef nên dùng ký tự chữ và số.
-            newPayment.setTransactionCode(
-                    "LT" + UUID.randomUUID().toString().replace("-", "")
-            );
-
-            newPayment.setAmount(amount);
-            newPayment.setPaymentStatus("Pending");
-            newPayment.setPaidAt(null);
-
-            if (!paymentDAO.createPayment(newPayment)) {
-                throw new IllegalStateException(
-                        "Không thể tạo giao dịch thanh toán."
-                );
-            }
-
-            payment = paymentDAO.getPendingPaymentForOrder(orderId);
-        }
-
-        if (payment == null
-                || payment.getTransactionCode() == null
-                || payment.getAmount() == null
-                || payment.getAmount().compareTo(amount) != 0) {
-            throw new IllegalStateException(
-                    "Không tìm thấy giao dịch Pending hợp lệ."
-            );
+        // VNPay hiểu thời gian theo GMT+7; hold_expired_at do SQL Server (GETDATE) sinh ra theo giờ Việt Nam
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(Constants.BUSINESS_ZONE_ID));
+        if (holdExpiredAt == null || !holdExpiredAt.isAfter(now.plusSeconds(30))) {
+            throw new IllegalStateException("Thời gian giữ vé đã hết hoặc sắp hết.");
         }
 
         long amountVnp;
@@ -135,9 +59,18 @@ public class PaymentController {
             );
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter
-                = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        // Mỗi lần thanh toán là một giao dịch mới: VNPay không nhận lại vnp_TxnRef đã dùng.
+        // Giao dịch Pending cũ (nếu có) vẫn được xử lý nếu VNPay báo kết quả muộn.
+        Payment payment = new Payment();
+        payment.setOrderId(orderId);
+        payment.setPaymentMethod("VNPAY");
+        payment.setTransactionCode("LT" + UUID.randomUUID().toString().replace("-", ""));
+        payment.setAmount(amount);
+        payment.setPaymentStatus(PaymentDAO.PAYMENT_PENDING);
+        payment.setPaidAt(null);
+        if (!paymentDAO.createPayment(payment)) {
+            throw new IllegalStateException("Không thể tạo giao dịch thanh toán.");
+        }
 
         Map<String, String> params = new TreeMap<>();
         params.put("vnp_Version", "2.1.0");
@@ -157,9 +90,8 @@ public class PaymentController {
 
         params.put("vnp_ReturnUrl", baseUrl + "/vnpay-return");
         params.put("vnp_IpAddr", request.getRemoteAddr());
-        params.put("vnp_CreateDate", now.format(formatter));
-        params.put("vnp_ExpireDate",
-                now.plusMinutes(15).format(formatter));
+        params.put("vnp_CreateDate", now.format(VNP_DATE));
+        params.put("vnp_ExpireDate", holdExpiredAt.format(VNP_DATE));
 
         return utils.VnPayUtil.createPaymentUrl(params);
     }
