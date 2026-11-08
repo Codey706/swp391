@@ -76,29 +76,27 @@ public final class VnPayUtil {
         }
     }
 
-   
-public static String createPaymentUrl(Map<String, String> params) {
-    String tmnCode = VnPayConfig.getTmnCode();
-    String hashSecret = VnPayConfig.getHashSecret();
+    public static String createPaymentUrl(Map<String, String> params) {
+        String tmnCode = VnPayConfig.getTmnCode();
+        String hashSecret = VnPayConfig.getHashSecret();
 
-    if (!tmnCode.equals(params.get("vnp_TmnCode"))) {
-        throw new IllegalStateException(
-                "vnp_TmnCode không khớp cấu hình VNPay."
-        );
+        if (!tmnCode.equals(params.get("vnp_TmnCode"))) {
+            throw new IllegalStateException(
+                    "vnp_TmnCode không khớp cấu hình VNPay."
+            );
+        }
+
+        Map<String, String> data = new TreeMap<>(params);
+        data.remove("vnp_SecureHash");
+        data.remove("vnp_SecureHashType");
+
+        String hashData = buildQueryString(data);
+        String secureHash = hmacSHA512(hashSecret, hashData);
+
+        return VnPayConfig.PAYMENT_URL
+                + "?" + hashData
+                + "&vnp_SecureHash=" + secureHash;
     }
-
-    Map<String, String> data = new TreeMap<>(params);
-    data.remove("vnp_SecureHash");
-    data.remove("vnp_SecureHashType");
-
-    String hashData = buildQueryString(data);
-    String secureHash = hmacSHA512(hashSecret, hashData);
-
-    return VnPayConfig.PAYMENT_URL
-            + "?" + hashData
-            + "&vnp_SecureHash=" + secureHash;
-}
-
 
     public static boolean verifySignature(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
@@ -120,6 +118,30 @@ public static String createPaymentUrl(Map<String, String> params) {
                 expectedHash.toLowerCase().getBytes(StandardCharsets.UTF_8),
                 receivedHash.toLowerCase().getBytes(StandardCharsets.UTF_8)
         );
+    }
+
+    /**
+     * Lấy các tham số VNPay gửi về (Return URL / IPN), mỗi khóa một giá trị.
+     */
+    public static Map<String, String> paramsFrom(jakarta.servlet.http.HttpServletRequest request) {
+        Map<String, String> params = new TreeMap<>();
+        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            String[] values = entry.getValue();
+            if (values != null && values.length > 0) {
+                params.put(entry.getKey(), values[0]);
+            }
+        }
+        return params;
+    }
+
+    /**
+     * vnp_Amount (VND x 100) -> VND; null nếu sai định dạng.
+     */
+    public static java.math.BigDecimal parseAmount(String vnpAmount) {
+        if (vnpAmount == null || !vnpAmount.matches("[0-9]{1,18}")) {
+            return null;
+        }
+        return new java.math.BigDecimal(vnpAmount).movePointLeft(2);
     }
 
     public static String createDateNow() {
