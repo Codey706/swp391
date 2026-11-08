@@ -147,10 +147,10 @@
                 msg: 'Vui lòng chọn danh mục sự kiện.'},
             {id: 'eventImage', step: 1,
                 ok: (!requireForSubmit || !!file)
-                    && (!file || (ALLOWED_EXTENSIONS.indexOf(extension) >= 0 && file.size <= MAX_IMAGE_SIZE)),
+                        && (!file || (ALLOWED_EXTENSIONS.indexOf(extension) >= 0 && file.size <= MAX_IMAGE_SIZE)),
                 msg: requireForSubmit && !file
-                    ? 'Cần có ảnh poster để gửi duyệt (hoặc chọn Lưu nháp).'
-                    : 'Ảnh phải là JPG, PNG hoặc WEBP và không quá 5MB.'},
+                        ? 'Cần có ảnh poster để gửi duyệt (hoặc chọn Lưu nháp).'
+                        : 'Ảnh phải là JPG, PNG hoặc WEBP và không quá 5MB.'},
             {id: 'description', step: 1, ok: description.length >= 20 && description.length <= 5000,
                 msg: 'Mô tả phải từ 20 đến 5000 ký tự.'},
             {id: 'startTime', step: 2, ok: start !== null && start > new Date(),
@@ -184,7 +184,8 @@
         if (firstInvalid !== null) {
             try {
                 document.getElementById(firstInvalid).focus({preventScroll: true});
-            } catch (err) { /* input file ẩn có thể không focus được */ }
+            } catch (err) { /* input file ẩn có thể không focus được */
+            }
         }
         // Bước 3 của trang tạo: hạng vé (module bên dưới)
         var ticketsOk = true;
