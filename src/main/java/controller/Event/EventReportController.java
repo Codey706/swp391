@@ -14,9 +14,8 @@ import model.Auth;
 import model.Event;
 
 /**
- * UC-24 View Sales Report: GET /organizer/event/report?eventId= — vé bán, doanh
- * thu, số check-in theo từng hạng vé của một sự kiện thuộc organizer đang đăng
- * nhập.
+ * UC-24 View Sales Report: GET /organizer/event/report?eventId= — vé bán, doanh thu,
+ * số check-in theo từng hạng vé của một sự kiện thuộc organizer đang đăng nhập.
  */
 @WebServlet(name = "EventReportController", urlPatterns = {"/organizer/event/report"})
 public class EventReportController extends EventController {

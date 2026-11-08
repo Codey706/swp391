@@ -40,6 +40,7 @@ public class BookTicketController extends HttpServlet {
     private final TicketBookingDAO ticketDao = new TicketBookingDAO();
     private final BookingDAO bookingDao = new BookingDAO();
     private final PaymentController paymentController = new PaymentController();
+    private final dao.UserDAO userDao = new dao.UserDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -98,23 +99,61 @@ public class BookTicketController extends HttpServlet {
             preparePayment(request, response, customer);
 
         } else if (PATH_CUSTOMER_INFO.equals(path)) {
-            int orderId = ValidationUtils.parseIntOrDefault(
-                    request.getParameter("orderId"), -1
-            );
+            saveCustomerInfo(request, response, customer);
+        }
+    }
 
-            if (orderId <= 0) {
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Mã đơn đặt vé không hợp lệ."
-                );
+    /**
+     * Bước 2: khách xác nhận thông tin. Số điện thoại bắt buộc (tài khoản Google chưa có),
+     * nếu nhập mới hoặc thay đổi thì lưu luôn vào hồ sơ rồi chuyển sang bước thanh toán.
+     */
+    private void saveCustomerInfo(HttpServletRequest request, HttpServletResponse response, User customer)
+            throws ServletException, IOException {
+        int orderId = ValidationUtils.parseIntOrDefault(request.getParameter("orderId"), -1);
+        if (orderId <= 0) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã đơn đặt vé không hợp lệ.");
+            return;
+        }
+        String phone = request.getParameter("phone");
+        phone = phone == null ? "" : phone.trim();
+        try {
+            Booking booking = bookingDao.getBookingDetail(orderId, customer.getUserId());
+            if (booking == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn đặt vé.");
                 return;
             }
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + PATH_PAYMENT
-                    + "?orderId=" + orderId
-            );
+            String error = null;
+            if (phone.isEmpty()) {
+                error = "Vui lòng nhập số điện thoại để nhận thông tin vé.";
+            } else if (!ValidationUtils.isPhone(phone)) {
+                error = "Số điện thoại không hợp lệ (bắt đầu bằng 0, gồm 10-11 chữ số).";
+            } else if (!phone.equals(customer.getPhone())) {
+                if (userDao.existsPhoneOfOtherUser(phone, customer.getUserId())) {
+                    error = "Số điện thoại này đã được sử dụng bởi tài khoản khác.";
+                } else if (userDao.updateCustomerPhone(customer.getUserId(), phone)) {
+                    HttpSession session = request.getSession(false);
+                    Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
+                    if (sessionUser instanceof Auth) {
+                        ((Auth) sessionUser).setPhone(phone);
+                    } else if (sessionUser instanceof User) {
+                        ((User) sessionUser).setPhone(phone);
+                    }
+                } else {
+                    error = "Không lưu được số điện thoại. Vui lòng thử lại.";
+                }
+            }
+            if (error != null) {
+                customer.setPhone(phone);
+                request.setAttribute("errorMessage", error);
+                request.setAttribute("booking", booking);
+                request.setAttribute("customer", customer);
+                request.getRequestDispatcher(CUSTOMER_VIEW).forward(request, response);
+                return;
+            }
+            response.sendRedirect(request.getContextPath() + PATH_PAYMENT + "?orderId=" + orderId);
+        } catch (SQLException e) {
+            getServletContext().log("Cannot save customer info", e);
+            throw new ServletException("Không lưu được thông tin khách hàng.", e);
         }
     }
 
@@ -283,9 +322,16 @@ public class BookTicketController extends HttpServlet {
                 return;
             }
 
+            // Chưa có số điện thoại (vd. tài khoản Google) thì quay lại bước "Thông tin" để nhập
+            if (customer.getPhone() == null || customer.getPhone().isBlank()) {
+                response.sendRedirect(request.getContextPath() + PATH_CUSTOMER_INFO + "?orderId=" + orderId);
+                return;
+            }
+
             String paymentUrl = paymentController.createVNPayUrl(
                     orderId,
                     booking.getFinalAmount(),
+                    booking.getHoldExpiredAt(),
                     request
             );
 
@@ -306,7 +352,11 @@ public class BookTicketController extends HttpServlet {
 
             request.setAttribute(
                     "errorMessage",
-                    "Không thể khởi tạo thanh toán VNPay. Vui lòng thử lại."
+                    utils.VnPayConfig.isConfigured()
+                            ? "Không thể khởi tạo thanh toán VNPay. Vui lòng thử lại."
+                            : "Chưa cấu hình VNPay: điền vnpay.tmnCode và vnpay.hashSecret trong "
+                            + "src/main/resources/vnpay.properties (hoặc biến môi trường "
+                            + "VNPAY_TMN_CODE / VNPAY_HASH_SECRET) rồi chạy lại."
             );
             request.setAttribute("customer", customer);
 

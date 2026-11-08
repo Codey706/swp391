@@ -82,10 +82,7 @@ public class OrganizerDashboardController extends EventController {
         request.getRequestDispatcher(DASHBOARD_VIEW).forward(request, response);
     }
 
-    /**
-     * % thay đổi so với kỳ trước; null nếu kỳ trước = 0 (không có cơ sở so
-     * sánh).
-     */
+    /** % thay đổi so với kỳ trước; null nếu kỳ trước = 0 (không có cơ sở so sánh). */
     private static Double percentChange(BigDecimal current, BigDecimal previous) {
         if (previous == null || previous.signum() <= 0) {
             return null;

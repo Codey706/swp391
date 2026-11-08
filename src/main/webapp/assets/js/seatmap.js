@@ -378,7 +378,7 @@
         select.innerHTML = '';
         var blank = document.createElement('option');
         blank.value = '';
-        blank.textContent = '- Chọn hạng vé -';
+        blank.textContent = '— Chọn hạng vé —';
         select.appendChild(blank);
         tickets.forEach(function (t) {
             var o = document.createElement('option');
@@ -861,8 +861,7 @@
         }
         try {
             svg.setPointerCapture(e.pointerId);
-        } catch (err) { /* không bắt buộc */
-        }
+        } catch (err) { /* không bắt buộc */ }
         e.preventDefault();
     });
 
@@ -913,8 +912,7 @@
         drag = null;
         try {
             svg.releasePointerCapture(e.pointerId);
-        } catch (err) { /* không bắt buộc */
-        }
+        } catch (err) { /* không bắt buộc */ }
         if (finished.mode === 'paint' || finished.moved) {
             // Bỏ/khôi phục ghế đổi số ghế nên vẽ lại khu để cập nhật tiêu đề; di chuyển/đổi cỡ đã vẽ sẵn
             onZoneChanged(finished.z, finished.mode === 'paint');
@@ -945,22 +943,10 @@
             select(null);
             return;
         }
-        if (e.key === 'ArrowLeft') {
-            z.x = clamp(z.x - step, 0, CANVAS.width - z.w);
-            moved = true;
-        }
-        if (e.key === 'ArrowRight') {
-            z.x = clamp(z.x + step, 0, CANVAS.width - z.w);
-            moved = true;
-        }
-        if (e.key === 'ArrowUp') {
-            z.y = clamp(z.y - step, 0, CANVAS.height - z.h);
-            moved = true;
-        }
-        if (e.key === 'ArrowDown') {
-            z.y = clamp(z.y + step, 0, CANVAS.height - z.h);
-            moved = true;
-        }
+        if (e.key === 'ArrowLeft') { z.x = clamp(z.x - step, 0, CANVAS.width - z.w); moved = true; }
+        if (e.key === 'ArrowRight') { z.x = clamp(z.x + step, 0, CANVAS.width - z.w); moved = true; }
+        if (e.key === 'ArrowUp') { z.y = clamp(z.y - step, 0, CANVAS.height - z.h); moved = true; }
+        if (e.key === 'ArrowDown') { z.y = clamp(z.y + step, 0, CANVAS.height - z.h); moved = true; }
         if (moved) {
             e.preventDefault();
             var g = zonesLayer.querySelector('g[data-uid="' + z.uid + '"]');
@@ -976,25 +962,19 @@
     function bindProps() {
         $('pName').addEventListener('input', function () {
             var z = byUid(selectedUid);
-            if (!z) {
-                return;
-            }
+            if (!z) { return; }
             z.name = $('pName').value;
             onZoneChanged(z);
         });
         $('pTicket').addEventListener('change', function () {
             var z = byUid(selectedUid);
-            if (!z) {
-                return;
-            }
+            if (!z) { return; }
             z.ticketId = $('pTicket').value === '' ? null : Number($('pTicket').value);
             onZoneChanged(z);
         });
         $('pRows').addEventListener('input', function () {
             var z = byUid(selectedUid);
-            if (!z) {
-                return;
-            }
+            if (!z) { return; }
             var v = Math.floor(Number($('pRows').value));
             if (v >= 1 && v <= LIMITS.maxRows) {
                 z.rows = v;
@@ -1004,9 +984,7 @@
         });
         $('pCols').addEventListener('input', function () {
             var z = byUid(selectedUid);
-            if (!z) {
-                return;
-            }
+            if (!z) { return; }
             var v = Math.floor(Number($('pCols').value));
             if (v >= 1 && v <= LIMITS.maxSeatsPerRow) {
                 z.cols = v;
@@ -1016,9 +994,7 @@
         });
         $('pCapacity').addEventListener('input', function () {
             var z = byUid(selectedUid);
-            if (!z) {
-                return;
-            }
+            if (!z) { return; }
             var v = Math.floor(Number($('pCapacity').value));
             z.capacity = v >= 1 ? Math.min(v, LIMITS.maxQuantity) : 0;
             onZoneChanged(z);
@@ -1029,9 +1005,7 @@
         });
         $('pResetSeats').addEventListener('click', function () {
             var z = byUid(selectedUid);
-            if (!z) {
-                return;
-            }
+            if (!z) { return; }
             z.blocked.clear();
             onZoneChanged(z);
         });
@@ -1039,18 +1013,14 @@
         if (dup) {
             dup.addEventListener('click', function () {
                 var z = byUid(selectedUid);
-                if (z) {
-                    duplicateZone(z);
-                }
+                if (z) { duplicateZone(z); }
             });
         }
         var del = $('pDelete');
         if (del) {
             del.addEventListener('click', function () {
                 var z = byUid(selectedUid);
-                if (z && window.confirm('Xóa khu "' + z.name + '"?')) {
-                    deleteZone(z);
-                }
+                if (z && window.confirm('Xóa khu "' + z.name + '"?')) { deleteZone(z); }
             });
         }
     }
@@ -1069,24 +1039,9 @@
     }
 
     function bindZoom() {
-<<<<<<< HEAD
         $('zoomIn').addEventListener('click', function () { zoom = Math.min(2, zoom + 0.25); applyZoom(); });
         $('zoomOut').addEventListener('click', function () { zoom = Math.max(0.5, zoom - 0.25); applyZoom(); });
         $('zoomFit').addEventListener('click', function () { zoom = 1; applyZoom(); });
-=======
-        $('zoomIn').addEventListener('click', function () {
-            zoom = Math.min(2, zoom + 0.25);
-            applyZoom();
-        });
-        $('zoomOut').addEventListener('click', function () {
-            zoom = Math.max(0.5, zoom - 0.25);
-            applyZoom();
-        });
-        $('zoomFit').addEventListener('click', function () {
-            zoom = 1;
-            applyZoom();
-        });
->>>>>>> 3b12187 (YHN_update_event_forms_and_seat_map_designer)
         bindFullscreen();
     }
 
@@ -1135,13 +1090,7 @@
                     return;
                 }
                 if (result && typeof result.catch === 'function') {
-<<<<<<< HEAD
                     result.catch(function () { setPseudo(true); });
-=======
-                    result.catch(function () {
-                        setPseudo(true);
-                    });
->>>>>>> 3b12187 (YHN_update_event_forms_and_seat_map_designer)
                 }
             } else {
                 setPseudo(true);
@@ -1293,8 +1242,8 @@
         if (active) {
             if (sum) {
                 sum.textContent = zones.length
-                        ? 'Theo sơ đồ ghế: ' + sellableZones().length + ' khu bán vé · ' + formatNumber(totalCapacity()) + ' chỗ · ' + tickets.length + ' hạng vé'
-                        : 'Theo sơ đồ ghế (chưa vẽ khu nào)';
+                    ? 'Theo sơ đồ ghế: ' + sellableZones().length + ' khu bán vé · ' + formatNumber(totalCapacity()) + ' chỗ · ' + tickets.length + ' hạng vé'
+                    : 'Theo sơ đồ ghế (chưa vẽ khu nào)';
             }
             var pvPrice = document.getElementById('pvPrice');
             var pvLabel = document.getElementById('pvPriceLabel');
@@ -1318,7 +1267,7 @@
             }
         } else if (sum) {
             var general = document.getElementById('ticketSummary');
-            sum.textContent = general ? general.textContent : '-';
+            sum.textContent = general ? general.textContent : '—';
         }
     }
 

@@ -8,21 +8,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ cá nhân - Light Ticketbox</title>
+    <title>Hồ sơ cá nhân - Light Ticket</title>
 
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
     <!-- Material Symbols Outlined -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Stitch Design System CSS -->
     <link rel="stylesheet" href="${ctx}/assets/css/stitch-custom.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
 </head>
 
 <body class="lt-body d-flex flex-column min-vh-100">
@@ -30,79 +37,7 @@
     <!-- ======================================================================
          HEADER (STITCH COMPATIBLE)
          ====================================================================== -->
-    <header class="lt-navbar">
-        <div class="container-xl d-flex align-items-center justify-content-between gap-3">
-            <!-- Brand Logo -->
-            <a class="lt-brand-logo" href="${ctx}/">
-                <div class="lt-brand-icon">
-                    <span class="material-symbols-outlined">confirmation_number</span>
-                </div>
-                <span class="lt-brand-title">Light <span>Ticketbox</span></span>
-            </a>
-
-            <!-- Navigation Links -->
-            <nav class="d-none d-lg-flex align-items-center gap-1">
-                <a class="lt-nav-link" href="${ctx}/">Trang chủ</a>
-                <a class="lt-nav-link" href="${ctx}/home#events">Khám phá sự kiện</a>
-                <a class="lt-nav-link" href="${ctx}/customer/booking-history">Vé của tôi</a>
-            </nav>
-
-            <!-- Search Bar -->
-            <div class="lt-search-box d-none d-md-block">
-                <span class="material-symbols-outlined search-icon">search</span>
-                <input type="search" placeholder="Tìm concert, kịch, workshop...">
-            </div>
-
-            <!-- Actions & User Profile -->
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="btn btn-sm btn-light rounded-circle p-2 d-none d-sm-flex align-items-center justify-content-center text-secondary" title="Thông báo" style="width:38px;height:38px;">
-                    <span class="material-symbols-outlined" style="font-size:20px;">notifications</span>
-                </button>
-
-                <!-- Avatar Dropdown -->
-                <div class="dropdown">
-                    <button class="lt-user-btn" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="lt-avatar-round">
-                            <span>${userInitial}</span>
-                        </div>
-                        <div class="lt-user-info-text d-none d-sm-block">
-                            <span class="lt-user-name"><c:out value="${empty user.fullName ? user.username : user.fullName}"/></span>
-                            <span class="lt-user-tier"><c:out value="${empty user.role ? 'Khách hàng' : user.role}"/></span>
-                        </div>
-                        <span class="material-symbols-outlined text-secondary d-none d-sm-inline" style="font-size:18px;">expand_more</span>
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end lt-dropdown-menu" aria-labelledby="userMenuDropdown">
-                        <li class="lt-dropdown-header d-sm-none">
-                            <p class="fw-bold mb-0 text-dark small"><c:out value="${user.fullName}"/></p>
-                            <span class="text-secondary small"><c:out value="${user.role}"/></span>
-                        </li>
-                        <li>
-                            <a class="lt-dropdown-item" href="${ctx}/CustomerProfileController">
-                                <span class="material-symbols-outlined text-secondary" style="font-size:18px;">account_circle</span>
-                                Hồ sơ của tôi
-                            </a>
-                        </li>
-                        <li>
-                            <a class="lt-dropdown-item" href="${ctx}/customer/booking-history">
-                                <span class="material-symbols-outlined text-secondary" style="font-size:18px;">local_activity</span>
-                                Vé của tôi
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li>
-                            <form action="${ctx}/logout" method="POST" class="m-0">
-                                <button type="submit" class="lt-dropdown-item danger border-0 bg-transparent w-100 text-start">
-                                    <span class="material-symbols-outlined" style="font-size:18px;">logout</span>
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </header>
+    <jsp:include page="/WEB-INF/views/common/site-header.jsp"/>
 
     <!-- ======================================================================
          MAIN CONTENT
@@ -112,10 +47,10 @@
         <!-- Breadcrumb -->
         <nav aria-label="Breadcrumb" class="lt-breadcrumb">
             <a href="${ctx}/" class="d-inline-flex align-items-center gap-1">
-                <span class="material-symbols-outlined" style="font-size:16px;">home</span>
+                <i class="ph ph-house" style="font-size:16px;" aria-hidden="true"></i>
                 Trang chủ
             </a>
-            <span class="material-symbols-outlined separator">chevron_right</span>
+            <i class="ph ph-caret-right separator" aria-hidden="true"></i>
             <span class="active">Hồ sơ cá nhân</span>
         </nav>
 
@@ -126,7 +61,7 @@
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                         <h1 class="h3 fw-bold text-dark mb-0">Hồ sơ cá nhân của tôi</h1>
                         <span class="lt-pill lt-pill-vip">
-                            <span class="material-symbols-outlined" style="font-size:14px;">workspace_premium</span>
+                            <i class="ph ph-medal" style="font-size:14px;" aria-hidden="true"></i>
                             Thành viên <c:out value="${user.role}"/>
                         </span>
                     </div>
@@ -136,12 +71,12 @@
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <a href="${ctx}/UpdateCustomerProfileController" class="btn-lt-primary">
-                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                        <i class="ph ph-pencil-simple" style="font-size:18px;" aria-hidden="true"></i>
                         Chỉnh sửa hồ sơ
                     </a>
-                    <a href="${ctx}/change-password" class="btn-lt-secondary">
-                        <span class="material-symbols-outlined" style="font-size:18px;">lock_reset</span>
-                        Đổi mật khẩu
+                    <a href="${ctx}/Auth?action=changePassword" class="btn-lt-secondary">
+                        <i class="ph ph-lock-key" style="font-size:18px;" aria-hidden="true"></i>
+                        ${sessionScope.user.passwordSet ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'}
                     </a>
                 </div>
             </div>
@@ -154,7 +89,7 @@
             <aside class="col-lg-4">
                 <!-- User ID Card -->
                 <div class="lt-card overflow-hidden text-center mb-4">
-                    <div style="height: 90px; background: linear-gradient(135deg, #ff7043, #ff9678); position: relative;"></div>
+                    <div style="height: 90px; background: #141414; position: relative;"></div>
                     
                     <div class="position-relative px-4 pb-4">
                         <!-- Avatar -->
@@ -163,20 +98,20 @@
                                 <span>${userInitial}</span>
                             </div>
                             <a href="${ctx}/UpdateCustomerProfileController" class="position-absolute bottom-0 end-0 btn btn-sm btn-primary rounded-circle p-1 d-flex align-items-center justify-content-center text-white shadow" style="width:28px;height:28px;background:var(--lt-primary);border:2px solid #fff;" title="Chỉnh sửa thông tin">
-                                <span class="material-symbols-outlined" style="font-size:15px;">photo_camera</span>
+                                <i class="ph ph-camera" style="font-size:15px;" aria-hidden="true"></i>
                             </a>
                         </div>
 
                         <!-- Name & Role -->
                         <h2 class="h5 fw-bold text-dark mb-1">
                             <c:out value="${user.fullName}"/>
-                            <span class="material-symbols-outlined text-primary align-middle" style="font-size:18px;color:var(--lt-primary)!important;" title="Tài khoản chính thức">verified</span>
+                            <i class="ph ph-seal-check text-primary align-middle" style="font-size:18px;color:var(--lt-primary)!important;" title="Tài khoản chính thức" aria-hidden="true"></i>
                         </h2>
                         <p class="text-secondary small mb-2"><c:out value="${user.email}"/></p>
                         
                         <div class="mb-3">
                             <span class="lt-pill lt-pill-paid">
-                                <span class="material-symbols-outlined" style="font-size:13px;">check_circle</span>
+                                <i class="ph ph-check-circle" style="font-size:13px;" aria-hidden="true"></i>
                                 Trạng thái: <c:out value="${user.status}"/>
                             </span>
                         </div>
@@ -186,15 +121,15 @@
                         <!-- Contact Quick Info -->
                         <div class="text-start d-flex flex-column gap-2 small">
                             <div class="d-flex align-items-center gap-2 text-secondary">
-                                <span class="material-symbols-outlined text-muted" style="font-size:18px;">mail</span>
+                                <i class="ph ph-envelope-simple text-muted" style="font-size:18px;" aria-hidden="true"></i>
                                 <span class="text-break"><c:out value="${user.email}"/></span>
                             </div>
                             <div class="d-flex align-items-center gap-2 text-secondary">
-                                <span class="material-symbols-outlined text-muted" style="font-size:18px;">phone</span>
+                                <i class="ph ph-phone text-muted" style="font-size:18px;" aria-hidden="true"></i>
                                 <span><c:out value="${empty user.phone ? 'Chưa cập nhật SĐT' : user.phone}"/></span>
                             </div>
                             <div class="d-flex align-items-start gap-2 text-secondary">
-                                <span class="material-symbols-outlined text-muted mt-1" style="font-size:18px;">location_on</span>
+                                <i class="ph ph-map-pin text-muted mt-1" style="font-size:18px;" aria-hidden="true"></i>
                                 <span><c:out value="${empty user.address ? 'Chưa cập nhật địa chỉ' : user.address}"/></span>
                             </div>
                         </div>
@@ -207,34 +142,34 @@
                     <nav class="lt-sidebar-nav">
                         <a href="${ctx}/CustomerProfileController" class="lt-sidebar-item active">
                             <div class="item-left">
-                                <span class="material-symbols-outlined" style="font-size:19px;">person</span>
+                                <i class="ph ph-user" style="font-size:19px;" aria-hidden="true"></i>
                                 <span>Hồ sơ của tôi</span>
                             </div>
-                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">chevron_right</span>
+                            <i class="ph ph-caret-right text-muted" style="font-size:16px;" aria-hidden="true"></i>
                         </a>
 
                         <a href="${ctx}/UpdateCustomerProfileController" class="lt-sidebar-item">
                             <div class="item-left">
-                                <span class="material-symbols-outlined" style="font-size:19px;">edit_square</span>
+                                <i class="ph ph-pencil-simple-line" style="font-size:19px;" aria-hidden="true"></i>
                                 <span>Chỉnh sửa thông tin</span>
                             </div>
-                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">chevron_right</span>
+                            <i class="ph ph-caret-right text-muted" style="font-size:16px;" aria-hidden="true"></i>
                         </a>
 
                         <a href="${ctx}/customer/booking-history" class="lt-sidebar-item">
                             <div class="item-left">
-                                <span class="material-symbols-outlined" style="font-size:19px;">confirmation_number</span>
+                                <i class="ph ph-ticket" style="font-size:19px;" aria-hidden="true"></i>
                                 <span>Vé của tôi</span>
                             </div>
-                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">chevron_right</span>
+                            <i class="ph ph-caret-right text-muted" style="font-size:16px;" aria-hidden="true"></i>
                         </a>
 
-                        <a href="${ctx}/change-password" class="lt-sidebar-item">
+                        <a href="${ctx}/Auth?action=changePassword" class="lt-sidebar-item">
                             <div class="item-left">
-                                <span class="material-symbols-outlined" style="font-size:19px;">lock</span>
-                                <span>Đổi mật khẩu</span>
+                                <i class="ph ph-lock" style="font-size:19px;" aria-hidden="true"></i>
+                                <span>${sessionScope.user.passwordSet ? 'Đổi mật khẩu' : 'Thiết lập mật khẩu'}</span>
                             </div>
-                            <span class="material-symbols-outlined text-muted" style="font-size:16px;">open_in_new</span>
+                            <i class="ph ph-arrow-square-out text-muted" style="font-size:16px;" aria-hidden="true"></i>
                         </a>
                     </nav>
                 </div>
@@ -244,20 +179,18 @@
             <section class="col-lg-8 d-flex flex-column gap-4">
                 
                 <!-- Welcome Banner Card -->
-                <div class="lt-card p-4 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #ff5722 0%, #b02f00 100%);">
+                <div class="lt-card p-4 text-white position-relative overflow-hidden" style="background: #141414;">
                     <div class="position-relative" style="z-index: 2;">
                         <div class="d-flex align-items-center gap-2 mb-2 opacity-75 small">
-                            <span class="material-symbols-outlined" style="font-size:18px;">waving_hand</span>
+                            <i class="ph ph-hand-waving" style="font-size:18px;" aria-hidden="true"></i>
                             <span>Xin chào trở lại!</span>
                         </div>
                         <h2 class="h4 fw-bold mb-2">Xin chào, <c:out value="${user.fullName}"/>!</h2>
                         <p class="mb-0 opacity-90 small" style="max-width: 32rem;">
-                            Đây là khu vực quản lý thông tin định danh khách hàng trên Light Ticketbox. Hãy đảm bảo thông tin của bạn luôn chính xác để việc nhận vé điện tử và check-in sự kiện diễn ra thuận tiện.
+                            Đây là khu vực quản lý thông tin định danh khách hàng trên Light Ticket. Hãy đảm bảo thông tin của bạn luôn chính xác để việc nhận vé điện tử và check-in sự kiện diễn ra thuận tiện.
                         </p>
                     </div>
-                    <span class="material-symbols-outlined position-absolute" style="right: 20px; bottom: 10px; font-size: 110px; opacity: 0.12; pointer-events: none;">
-                        badge
-                    </span>
+                    <i class="ph ph-identification-badge position-absolute" style="right: 20px; bottom: 10px; font-size: 110px; opacity: 0.12; pointer-events: none;" aria-hidden="true"></i>
                 </div>
 
                 <!-- Personal Information Grid Card -->
@@ -265,7 +198,7 @@
                     <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 pb-3 mb-3 border-bottom" style="border-color: var(--lt-surface-border)!important;">
                         <div class="d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center justify-content-center rounded-3 p-2" style="background: var(--lt-primary-fixed); color: var(--lt-primary);">
-                                <span class="material-symbols-outlined" style="font-size:22px;">badge</span>
+                                <i class="ph ph-identification-badge" style="font-size:22px;" aria-hidden="true"></i>
                             </div>
                             <div>
                                 <h3 class="h6 fw-bold text-dark mb-0">Thông tin cá nhân</h3>
@@ -273,7 +206,7 @@
                             </div>
                         </div>
                         <a href="${ctx}/UpdateCustomerProfileController" class="btn-lt-secondary btn-sm">
-                            <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                            <i class="ph ph-pencil-simple" style="font-size:16px;" aria-hidden="true"></i>
                             Chỉnh sửa
                         </a>
                     </div>
@@ -322,11 +255,11 @@
                 </div>
 
                 <!-- Security & Notice Card -->
-                <div class="lt-card p-3 p-md-4 d-flex align-items-start gap-3" style="background-color: #f0fdf4; border-color: #bbf7d0;">
-                    <span class="material-symbols-outlined text-success mt-1" style="font-size:24px;">security</span>
+                <div class="lt-card p-3 p-md-4 d-flex align-items-start gap-3" style="background-color: #e7f6ee; border-color: #bfe3cf;">
+                    <i class="ph ph-shield-check text-success mt-1" style="font-size:24px;" aria-hidden="true"></i>
                     <div class="small text-secondary">
                         <strong class="text-dark d-block mb-1">Bảo mật thông tin & Định danh vé điện tử</strong>
-                        Hệ thống Light Ticketbox bảo vệ an toàn thông tin khách hàng, sử dụng dữ liệu định danh để đối chiếu và phát hành mã QR check-in tại cổng sự kiện.
+                        Hệ thống Light Ticket bảo vệ an toàn thông tin khách hàng, sử dụng dữ liệu định danh để đối chiếu và phát hành mã QR check-in tại cổng sự kiện.
                     </div>
                 </div>
 
@@ -334,7 +267,7 @@
                 <div class="lt-card p-4 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
                     <div class="d-flex align-items-center gap-3">
                         <div class="d-flex align-items-center justify-content-center rounded-circle p-3" style="background: var(--lt-primary-fixed); color: var(--lt-primary);">
-                            <span class="material-symbols-outlined" style="font-size:24px;">confirmation_number</span>
+                            <i class="ph ph-ticket" style="font-size:24px;" aria-hidden="true"></i>
                         </div>
                         <div>
                             <h4 class="h6 fw-bold text-dark mb-1">Bạn muốn kiểm tra vé hoặc đặt vé mới?</h4>
@@ -354,22 +287,7 @@
     <!-- ======================================================================
          FOOTER
          ====================================================================== -->
-    <footer class="lt-footer">
-        <div class="container-xl d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <div class="lt-brand-icon" style="width:30px;height:30px;border-radius:8px;">
-                    <span class="material-symbols-outlined" style="font-size:18px;">confirmation_number</span>
-                </div>
-                <span class="fw-bold text-dark">Light Ticketbox</span>
-            </div>
-            <div class="d-flex align-items-center gap-4 small">
-                <a href="${ctx}/">Trang chủ</a>
-                <a href="${ctx}/customer/booking-history">Vé của tôi</a>
-                <a href="${ctx}/CustomerProfileController">Hồ sơ cá nhân</a>
-            </div>
-            <span class="text-secondary small">© 2026 Light Ticket. All rights reserved.</span>
-        </div>
-    </footer>
+    <jsp:include page="/WEB-INF/views/common/site-footer.jsp"/>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

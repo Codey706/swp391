@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Auth;
 import model.User;
+import utils.Constants;
+import utils.ValidationUtils;
 
 @WebServlet(
         name = "UpdateCustomerProfileController",
@@ -86,103 +88,67 @@ public class UpdateCustomerProfileController extends HttpServlet {
             return;
         }
 
-        // ==============================
-        // Lấy dữ liệu từ form
-        // ==============================
-        String fullName
-                = request.getParameter("fullName");
+        String fullName = trim(request.getParameter("fullName"));
+        String email = trim(request.getParameter("email"));
+        String phone = trim(request.getParameter("phone"));
+        String address = trim(request.getParameter("address"));
 
-        String email
-                = request.getParameter("email");
-
-        String phone
-                = request.getParameter("phone");
-
-        String address
-                = request.getParameter("address");
-
-        // ==============================
-        // Validation
-        // ==============================
-        if (fullName == null
-                || fullName.trim().isEmpty()) {
-
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Full Name is required"
-            );
-            return;
-        }
-
-        if (email == null
-                || email.trim().isEmpty()) {
-
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Email is required"
-            );
-            return;
-        }
-
-        // ==============================
-        // Tạo User object
-        // ==============================
         User user = new User();
-
         user.setUserId(userId);
+        user.setFullName(fullName);
+        user.setEmail(email);
+        user.setPhone(phone.isEmpty() ? null : phone);
+        user.setAddress(address.isEmpty() ? null : address);
 
-        user.setFullName(
-                fullName.trim()
-        );
-
-        user.setEmail(
-                email.trim()
-        );
-
-        user.setPhone(
-                phone == null
-                        ? ""
-                        : phone.trim()
-        );
-
-        user.setAddress(
-                address == null
-                        ? ""
-                        : address.trim()
-        );
-
-        // ==============================
-        // Update Database
-        // ==============================
         try {
+            // ==============================
+            // Validation: lỗi thì hiển thị lại form kèm dữ liệu đã nhập
+            // ==============================
+            String error = null;
+            if (!ValidationUtils.isLengthBetween(fullName,
+                    Constants.PROFILE_FULL_NAME_MIN_LENGTH, Constants.PROFILE_FULL_NAME_MAX_LENGTH)) {
+                error = "Họ và tên phải từ " + Constants.PROFILE_FULL_NAME_MIN_LENGTH
+                        + " đến " + Constants.PROFILE_FULL_NAME_MAX_LENGTH + " ký tự.";
+            } else if (email.length() > Constants.PROFILE_EMAIL_MAX_LENGTH || !ValidationUtils.isEmail(email)) {
+                error = "Email không đúng định dạng.";
+            } else if (!phone.isEmpty() && !ValidationUtils.isPhone(phone)) {
+                error = "Số điện thoại không hợp lệ (bắt đầu bằng 0, gồm 10-11 chữ số).";
+            } else if (address.length() > Constants.PROFILE_ADDRESS_MAX_LENGTH) {
+                error = "Địa chỉ tối đa " + Constants.PROFILE_ADDRESS_MAX_LENGTH + " ký tự.";
+            } else if (userDao.existsEmailOfOtherUser(email, userId)) {
+                error = "Email này đã được sử dụng bởi tài khoản khác.";
+            } else if (!phone.isEmpty() && userDao.existsPhoneOfOtherUser(phone, userId)) {
+                error = "Số điện thoại này đã được sử dụng bởi tài khoản khác.";
+            }
 
-            boolean updated
-                    = userDao.updateUser(user);
-
-            if (updated) {
-                // Đồng bộ thông tin mới vào session để Header cập nhật ngay lập tức
-                Object currentSessionUser = session.getAttribute("user");
-                if (currentSessionUser instanceof Auth) {
-                    Auth auth = (Auth) currentSessionUser;
-                    auth.setFullName(user.getFullName());
-                    auth.setEmail(user.getEmail());
-                    auth.setPhone(user.getPhone());
-                    auth.setAddress(user.getAddress());
-                    session.setAttribute("user", auth);
-                } else if (currentSessionUser instanceof User) {
-                    User u = (User) currentSessionUser;
-                    u.setFullName(user.getFullName());
-                    u.setEmail(user.getEmail());
-                    u.setPhone(user.getPhone());
-                    u.setAddress(user.getAddress());
-                    session.setAttribute("user", u);
+            if (error != null) {
+                User current = userDao.getUserById(userId);
+                if (current != null) {
+                    user.setUsername(current.getUsername());
                 }
+                request.setAttribute("errorMessage", error);
+                request.setAttribute("user", user);
+                request.getRequestDispatcher(
+                        "/WEB-INF/views/customer/edit.jsp"
+                ).forward(request, response);
+                return;
+            }
+
+            // ==============================
+            // Update Database
+            // ==============================
+            if (userDao.updateCustomerProfile(user)) {
+                // Đồng bộ thông tin mới vào session để Header cập nhật ngay lập tức
+                sessionUser.setFullName(user.getFullName());
+                sessionUser.setEmail(user.getEmail());
+                sessionUser.setPhone(user.getPhone());
+                sessionUser.setAddress(user.getAddress());
+                session.setAttribute("user", sessionUser);
 
                 response.sendRedirect(
                         request.getContextPath()
                         + "/CustomerProfileController"
                 );
-
                 return;
             }
 
@@ -197,5 +163,9 @@ public class UpdateCustomerProfileController extends HttpServlet {
                     "Cannot update customer profile", e
             );
         }
+    }
+
+    private static String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 }
