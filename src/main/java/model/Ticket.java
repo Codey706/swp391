@@ -11,16 +11,17 @@ import java.time.LocalDateTime;
  * @author BT
  */
 public class Ticket {
+
     private int ticketId;
-private int orderId;
-private String ticketCode;
-private String qrCode;
-private String ticketStatus;
-private String eventName;
-private String venueName;
-private String ticketName;
-private String seatLabel;
-private LocalDateTime eventStartTime;
+    private int orderId;
+    private String ticketCode;
+    private String qrCode;
+    private String ticketStatus;
+    private String eventName;
+    private String venueName;
+    private String ticketName;
+    private String seatLabel;
+    private LocalDateTime eventStartTime;
 
     public Ticket() {
     }
@@ -118,4 +119,11 @@ private LocalDateTime eventStartTime;
         this.eventStartTime = eventStartTime;
     }
 
+    /**
+     * "19:30 · 15/11/2026" — cách hiển thị thời gian trên vé điện tử.
+     */
+    public String getEventStartLabel() {
+        return eventStartTime == null ? ""
+                : eventStartTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm '·' dd/MM/yyyy"));
+    }
 }

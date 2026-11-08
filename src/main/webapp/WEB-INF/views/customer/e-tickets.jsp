@@ -8,17 +8,19 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Vé điện tử | Light Ticket</title>
+        <%-- checkout.css chứa style của header dùng chung (booking-header.jsp) --%>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/checkout.css">
 
         <style>
             :root {
-                --primary: #ff7043;
-                --primary-dark: #e85d32;
-                --primary-light: #fff0e9;
-                --background: #f7f8fc;
-                --text: #242424;
-                --muted: #777;
-                --border: #ececec;
-                --success: #16834a;
+                --primary: #d93a27;
+                --primary-dark: #ff5b49;
+                --primary-light: #fafafa;
+                --background: #f5f5f6;
+                --text: #1f1f22;
+                --muted: #77777e;
+                --border: #efeff1;
+                --success: #13804b;
             }
 
             * {
@@ -27,7 +29,7 @@
 
             body {
                 margin: 0;
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: 'Inter', Arial, sans-serif;
                 color: var(--text);
                 background: var(--background);
                 line-height: 1.6;
@@ -78,15 +80,15 @@
                 grid-template-columns: minmax(0, 1fr) 225px;
                 background: #fff;
                 border: 1px solid var(--border);
-                border-radius: 18px;
+                border-radius: 12px;
                 overflow: hidden;
-                box-shadow: 0 5px 22px rgba(30, 30, 30, 0.045);
+                box-shadow: 0 5px 22px rgba(31, 31, 34, 0.045);
                 transition: box-shadow 0.2s ease,
                     transform 0.2s ease;
             }
 
             .ticket:hover {
-                box-shadow: 0 9px 28px rgba(30, 30, 30, 0.08);
+                box-shadow: 0 9px 28px rgba(31, 31, 34, 0.08);
                 transform: translateY(-2px);
             }
 
@@ -110,7 +112,7 @@
                 padding: 5px 11px;
                 background: var(--primary-light);
                 color: var(--primary-dark);
-                border-radius: 20px;
+                border-radius: 12px;
                 font-size: 12px;
                 font-weight: 700;
             }
@@ -119,11 +121,27 @@
                 display: inline-flex;
                 align-items: center;
                 padding: 5px 11px;
-                border-radius: 20px;
-                background: #e9f8ef;
+                border-radius: 12px;
+                background: #e7f6ee;
                 color: var(--success);
                 font-size: 12px;
                 font-weight: 700;
+            }
+
+            .status.is-checked-in {
+                background: #efeff1;
+                color: #4b4b52;
+            }
+
+            .status.is-cancelled {
+                background: #fff4f2;
+                color: #b42e1d;
+            }
+
+            .ticket.is-used .ticket-qr img,
+            .ticket.is-cancelled .ticket-qr img {
+                opacity: 0.35;
+                filter: grayscale(1);
             }
 
             .ticket-info h2 {
@@ -170,8 +188,8 @@
                 justify-content: center;
                 text-align: center;
                 padding: 24px 18px;
-                background: #fffaf7;
-                border-left: 1px dashed #f0c7b8;
+                background: #fafafa;
+                border-left: 1px dashed #ffd6cf;
                 position: relative;
             }
 
@@ -228,10 +246,10 @@
             .empty-state {
                 background: #fff;
                 border: 1px solid var(--border);
-                border-radius: 18px;
+                border-radius: 12px;
                 padding: 54px 24px;
                 text-align: center;
-                box-shadow: 0 5px 22px rgba(30, 30, 30, 0.04);
+                box-shadow: 0 5px 22px rgba(31, 31, 34, 0.04);
             }
 
             .empty-icon {
@@ -306,7 +324,7 @@
 
                 .ticket-qr {
                     border-left: none;
-                    border-top: 1px dashed #f0c7b8;
+                    border-top: 1px dashed #ffd6cf;
                     padding: 24px 18px;
                 }
 
@@ -335,6 +353,145 @@
                 }
             }
 
+            /* ---- Nút in vé ---- */
+            .page-heading-row {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+
+            .print-button {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                height: 42px;
+                padding: 0 18px;
+                border: 0;
+                border-radius: 10px;
+                background: var(--primary);
+                color: #fff;
+                font: inherit;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .print-button:hover {
+                background: #b42e1d;
+            }
+
+            .print-only {
+                display: none;
+            }
+
+            /* ---- Bản in: chỉ in e-ticket, mỗi vé một trang ---- */
+            @media print {
+                @page {
+                    size: A4 portrait;
+                    margin: 14mm;
+                }
+
+                html,
+                body {
+                    background: #fff !important;
+                }
+
+                body * {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                .sh-header,
+                .page-heading,
+                .print-button,
+                .page-footer-note,
+                .empty-state,
+                .modal,
+                .modal-backdrop,
+                .ticket.is-cancelled {
+                    display: none !important;
+                }
+
+                .page-container {
+                    width: auto;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .ticket-list {
+                    display: block;
+                }
+
+                .ticket {
+                    display: block;
+                    box-shadow: none !important;
+                    transform: none !important;
+                    border: 1.5px solid #1f1f22;
+                    border-radius: 14px;
+                    overflow: hidden;
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                    break-after: page;
+                    page-break-after: always;
+                }
+
+                .ticket:last-child {
+                    break-after: auto;
+                    page-break-after: auto;
+                }
+
+                .print-only {
+                    display: block;
+                }
+
+                .print-brand {
+                    padding: 14px 28px;
+                    border-bottom: 1.5px dashed #9a9aa1;
+                    font-size: 14px;
+                    font-weight: 700;
+                    letter-spacing: .04em;
+                }
+
+                .ticket-info {
+                    padding: 24px 28px;
+                }
+
+                .ticket-info h2 {
+                    font-size: 26px;
+                }
+
+                .ticket-details {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
+                .ticket-qr {
+                    border-left: none;
+                    border-top: 1.5px dashed #9a9aa1;
+                    padding: 24px 28px 28px;
+                    text-align: center;
+                }
+
+                .ticket-qr::before,
+                .ticket-qr::after {
+                    display: none;
+                }
+
+                .qr-image-wrap {
+                    width: 64mm;
+                    height: 64mm;
+                    margin: 0 auto;
+                    padding: 3mm;
+                }
+
+                .ticket-qr img {
+                    width: 100%;
+                    height: 100%;
+                    filter: none !important;
+                    opacity: 1 !important;
+                }
+            }
+
             @media (prefers-reduced-motion: reduce) {
                 *,
                 *::before,
@@ -343,22 +500,38 @@
                 }
             }
         </style>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
     </head>
 
     <body>
         <jsp:include page="booking-header.jsp"/>
 
         <main class="page-container">
-            <header class="page-heading">
-                <p class="eyebrow">Light Ticket · Tài khoản của tôi</p>
-                <h1>Vé điện tử của tôi</h1>
-                <p>Xem thông tin vé và sử dụng mã QR khi check-in sự kiện.</p>
+            <header class="page-heading page-heading-row">
+                <div>
+                    <p class="eyebrow">Light Ticket · Tài khoản của tôi</p>
+                    <h1>Vé điện tử của tôi</h1>
+                    <p>Xem thông tin vé và sử dụng mã QR khi check-in sự kiện.</p>
+                </div>
+                <c:if test="${not empty tickets}">
+                    <button type="button" class="print-button" onclick="window.print()">
+                        <i class="ph ph-printer" aria-hidden="true"></i> In vé
+                    </button>
+                </c:if>
             </header>
 
             <c:choose>
                 <c:when test="${empty tickets}">
                     <section class="empty-state">
-                        <div class="empty-icon" aria-hidden="true">&#127915;</div>
+                        <div class="empty-icon" aria-hidden="true">&#13804b;</div>
                         <h2>Bạn chưa có vé điện tử</h2>
                         <p>
                             Vé điện tử sẽ hiển thị tại đây sau khi bạn hoàn tất
@@ -374,15 +547,20 @@
                 <c:otherwise>
                     <div class="ticket-list">
                         <c:forEach var="ticket" items="${tickets}">
-                            <article class="ticket">
+                            <c:set var="st" value="${ticket.ticketStatus}"/>
+                            <article class="ticket ${st == 'CheckedIn' ? 'is-used' : (st == 'Cancelled' ? 'is-cancelled' : '')}">
+                                <div class="print-only print-brand">LIGHT TICKET · VÉ ĐIỆN TỬ</div>
                                 <div class="ticket-info">
                                     <div class="ticket-topline">
                                         <span class="ticket-label">
                                             VÉ ĐIỆN TỬ
                                         </span>
-                                        <span class="status">
-                                            <c:out value="${ticket.ticketStatus}"/>
-                                        </span>
+                                        <c:choose>
+                                            <c:when test="${st == 'Valid'}"><span class="status">Còn hiệu lực</span></c:when>
+                                            <c:when test="${st == 'CheckedIn'}"><span class="status is-checked-in">Đã check-in</span></c:when>
+                                            <c:when test="${st == 'Cancelled'}"><span class="status is-cancelled">Đã huỷ</span></c:when>
+                                            <c:otherwise><span class="status"><c:out value="${st}"/></span></c:otherwise>
+                                        </c:choose>
                                     </div>
 
                                     <h2>
@@ -416,7 +594,7 @@
                                                 Thời gian bắt đầu
                                             </span>
                                             <span class="detail-value">
-                                                <c:out value="${ticket.eventStartTime}"/>
+                                                <c:out value="${ticket.eventStartLabel}"/>
                                             </span>
                                         </div>
 
@@ -440,9 +618,11 @@
                                     <p class="qr-title">Mã QR check-in</p>
 
                                     <div class="qr-image-wrap">
-                                        <img
-                                            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=${ticket.ticketCode}"
-                                            alt="Mã QR của vé điện tử">
+                                        <c:url var="qrUrl" value="/customer/ticket-qr">
+                                            <c:param name="code" value="${ticket.ticketCode}"/>
+                                        </c:url>
+                                        <img src="${qrUrl}" width="180" height="180"
+                                             alt="Mã QR của vé điện tử">
                                     </div>
 
                                     <p class="qr-note">
@@ -459,5 +639,16 @@
                 </c:otherwise>
             </c:choose>
         </main>
+        <script>
+            // Mở từ "In vé" ở trang chi tiết đơn (?print=1): đợi ảnh QR tải xong rồi mở hộp thoại in.
+            (function () {
+                if (!/[?&]print=1(&|$)/.test(location.search))
+                    return;
+                window.addEventListener('load', function () {
+                    window.print();
+                });
+            })();
+        </script>
+        <jsp:include page="/WEB-INF/views/common/site-footer.jsp"/>
     </body>
 </html>
