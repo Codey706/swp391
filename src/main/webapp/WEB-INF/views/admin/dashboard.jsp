@@ -183,31 +183,6 @@
                         </div>
                     </div>
 
-                    <%-- UC-35: số liệu hệ thống --%>
-                    <div class="stats">
-                        <div class="stat-card total"><p>Users</p><h2><fmt:formatNumber value="${userTotal}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card customer"><p>Customers</p><h2><fmt:formatNumber value="${usersByRole['Customer']}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card organizer"><p>Organizers</p><h2><fmt:formatNumber value="${usersByRole['Organizer']}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card staff"><p>Staff</p><h2><fmt:formatNumber value="${usersByRole['Staff']}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card active"><p>Paid orders</p><h2><fmt:formatNumber value="${paidOrders}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card total"><p>Revenue (VND)</p><h2><fmt:formatNumber value="${revenue}" pattern="#,##0"/></h2></div>
-                    </div>
-
-                    <div class="stats">
-                        <a class="stat-card inactive" href="${ctx}/admin/events" style="text-decoration:none">
-                            <p>Events awaiting approval</p><h2><fmt:formatNumber value="${pendingEvents}" pattern="#,##0"/></h2>
-                        </a>
-                        <c:forEach var="entry" items="${eventsByStatus}">
-                            <c:if test="${entry.key ne 'PENDING_APPROVAL'}">
-                                <div class="stat-card"><p>Events · <c:out value="${entry.key}"/></p><h2><fmt:formatNumber value="${entry.value}" pattern="#,##0"/></h2></div>
-                                </c:if>
-                            </c:forEach>
-                            <c:if test="${refundPending gt 0}">
-                            <div class="stat-card inactive" title="Thanh toán VNPay đến sau khi đơn đã hủy: cần hoàn tiền thủ công (Payments.payment_status = RefundPending)">
-                                <p>Payments to refund</p><h2><fmt:formatNumber value="${refundPending}" pattern="#,##0"/></h2>
-                            </div>
-                        </c:if>
-                    </div>
 
                     <!-- Dashboard Cards -->
                     <div class="dashboard-grid">
@@ -219,7 +194,7 @@
                             </div>
 
                             <div class="dashboard-info">
-                                <h2>Users</h2>
+                                <h2>Manage Users</h2>
                                 <p>Manage system users</p>
                             </div>
                         </a>
@@ -231,7 +206,7 @@
                             </div>
 
                             <div class="dashboard-info">
-                                <h2>Events</h2>
+                                <h2>Manage Events</h2>
                                 <p>Manage events</p>
                             </div>
                         </a>
@@ -243,7 +218,7 @@
                             </div>
 
                             <div class="dashboard-info">
-                                <h2>Categories</h2>
+                                <h2>Manage Categories</h2>
                                 <p>Manage event categories</p>
                             </div>
                         </a>
@@ -255,7 +230,7 @@
                             </div>
 
                             <div class="dashboard-info">
-                                <h2>Venues</h2>
+                                <h2>Manage Venues</h2>
                                 <p>Manage event venues</p>
                             </div>
                         </a>
@@ -267,7 +242,7 @@
                             </div>
 
                             <div class="dashboard-info">
-                                <h2>Vouchers</h2>
+                                <h2>Manage Vouchers</h2>
                                 <p>Manage vouchers</p>
                             </div>
                         </a>
@@ -279,7 +254,7 @@
                             </div>
 
                             <div class="dashboard-info">
-                                <h2>Reviews</h2>
+                                <h2>Manage Reviews</h2>
                                 <p>Manage customer reviews</p>
                             </div>
                         </a>
