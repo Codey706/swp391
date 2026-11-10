@@ -207,7 +207,13 @@
                             </select>
                             <input type="text" name="keyword" maxlength="100" class="form-control" style="max-width:280px"
                                    placeholder="Event, customer, comment" value="${fn:escapeXml(keyword)}">
-                            <button type="submit" class="add-button">Filter</button>
+                            <button type="submit"
+                                    style="display: inline-flex; align-items: center; justify-content: center;
+                                    background: #FF5B49; color: white; padding: 13px 20px;
+                                    border-radius: 10px; font-weight: bold; border: none;
+                                    white-space: nowrap; cursor: pointer;">
+                                Filter
+                            </button>
                         </form>
 
                         <div class="table-wrapper">

@@ -244,12 +244,13 @@
                                 <p>Danh sách tất cả danh mục sự kiện trong hệ thống</p>
                             </div>
 
-                            <button class="add-button"
-                                    type="button"
-                                    onclick="window.location.href = '<%= contextPath%>/admin/category-create'">
-
+                            <a href="${ctx}/admin/category-create"
+                               style="display: inline-flex; align-items: center; justify-content: center;
+                               background: #FF5B49; color: white; padding: 13px 20px;
+                               border-radius: 10px; font-weight: bold; text-decoration: none;
+                               white-space: nowrap; cursor: pointer;">
                                 Add New Category
-                            </button>
+                            </a>
                         </div>
 
                         <div class="table-wrapper">
@@ -283,7 +284,7 @@
                                         </td>
 
                                         <td>
-                                              <span class="status <%= category.getStatus() != null
+                                            <span class="status <%= category.getStatus() != null
                                                       ? category.getStatus().toLowerCase() : ""%>">
                                                 <%= HtmlUtils.escape(category.getStatus(), "")%>
                                             </span>
@@ -340,34 +341,34 @@
 
         <!-- Điều khiển sidebar trên màn hình nhỏ -->
         <script>
-                                        (function () {
-                                            const sidebar = document.getElementById('adminSidebar');
-                                            const backdrop = document.getElementById('adminSidebarBackdrop');
-                                            const openButton = document.getElementById('adminSidebarOpen');
-                                            const closeButton = document.getElementById('adminSidebarClose');
+            (function () {
+                const sidebar = document.getElementById('adminSidebar');
+                const backdrop = document.getElementById('adminSidebarBackdrop');
+                const openButton = document.getElementById('adminSidebarOpen');
+                const closeButton = document.getElementById('adminSidebarClose');
 
-                                            function openSidebar() {
-                                                sidebar.classList.add('is-open');
-                                                backdrop.classList.add('is-visible');
-                                                openButton.setAttribute('aria-expanded', 'true');
-                                            }
+                function openSidebar() {
+                    sidebar.classList.add('is-open');
+                    backdrop.classList.add('is-visible');
+                    openButton.setAttribute('aria-expanded', 'true');
+                }
 
-                                            function closeSidebar() {
-                                                sidebar.classList.remove('is-open');
-                                                backdrop.classList.remove('is-visible');
-                                                openButton.setAttribute('aria-expanded', 'false');
-                                            }
+                function closeSidebar() {
+                    sidebar.classList.remove('is-open');
+                    backdrop.classList.remove('is-visible');
+                    openButton.setAttribute('aria-expanded', 'false');
+                }
 
-                                            openButton.addEventListener('click', openSidebar);
-                                            closeButton.addEventListener('click', closeSidebar);
-                                            backdrop.addEventListener('click', closeSidebar);
+                openButton.addEventListener('click', openSidebar);
+                closeButton.addEventListener('click', closeSidebar);
+                backdrop.addEventListener('click', closeSidebar);
 
-                                            document.addEventListener('keydown', function (event) {
-                                                if (event.key === 'Escape') {
-                                                    closeSidebar();
-                                                }
-                                            });
-                                        })();
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeSidebar();
+                    }
+                });
+            })();
         </script>
 
     </body>
