@@ -8,9 +8,8 @@ import java.nio.file.Paths;
 import java.util.Locale;
 
 /**
- * Tài liệu pháp lý của Organizer lưu ngoài thư mục web
- * (${user.home}/ltm-uploads/organizer-docs), chỉ trả về qua controller đã kiểm
- * tra quyền.
+ * Tài liệu pháp lý của Organizer lưu ngoài thư mục web (${user.home}/ltm-uploads/organizer-docs),
+ * chỉ trả về qua controller đã kiểm tra quyền.
  */
 public final class PrivateDocuments {
 
@@ -22,10 +21,7 @@ public final class PrivateDocuments {
                 .toAbsolutePath().normalize();
     }
 
-    /**
-     * Gửi file (inline) về trình duyệt; 404 nếu tên file không hợp lệ hoặc
-     * không tồn tại.
-     */
+    /** Gửi file (inline) về trình duyệt; 404 nếu tên file không hợp lệ hoặc không tồn tại. */
     public static void serve(HttpServletResponse response, String storedFileName) throws IOException {
         Path directory = directory();
         Path file = directory.resolve(Paths.get(storedFileName).getFileName().toString()).normalize();
@@ -37,14 +33,10 @@ public final class PrivateDocuments {
         int dot = name.lastIndexOf('.');
         String extension = dot < 0 ? "" : name.substring(dot + 1).toLowerCase(Locale.ROOT);
         String contentType = switch (extension) {
-            case "pdf" ->
-                "application/pdf";
-            case "png" ->
-                "image/png";
-            case "jpg", "jpeg" ->
-                "image/jpeg";
-            default ->
-                "application/octet-stream";
+            case "pdf" -> "application/pdf";
+            case "png" -> "image/png";
+            case "jpg", "jpeg" -> "image/jpeg";
+            default -> "application/octet-stream";
         };
         response.setContentType(contentType);
         response.setContentLengthLong(Files.size(file));

@@ -10,15 +10,15 @@
         <jsp:include page="/WEB-INF/views/staff/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/staff-seats.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/staff/_header.jsp">
             <jsp:param name="active" value="seats"/>
@@ -38,13 +38,6 @@
                 </div>
 
                 <c:choose>
-                    <c:when test="${not empty loadError}">
-                        <div class="ss-panel ss-empty" role="alert">
-                            <i class="ph ph-warning-circle" aria-hidden="true"></i>
-                            <p><c:out value="${loadError}"/></p>
-                        </div>
-                    </c:when>
-
                     <c:when test="${empty events}">
                         <div class="ss-panel ss-empty">
                             <i class="ph ph-calendar-x" aria-hidden="true"></i>
@@ -61,8 +54,8 @@
                                 </c:when>
                                 <c:otherwise>
                                     <span class="ss-thumb ss-thumb-empty"><i class="ph ph-image" aria-hidden="true"></i></span>
-                                    </c:otherwise>
-                                </c:choose>
+                                </c:otherwise>
+                            </c:choose>
 
                             <div class="ss-event-main">
                                 <div class="ss-title-row">
@@ -70,9 +63,9 @@
                                     <span class="ss-badge is-live">Đang diễn ra</span>
                                 </div>
                                 <div class="ss-meta"><i class="ph ph-tag" aria-hidden="true"></i><span><c:out value="${event.categoryName}"/></span></div>
-                                        <c:if test="${not empty timeText}">
+                                <c:if test="${not empty timeText}">
                                     <div class="ss-meta"><i class="ph ph-clock" aria-hidden="true"></i><span><c:out value="${timeText}"/></span></div>
-                                        </c:if>
+                                </c:if>
                                 <div class="ss-meta"><i class="ph ph-map-pin" aria-hidden="true"></i>
                                     <span><c:out value="${event.venueName}"/><c:if test="${not empty event.venueAddress}"> - <c:out value="${event.venueAddress}"/></c:if></span></div>
                                 </div>
@@ -81,8 +74,8 @@
                                     <h3>Thông tin phân công</h3>
                                 <c:if test="${not empty assignedText}">
                                     <div class="ss-meta"><i class="ph ph-user-list" aria-hidden="true"></i><span>Được phân công ngày <c:out value="${assignedText}"/></span></div>
-                                        </c:if>
-                                        <c:if test="${fn:length(events) > 1}">
+                                </c:if>
+                                <c:if test="${fn:length(events) > 1}">
                                     <form method="get" action="${ctx}/staff/seats" id="ssEventForm" class="ss-switch">
                                         <label for="ssEventSelect">Sự kiện đang xem</label>
                                         <select id="ssEventSelect" name="eventId">
@@ -111,11 +104,11 @@
                                     <c:choose>
                                         <c:when test="${noLayout}">
                                             <div class="ss-empty"><i class="ph ph-prohibit" aria-hidden="true"></i><p>Sự kiện này chưa có sơ đồ chỗ ngồi.</p></div>
-                                                </c:when>
-                                                <c:when test="${!hasSeated}">
+                                        </c:when>
+                                        <c:when test="${!hasSeated}">
                                             <div class="ss-empty"><i class="ph ph-armchair" aria-hidden="true"></i><p>Sự kiện này không có khu vực ghế ngồi.</p></div>
-                                                </c:when>
-                                                <c:otherwise>
+                                        </c:when>
+                                        <c:otherwise>
                                             <div class="ss-toolbar">
                                                 <ul class="ss-legend" aria-label="Chú thích">
                                                     <li><i class="st-0"></i>Còn trống</li>
@@ -151,11 +144,11 @@
                                     <c:choose>
                                         <c:when test="${noLayout}">
                                             <div class="ss-empty"><i class="ph ph-prohibit" aria-hidden="true"></i><p>Sự kiện này chưa có khu vực nào được thiết lập.</p></div>
-                                                </c:when>
-                                                <c:when test="${!hasStanding}">
+                                        </c:when>
+                                        <c:when test="${!hasStanding}">
                                             <div class="ss-empty"><i class="ph ph-users-three" aria-hidden="true"></i><p>Sự kiện này không có khu vực đứng.</p></div>
-                                                </c:when>
-                                                <c:otherwise>
+                                        </c:when>
+                                        <c:otherwise>
                                             <div class="ss-standing-grid">
                                                 <c:forEach var="z" items="${standingZones}">
                                                     <article class="ss-zone-card">

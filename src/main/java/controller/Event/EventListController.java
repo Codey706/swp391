@@ -1,9 +1,11 @@
 package controller.Event;
 
+import utils.CsrfUtils;
 import static controller.Event.EventController.EVENT_LIST_VIEW;
 import static controller.Event.EventController.MODIFIABLE_STATUSES;
 import static controller.Event.EventController.trimToNull;
 import model.Auth;
+import utils.SessionUtils;
 import utils.Constants;
 import utils.ValidationUtils;
 
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -30,43 +33,43 @@ public class EventListController extends EventController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        Auth organizer = getAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
+        try {
+            Auth organizer = currentOrganizer(request);
 
-        String keyword = trimToNull(request.getParameter("keyword"));
-        String status = trimToNull(request.getParameter("status"));
-        if (status != null) {
-            status = status.toUpperCase(Locale.ROOT);
-            if (!LIST_STATUSES.contains(status)) {
-                status = null; // không tin dữ liệu từ browser
+            String keyword = trimToNull(request.getParameter("keyword"));
+            String status = trimToNull(request.getParameter("status"));
+            if (status != null) {
+                status = status.toUpperCase(Locale.ROOT);
+                if (!LIST_STATUSES.contains(status)) {
+                    status = null; // không tin dữ liệu từ browser
+                }
             }
-        }
-        if (keyword != null && keyword.length() > Constants.EVENT_NAME_MAX_LENGTH) {
-            keyword = keyword.substring(0, Constants.EVENT_NAME_MAX_LENGTH);
-        }
+            if (keyword != null && keyword.length() > Constants.EVENT_NAME_MAX_LENGTH) {
+                keyword = keyword.substring(0, Constants.EVENT_NAME_MAX_LENGTH);
+            }
 
-        int total = eventDAO.countEventsByOrganizer(organizer.getUserId(), keyword, status);
-        int totalPages = Math.max(1, (int) Math.ceil(total / (double) Constants.EVENT_PAGE_SIZE));
-        int page = Math.min(Math.max(1, ValidationUtils.parseIntOrDefault(request.getParameter("page"), 1)), totalPages);
+            int total = eventDAO.countEventsByOrganizer(organizer.getUserId(), keyword, status);
+            int totalPages = Math.max(1, (int) Math.ceil(total / (double) Constants.EVENT_PAGE_SIZE));
+            int page = Math.min(Math.max(1, ValidationUtils.parseIntOrDefault(request.getParameter("page"), 1)), totalPages);
 
-        request.setAttribute("events", eventDAO.getEventsByOrganizer(
-                organizer.getUserId(), keyword, status, page, Constants.EVENT_PAGE_SIZE));
-        request.setAttribute("keyword", keyword);
-        request.setAttribute("selectedStatus", status);
-        request.setAttribute("statuses", LIST_STATUSES);
-        request.setAttribute("page", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("totalEvents", total);
-        request.setAttribute("modifiableStatuses", MODIFIABLE_STATUSES);
-        request.setAttribute("statusCounts", eventDAO.countEventsByStatus(organizer.getUserId()));
-        request.setAttribute("salesSummary", eventDAO.getOrganizerSalesSummary(organizer.getUserId()));
-        request.setAttribute("pageSize", Constants.EVENT_PAGE_SIZE);
-        moveFlashMessage(request, "successMessage", "errorMessage");
-        //utils.CsrfUtils.expose(request);
-        request.getRequestDispatcher(EVENT_LIST_VIEW).forward(request, response);
+            request.setAttribute("events", eventDAO.getEventsByOrganizer(
+                    organizer.getUserId(), keyword, status, page, Constants.EVENT_PAGE_SIZE));
+            request.setAttribute("keyword", keyword);
+            request.setAttribute("selectedStatus", status);
+            request.setAttribute("statuses", LIST_STATUSES);
+            request.setAttribute("page", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("totalEvents", total);
+            request.setAttribute("modifiableStatuses", MODIFIABLE_STATUSES);
+            request.setAttribute("statusCounts", eventDAO.countEventsByStatus(organizer.getUserId()));
+            request.setAttribute("salesSummary", eventDAO.getOrganizerSalesSummary(organizer.getUserId()));
+            request.setAttribute("pageSize", Constants.EVENT_PAGE_SIZE);
+            SessionUtils.moveFlash(request, "successMessage", "errorMessage");
+            CsrfUtils.expose(request);
+            request.getRequestDispatcher(EVENT_LIST_VIEW).forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
     }
 
     @Override

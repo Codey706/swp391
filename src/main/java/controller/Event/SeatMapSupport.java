@@ -213,6 +213,23 @@ public final class SeatMapSupport {
                     + venueCapacity + " chỗ).");
         }
 
+        // Một hạng vé chỉ thuộc một loại khu: ngồi cần đúng số ghế, đứng thì không có ghế
+        Set<Integer> seatedTickets = new HashSet<>();
+        Set<Integer> standingTickets = new HashSet<>();
+        for (EventZone zone : zones) {
+            if (zone.isSeated()) {
+                seatedTickets.add(zone.getEventTicketId());
+            } else if (zone.isStanding()) {
+                standingTickets.add(zone.getEventTicketId());
+            }
+        }
+        seatedTickets.retainAll(standingTickets);
+        for (Integer ticketId : seatedTickets) {
+            TicketDraft draft = finalTickets.get(ticketId);
+            errors.add("Hạng vé \"" + (draft == null ? "" : draft.name)
+                    + "\" đang gắn cả khu ngồi lẫn khu đứng. Mỗi hạng vé chỉ được thuộc một loại khu.");
+        }
+
         // Sức chứa các khu gán cho từng hạng vé = số lượng vé mới của hạng đó
         Map<Integer, Integer> capacityByTicket = new HashMap<>();
         for (EventZone zone : zones) {
@@ -328,7 +345,6 @@ public final class SeatMapSupport {
         }
         return code;
     }
-
 
     // ------------------------------------------------------------------ Dữ liệu cho trình thiết kế (JSON)
     /** Hạng vé từ database -> dữ liệu cho trình thiết kế. */

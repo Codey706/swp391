@@ -2,6 +2,9 @@ package controller;
 
 import dao.VoucherDAO;
 import model.Voucher;
+import utils.CsrfUtils;
+import utils.DBContext;
+import utils.ValidationUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,306 +22,116 @@ import java.time.format.DateTimeParseException;
 @WebServlet("/admin/vouchers")
 public class VoucherController extends HttpServlet {
 
-    private VoucherDAO voucherDAO;
+    private static final String LIST_VIEW = "/WEB-INF/views/admin/voucher-list.jsp";
+    private static final String CREATE_VIEW = "/WEB-INF/views/admin/voucher-create.jsp";
+    private static final String UPDATE_VIEW = "/WEB-INF/views/admin/voucher-update.jsp";
 
-    private static final String CREATE_VIEW
-            = "/WEB-INF/views/admin/voucher-create.jsp";
-
-    private static final String UPDATE_VIEW
-            = "/WEB-INF/views/admin/voucher-update.jsp";
+    private final VoucherDAO voucherDAO = new VoucherDAO();
 
     @Override
-    public void init() {
-        voucherDAO = new VoucherDAO();
-    }
-
-    @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         String action = request.getParameter("action");
-
         try {
-            // Mo form tao voucher
             if ("create".equals(action)) {
-                request.getRequestDispatcher(CREATE_VIEW)
-                        .forward(request, response);
-                return;
-            }
-
-            // Mo form cap nhat voucher
-            if ("edit".equals(action)) {
-                String idText = request.getParameter("id");
-
-                if (idText == null || idText.trim().isEmpty()) {
-                    response.sendError(
-                            HttpServletResponse.SC_BAD_REQUEST,
-                            "Missing voucher ID"
-                    );
-                    return;
-                }
-
-                int voucherId;
-
-                try {
-                    voucherId = Integer.parseInt(idText);
-                } catch (NumberFormatException e) {
-                    response.sendError(
-                            HttpServletResponse.SC_BAD_REQUEST,
-                            "Invalid voucher ID"
-                    );
-                    return;
-                }
-
-                Voucher voucher = voucherDAO.getVoucherById(voucherId);
-
+                request.getRequestDispatcher(CREATE_VIEW).forward(request, response);
+            } else if ("edit".equals(action)) {
+                int voucherId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), 0);
+                Voucher voucher = voucherId > 0 ? voucherDAO.getVoucherById(voucherId) : null;
                 if (voucher == null) {
-                    response.sendError(
-                            HttpServletResponse.SC_NOT_FOUND,
-                            "Voucher not found"
-                    );
-                    return;
-                }
-
-                request.setAttribute("voucher", voucher);
-
-                request.getRequestDispatcher(UPDATE_VIEW)
-                        .forward(request, response);
-                return;
-            }
-
-            // Mac dinh hien thi danh sach voucher
-            request.setAttribute(
-                    "vouchers",
-                    voucherDAO.getAllVouchers()
-            );
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/admin/voucher-list.jsp"
-            ).forward(request, response);
-
-        } catch (SQLException e) {
-            throw new ServletException(
-                    "Cannot load voucher",
-                    e
-            );
-        }
-    }
-
-    @Override
-    protected void doPost(
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
-
-        String action = request.getParameter("action");
-
-        // Giu nguyen chuc nang Create Voucher
-        if ("create".equals(action)) {
-            handleCreate(request, response);
-            return;
-        }
-
-        // Xu ly Update Voucher
-        if ("update".equals(action)) {
-            handleUpdate(request, response);
-            return;
-        }
-
-        // Ngung / kich hoat voucher (khong xoa cung)
-        if ("activate".equals(action) || "deactivate".equals(action)) {
-            if (!utils.CsrfUtils.isValid(request)) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-            int voucherId = utils.ValidationUtils.parseIntOrDefault(request.getParameter("id"), -1);
-            try {
-                if (voucherId <= 0 || !voucherDAO.updateStatus(voucherId,
-                        "activate".equals(action) ? "ACTIVE" : "INACTIVE")) {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Voucher not found");
                     return;
                 }
-            } catch (java.sql.SQLException e) {
-                throw new ServletException("Cannot change voucher status", e);
+                request.setAttribute("voucher", voucher);
+                request.getRequestDispatcher(UPDATE_VIEW).forward(request, response);
+            } else {
+                request.setAttribute("vouchers", voucherDAO.getAllVouchers());
+                request.getRequestDispatcher(LIST_VIEW).forward(request, response);
             }
-            response.sendRedirect(request.getContextPath() + "/admin/voucher-detail?id=" + voucherId
-                    + "&msg=" + ("activate".equals(action) ? "activated" : "deactivated"));
-            return;
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
-
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
 
-    private void handleCreate(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String action = request.getParameter("action");
+        try {
+            switch (action == null ? "" : action) {
+                case "create" -> save(request, response, false);
+                case "update" -> save(request, response, true);
+                case "activate", "deactivate" -> changeStatus(request, response, "activate".equals(action));
+                default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
+    }
 
+    /** Tạo mới hoặc cập nhật voucher; lỗi dữ liệu thì hiển thị lại form. */
+    private void save(HttpServletRequest request, HttpServletResponse response, boolean update)
+            throws ServletException, IOException, SQLException {
+        int voucherId = 0;
+        if (update) {
+            voucherId = ValidationUtils.parseIntOrDefault(request.getParameter("voucherId"), 0);
+            Voucher existing = voucherId > 0 ? voucherDAO.getVoucherById(voucherId) : null;
+            if (existing == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Voucher not found");
+                return;
+            }
+            request.setAttribute("voucher", existing);
+        }
+
+        String error;
         try {
             Voucher voucher = readVoucherFromRequest(request);
-
-            String error = validateVoucher(voucher);
-
-            if (error != null) {
-                request.setAttribute("error", error);
-                request.getRequestDispatcher(CREATE_VIEW)
-                        .forward(request, response);
+            voucher.setVoucherId(voucherId);
+            error = validateVoucher(voucher);
+            if (error == null) {
+                if (update) {
+                    voucherDAO.updateVoucher(voucher);
+                    response.sendRedirect(request.getContextPath() + "/admin/voucher-detail?id=" + voucherId
+                            + "&success=updated");
+                } else {
+                    voucherDAO.createVoucher(voucher);
+                    response.sendRedirect(request.getContextPath() + "/admin/vouchers?success=created");
+                }
                 return;
             }
-
-            voucherDAO.createVoucher(voucher);
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/admin/vouchers?success=created"
-            );
-
-        } catch (NumberFormatException | DateTimeParseException e) {
-            request.setAttribute(
-                    "error",
-                    "Invalid number or date format."
-            );
-
-            request.getRequestDispatcher(CREATE_VIEW)
-                    .forward(request, response);
-
-        } catch (SQLException e) {
-            if (isDuplicateVoucherCode(e)) {
-                request.setAttribute(
-                        "error",
-                        "Voucher code already exists."
-                );
-
-                request.getRequestDispatcher(CREATE_VIEW)
-                        .forward(request, response);
-            } else {
-                throw new ServletException(
-                        "Cannot create voucher",
-                        e
-                );
+            if (update) {
+                request.setAttribute("voucher", voucher);
             }
+        } catch (IllegalArgumentException | DateTimeParseException e) {
+            error = "Invalid number or date format.";
+        } catch (SQLException e) {
+            if (!DBContext.isDuplicateKey(e)) {
+                throw e;
+            }
+            error = "Voucher code already exists.";
         }
+        request.setAttribute("error", error);
+        request.getRequestDispatcher(update ? UPDATE_VIEW : CREATE_VIEW).forward(request, response);
     }
 
-    private void handleUpdate(
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws ServletException, IOException {
-
-        Voucher voucher;
-
-        // Doc ID va du lieu tu form
-        try {
-            String idText = request.getParameter("voucherId");
-
-            if (idText == null || idText.trim().isEmpty()) {
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Missing voucher ID"
-                );
-                return;
-            }
-
-            int voucherId = Integer.parseInt(idText);
-
-            // Kiem tra voucher co ton tai khong
-            Voucher existingVoucher = voucherDAO.getVoucherById(voucherId);
-
-            if (existingVoucher == null) {
-                response.sendError(
-                        HttpServletResponse.SC_NOT_FOUND,
-                        "Voucher not found"
-                );
-                return;
-            }
-
-            voucher = readVoucherFromRequest(request);
-            voucher.setVoucherId(voucherId);
-
-            String error = validateVoucher(voucher);
-
-            if (error != null) {
-                request.setAttribute("error", error);
-                request.setAttribute("voucher", voucher);
-
-                request.getRequestDispatcher(UPDATE_VIEW)
-                        .forward(request, response);
-                return;
-            }
-
-            voucherDAO.updateVoucher(voucher);
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/admin/voucher-detail?id=" + voucherId
-                    + "&success=updated"
-            );
-
-        } catch (NumberFormatException | DateTimeParseException e) {
-            request.setAttribute(
-                    "error",
-                    "Invalid number or date format."
-            );
-
-            // Neu ID hop le, nap lai voucher de hien thi form
-            String idText = request.getParameter("voucherId");
-
-            try {
-                int voucherId = Integer.parseInt(idText);
-                Voucher existingVoucher
-                        = voucherDAO.getVoucherById(voucherId);
-
-                if (existingVoucher != null) {
-                    request.setAttribute("voucher", existingVoucher);
-                }
-            } catch (NumberFormatException | SQLException ignored) {
-                // Khong lam gi neu ID khong hop le
-            }
-
-            request.getRequestDispatcher(UPDATE_VIEW)
-                    .forward(request, response);
-
-        } catch (SQLException e) {
-            if (isDuplicateVoucherCode(e)) {
-                request.setAttribute(
-                        "error",
-                        "Voucher code already exists."
-                );
-
-                String idText = request.getParameter("voucherId");
-
-                try {
-                    int voucherId = Integer.parseInt(idText);
-                    Voucher existingVoucher
-                            = voucherDAO.getVoucherById(voucherId);
-
-                    if (existingVoucher != null) {
-                        request.setAttribute("voucher", existingVoucher);
-                    }
-                } catch (NumberFormatException | SQLException ignored) {
-                    // Khong lam gi neu khong the nap lai voucher
-                }
-
-                request.getRequestDispatcher(UPDATE_VIEW)
-                        .forward(request, response);
-            } else {
-                throw new ServletException(
-                        "Cannot update voucher",
-                        e
-                );
-            }
+    /** Ngừng / kích hoạt voucher (không xóa cứng). */
+    private void changeStatus(HttpServletRequest request, HttpServletResponse response, boolean activate)
+            throws IOException, SQLException {
+        if (!CsrfUtils.isValid(request)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
         }
+        int voucherId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), -1);
+        if (voucherId <= 0 || !voucherDAO.updateStatus(voucherId, activate ? "ACTIVE" : "INACTIVE")) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Voucher not found");
+            return;
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/voucher-detail?id=" + voucherId
+                + "&msg=" + (activate ? "activated" : "deactivated"));
     }
 
     // Doc cac truong dung chung cho Create va Update
-    private Voucher readVoucherFromRequest(
-            HttpServletRequest request)
-            throws NumberFormatException, DateTimeParseException {
-
+    private Voucher readVoucherFromRequest(HttpServletRequest request) {
         String voucherCode = request.getParameter("voucherCode");
         String voucherName = request.getParameter("voucherName");
         String discountType = request.getParameter("discountType");
@@ -334,9 +147,7 @@ public class VoucherController extends HttpServlet {
                 || discountValueText == null
                 || startTimeText == null || endTimeText == null
                 || usageLimitText == null) {
-            throw new IllegalArgumentException(
-                    "Missing required voucher fields"
-            );
+            throw new IllegalArgumentException("Missing required voucher fields");
         }
 
         BigDecimal discountValue = new BigDecimal(discountValueText);
@@ -381,7 +192,6 @@ public class VoucherController extends HttpServlet {
 
     // Kiem tra du lieu voucher
     private String validateVoucher(Voucher voucher) {
-
         if (voucher.getVoucherCode() == null
                 || voucher.getVoucherCode().trim().isEmpty()
                 || voucher.getVoucherName() == null
@@ -394,7 +204,6 @@ public class VoucherController extends HttpServlet {
                 || voucher.getStatus() == null
                 || (!"ACTIVE".equals(voucher.getStatus())
                 && !"INACTIVE".equals(voucher.getStatus()))) {
-
             return "Please fill in all required fields correctly.";
         }
 
@@ -409,21 +218,9 @@ public class VoucherController extends HttpServlet {
                 || ("Percentage".equals(voucher.getDiscountType())
                 && voucher.getDiscountValue().compareTo(
                         new BigDecimal("100")) > 0)) {
-
             return "Please check discount values, usage limit, and validity period.";
         }
 
         return null;
-    }
-
-    private boolean isDuplicateVoucherCode(SQLException e) {
-        String message = e.getMessage();
-
-        return message != null
-                && (message.contains("UNIQUE")
-                || message.contains("duplicate")
-                || message.contains("Duplicate")
-                || message.contains("2627")
-                || message.contains("2601"));
     }
 }

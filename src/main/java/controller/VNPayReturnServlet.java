@@ -2,11 +2,6 @@ package controller;
 
 import dao.PaymentDAO;
 import dao.PaymentDAO.VnPayOutcome;
-import static dao.PaymentDAO.VnPayOutcome.AMOUNT_MISMATCH;
-import static dao.PaymentDAO.VnPayOutcome.FAILED;
-import static dao.PaymentDAO.VnPayOutcome.NOT_FOUND;
-import static dao.PaymentDAO.VnPayOutcome.PAID;
-import static dao.PaymentDAO.VnPayOutcome.REFUND_REQUIRED;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,8 +16,8 @@ import utils.VnPayUtil;
 
 /**
  * Return URL: trình duyệt của khách được VNPay chuyển về sau khi thanh toán.
- * Cập nhật đơn hàng qua PaymentDAO.applyVnPayResult() (cùng logic với IPN, xử
- * lý đúng một lần dù Return và IPN đến theo thứ tự nào), rồi hiển thị kết quả.
+ * Cập nhật đơn hàng qua PaymentDAO.applyVnPayResult() (cùng logic với IPN, xử lý
+ * đúng một lần dù Return và IPN đến theo thứ tự nào), rồi hiển thị kết quả.
  *
  * @author BT
  */
@@ -32,30 +27,21 @@ public class VNPayReturnServlet extends HttpServlet {
     private final PaymentDAO paymentDAO = new PaymentDAO();
 
     @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         Map<String, String> params = VnPayUtil.paramsFrom(request);
 
         try {
             // Bước 1: Xác minh chữ ký VNPay.
             if (!VnPayUtil.verifySignature(params)) {
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Chữ ký VNPay không hợp lệ."
-                );
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Chữ ký VNPay không hợp lệ.");
                 return;
             }
 
             String transactionCode = params.get("vnp_TxnRef");
             BigDecimal amount = VnPayUtil.parseAmount(params.get("vnp_Amount"));
             if (transactionCode == null || transactionCode.isBlank() || amount == null) {
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Thiếu hoặc sai thông tin giao dịch VNPay."
-                );
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu hoặc sai thông tin giao dịch VNPay.");
                 return;
             }
             boolean success = "00".equals(params.get("vnp_ResponseCode"))
@@ -101,29 +87,20 @@ public class VNPayReturnServlet extends HttpServlet {
                 default ->
                     showAlreadyProcessed(request, response, transactionCode);
             }
-
         } catch (IllegalStateException e) {
-            getServletContext().log("VNPay configuration error", e);
-            response.sendError(
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Không thể xác minh giao dịch VNPay."
-            );
+            log("VNPay configuration error", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể xác minh giao dịch VNPay.");
         } catch (SQLException e) {
-            getServletContext().log("Error processing VNPay return", e);
-            throw new ServletException(
-                    "Không thể xử lý kết quả thanh toán.", e
-            );
+            throw new ServletException(e);
         }
     }
 
     static final String REFUND_MESSAGE = "Thanh toán đến sau khi đơn hàng đã hết thời gian giữ vé (hoặc sự kiện đã hủy) "
             + "nên vé không được phát hành. Chúng tôi sẽ liên hệ để hoàn tiền.";
 
-    /**
-     * IPN đã xử lý trước khi khách quay về: hiển thị theo trạng thái đã lưu.
-     */
+    /** IPN đã xử lý trước khi khách quay về: hiển thị theo trạng thái đã lưu. */
     private void showAlreadyProcessed(HttpServletRequest request, HttpServletResponse response,
-            String transactionCode) throws ServletException, IOException {
+            String transactionCode) throws ServletException, IOException, SQLException {
         Payment payment = paymentDAO.getPaymentByTransactionCode(transactionCode);
         String status = payment == null ? "" : payment.getPaymentStatus();
         if (PaymentDAO.PAYMENT_SUCCESS.equalsIgnoreCase(status)) {
@@ -135,18 +112,11 @@ public class VNPayReturnServlet extends HttpServlet {
         }
     }
 
-    private void showResult(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            boolean success,
-            String message
-    ) throws ServletException, IOException {
-
+    private void showResult(HttpServletRequest request, HttpServletResponse response, boolean success, String message)
+            throws ServletException, IOException {
         request.setAttribute("paymentSuccess", success);
         request.setAttribute("paymentMessage", message);
 
-        request.getRequestDispatcher(
-                "/WEB-INF/views/customer/payment-result.jsp"
-        ).forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/customer/payment-result.jsp").forward(request, response);
     }
 }

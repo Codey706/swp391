@@ -6,176 +6,176 @@
 <c:set var="hasFilter" value="${not empty keyword or selectedTab != 'all' or selectedRange != 'all'}"/>
 <!DOCTYPE html>
 <html lang="vi">
-    <head>
-        <title>Sự kiện được phân công - Light Ticket</title>
-        <jsp:include page="/WEB-INF/views/staff/_head.jsp"/>
-        <link rel="stylesheet" href="${ctx}/assets/css/staff-assignments.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
-    <body class="org-body">
-        <jsp:include page="/WEB-INF/views/staff/_header.jsp">
-            <jsp:param name="active" value="dashboard"/>
-            <jsp:param name="current" value="Sự kiện được phân công"/>
-        </jsp:include>
+<head>
+    <title>Sự kiện được phân công - Light Ticket</title>
+    <jsp:include page="/WEB-INF/views/staff/_head.jsp"/>
+    <link rel="stylesheet" href="${ctx}/assets/css/staff-assignments.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
+<body class="org-body">
+    <jsp:include page="/WEB-INF/views/staff/_header.jsp">
+        <jsp:param name="active" value="dashboard"/>
+        <jsp:param name="current" value="Sự kiện được phân công"/>
+    </jsp:include>
 
-        <main class="org-main">
-            <div class="sa-page">
-                <div class="sa-head">
-                    <h1>Sự kiện được phân công</h1>
-                    <p>Danh sách các sự kiện bạn được phân công hỗ trợ. Vui lòng kiểm tra thông tin chi tiết và thời gian làm việc.</p>
-                </div>
+    <main class="org-main">
+        <div class="sa-page">
+            <div class="sa-head">
+                <h1>Sự kiện được phân công</h1>
+                <p>Danh sách các sự kiện bạn được phân công hỗ trợ. Vui lòng kiểm tra thông tin chi tiết và thời gian làm việc.</p>
+            </div>
 
-                <section class="sa-panel">
-                    <%-- Tab trạng thái + tìm kiếm + lọc thời gian --%>
-                    <div class="sa-toolbar">
-                        <nav class="sa-tabs" aria-label="Lọc theo trạng thái">
-                            <c:forEach var="t" items="${tabLabels}">
-                                <c:url var="tabUrl" value="/staff">
-                                    <c:param name="tab" value="${t.key}"/>
-                                    <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
-                                    <c:if test="${selectedRange != 'all'}"><c:param name="range" value="${selectedRange}"/></c:if>
-                                </c:url>
-                                <a class="sa-tab ${selectedTab == t.key ? 'is-active' : ''}" href="${tabUrl}">
-                                    <c:out value="${t.value}"/>&nbsp;(${tabCounts[t.key]})
-                                </a>
-                            </c:forEach>
-                        </nav>
-
-                        <form class="sa-tools" method="get" action="${ctx}/staff">
-                            <input type="hidden" name="tab" value="${selectedTab}">
-                            <div class="sa-search">
-                                <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-                                <input type="text" name="keyword" class="sa-input" maxlength="200"
-                                       placeholder="Tìm kiếm sự kiện..." value="<c:out value='${keyword}'/>">
-                            </div>
-                            <select name="range" class="sa-input" aria-label="Lọc theo thời gian" onchange="this.form.submit()">
-                                <c:forEach var="r" items="${rangeLabels}">
-                                    <option value="${r.key}" ${selectedRange == r.key ? 'selected' : ''}><c:out value="${r.value}"/></option>
-                                </c:forEach>
-                            </select>
-                        </form>
-                    </div>
-
-                    <%-- Danh sách --%>
-                    <div class="sa-list">
-                        <c:forEach var="e" items="${events}">
-                            <c:set var="st" value="${e.startTime}"/>
-                            <c:set var="en" value="${e.endTime}"/>
-                            <c:set var="asg" value="${e.assignedAt}"/>
-                            <article class="sa-item">
-                                <c:choose>
-                                    <c:when test="${not empty e.eventImage}">
-                                        <img class="sa-thumb" alt="" src="${ctx}/<c:out value='${e.eventImage}'/>">
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="sa-thumb"><i class="ph ph-image" style="font-size:40px" aria-hidden="true"></i></span>
-                                        </c:otherwise>
-                                    </c:choose>
-
-                                <div>
-                                    <h2 class="sa-name"><c:out value="${e.eventName}"/></h2>
-                                    <span class="sa-chip"><c:out value="${e.categoryName}"/></span>
-                                    <div class="sa-meta"><i class="ph ph-map-pin" aria-hidden="true"></i><span><c:out value="${e.venueName}"/></span></div>
-                                    <div class="sa-meta"><i class="ph ph-calendar" aria-hidden="true"></i>
-                                        <span>${fn:substring(st, 11, 16)} - ${fn:substring(st, 8, 10)}/${fn:substring(st, 5, 7)}/${fn:substring(st, 0, 4)}</span></div>
-                                </div>
-
-                                <div class="sa-col">
-                                    <div>
-                                        <span class="sa-label">Bắt đầu</span>
-                                        <span class="sa-value">${fn:substring(st, 11, 16)} - ${fn:substring(st, 8, 10)}/${fn:substring(st, 5, 7)}/${fn:substring(st, 0, 4)}</span>
-                                    </div>
-                                    <div>
-                                        <span class="sa-label">Kết thúc</span>
-                                        <span class="sa-value">${fn:substring(en, 11, 16)} - ${fn:substring(en, 8, 10)}/${fn:substring(en, 5, 7)}/${fn:substring(en, 0, 4)}</span>
-                                    </div>
-                                    <c:if test="${not empty asg}">
-                                        <div>
-                                            <span class="sa-label">Ngày phân công</span>
-                                            <span class="sa-value">${fn:substring(asg, 8, 10)}/${fn:substring(asg, 5, 7)}/${fn:substring(asg, 0, 4)}</span>
-                                        </div>
-                                    </c:if>
-                                </div>
-
-                                <div class="sa-col">
-                                    <c:choose>
-                                        <c:when test="${e.timeStatus == 'UPCOMING'}"><span class="sa-badge is-upcoming">Sắp diễn ra</span></c:when>
-                                        <c:when test="${e.timeStatus == 'ONGOING'}"><span class="sa-badge is-ongoing">Đang diễn ra</span></c:when>
-                                        <c:when test="${e.timeStatus == 'CANCELLED'}"><span class="sa-badge is-cancelled">Đã hủy</span></c:when>
-                                        <c:otherwise><span class="sa-badge is-ended">Đã kết thúc</span></c:otherwise>
-                                    </c:choose>
-                                    <div class="sa-stats">
-                                        <div>
-                                            <span class="sa-label">Tổng vé</span>
-                                            <span class="sa-value"><fmt:formatNumber value="${e.ticketTotal}" pattern="#,##0"/></span>
-                                        </div>
-                                        <div>
-                                            <span class="sa-label">Đã check-in</span>
-                                            <span class="sa-value"><fmt:formatNumber value="${e.checkedIn}" pattern="#,##0"/></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="sa-act">
-                                    <a class="sa-btn" href="${ctx}/staff/event-detail?eventId=${e.eventId}">
-                                        Xem chi tiết <i class="ph ph-arrow-right" style="font-size:18px" aria-hidden="true"></i>
-                                    </a>
-                                </div>
-                            </article>
-                        </c:forEach>
-
-                        <c:if test="${empty events}">
-                            <div class="sa-empty">
-                                <i class="ph ph-calendar-x" aria-hidden="true"></i>
-                                <c:choose>
-                                    <c:when test="${totalAssigned == 0}">
-                                        <p>Bạn chưa được phân công sự kiện nào.</p>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p>Không tìm thấy sự kiện phù hợp.</p>
-                                        <c:if test="${hasFilter}">
-                                            <a class="sa-btn is-outline" href="${ctx}/staff">Xóa bộ lọc</a>
-                                        </c:if>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </c:if>
-                    </div>
-                </section>
-
-                <%-- Chân trang: số kết quả + phân trang (giữ nguyên tab, từ khóa, bộ lọc) --%>
-                <c:if test="${totalResults > 0}">
-                    <div class="sa-foot">
-                        <span>Hiển thị ${fromItem} - ${toItem} trong ${totalResults} sự kiện</span>
-                        <c:if test="${totalPages > 1}">
-                            <c:url var="pageBase" value="/staff">
-                                <c:param name="tab" value="${selectedTab}"/>
+            <section class="sa-panel">
+                <%-- Tab trạng thái + tìm kiếm + lọc thời gian --%>
+                <div class="sa-toolbar">
+                    <nav class="sa-tabs" aria-label="Lọc theo trạng thái">
+                        <c:forEach var="t" items="${tabLabels}">
+                            <c:url var="tabUrl" value="/staff">
+                                <c:param name="tab" value="${t.key}"/>
                                 <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
                                 <c:if test="${selectedRange != 'all'}"><c:param name="range" value="${selectedRange}"/></c:if>
                             </c:url>
-                            <nav class="pager" aria-label="Phân trang">
-                                <a class="${currentPage <= 1 ? 'disabled' : ''}" href="${pageBase}&page=${currentPage - 1}" aria-label="Trang trước"><i class="ph ph-caret-left" style="font-size:20px" aria-hidden="true"></i></a>
-                                    <c:forEach var="i" begin="1" end="${totalPages}">
-                                    <a class="${i == currentPage ? 'active' : ''}" href="${pageBase}&page=${i}">${i}</a>
-                                </c:forEach>
-                                <a class="${currentPage >= totalPages ? 'disabled' : ''}" href="${pageBase}&page=${currentPage + 1}" aria-label="Trang sau"><i class="ph ph-caret-right" style="font-size:20px" aria-hidden="true"></i></a>
-                            </nav>
-                        </c:if>
-                    </div>
-                </c:if>
-            </div>
-        </main>
+                            <a class="sa-tab ${selectedTab == t.key ? 'is-active' : ''}" href="${tabUrl}">
+                                <c:out value="${t.value}"/>&nbsp;(${tabCounts[t.key]})
+                            </a>
+                        </c:forEach>
+                    </nav>
 
-        <jsp:include page="/WEB-INF/views/staff/_footer.jsp"/>
-        <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
-        <script src="${ctx}/assets/js/event.js"></script>
-    </body>
+                    <form class="sa-tools" method="get" action="${ctx}/staff">
+                        <input type="hidden" name="tab" value="${selectedTab}">
+                        <div class="sa-search">
+                            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                            <input type="text" name="keyword" class="sa-input" maxlength="200"
+                                   placeholder="Tìm kiếm sự kiện..." value="<c:out value='${keyword}'/>">
+                        </div>
+                        <select name="range" class="sa-input" aria-label="Lọc theo thời gian" onchange="this.form.submit()">
+                            <c:forEach var="r" items="${rangeLabels}">
+                                <option value="${r.key}" ${selectedRange == r.key ? 'selected' : ''}><c:out value="${r.value}"/></option>
+                            </c:forEach>
+                        </select>
+                    </form>
+                </div>
+
+                <%-- Danh sách --%>
+                <div class="sa-list">
+                    <c:forEach var="e" items="${events}">
+                        <c:set var="st" value="${e.startTime}"/>
+                        <c:set var="en" value="${e.endTime}"/>
+                        <c:set var="asg" value="${e.assignedAt}"/>
+                        <article class="sa-item">
+                            <c:choose>
+                                <c:when test="${not empty e.eventImage}">
+                                    <img class="sa-thumb" alt="" src="${ctx}/<c:out value='${e.eventImage}'/>">
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="sa-thumb"><i class="ph ph-image" style="font-size:40px" aria-hidden="true"></i></span>
+                                </c:otherwise>
+                            </c:choose>
+
+                            <div>
+                                <h2 class="sa-name"><c:out value="${e.eventName}"/></h2>
+                                <span class="sa-chip"><c:out value="${e.categoryName}"/></span>
+                                <div class="sa-meta"><i class="ph ph-map-pin" aria-hidden="true"></i><span><c:out value="${e.venueName}"/></span></div>
+                                <div class="sa-meta"><i class="ph ph-calendar" aria-hidden="true"></i>
+                                    <span>${fn:substring(st, 11, 16)} - ${fn:substring(st, 8, 10)}/${fn:substring(st, 5, 7)}/${fn:substring(st, 0, 4)}</span></div>
+                            </div>
+
+                            <div class="sa-col">
+                                <div>
+                                    <span class="sa-label">Bắt đầu</span>
+                                    <span class="sa-value">${fn:substring(st, 11, 16)} - ${fn:substring(st, 8, 10)}/${fn:substring(st, 5, 7)}/${fn:substring(st, 0, 4)}</span>
+                                </div>
+                                <div>
+                                    <span class="sa-label">Kết thúc</span>
+                                    <span class="sa-value">${fn:substring(en, 11, 16)} - ${fn:substring(en, 8, 10)}/${fn:substring(en, 5, 7)}/${fn:substring(en, 0, 4)}</span>
+                                </div>
+                                <c:if test="${not empty asg}">
+                                    <div>
+                                        <span class="sa-label">Ngày phân công</span>
+                                        <span class="sa-value">${fn:substring(asg, 8, 10)}/${fn:substring(asg, 5, 7)}/${fn:substring(asg, 0, 4)}</span>
+                                    </div>
+                                </c:if>
+                            </div>
+
+                            <div class="sa-col">
+                                <c:choose>
+                                    <c:when test="${e.timeStatus == 'UPCOMING'}"><span class="sa-badge is-upcoming">Sắp diễn ra</span></c:when>
+                                    <c:when test="${e.timeStatus == 'ONGOING'}"><span class="sa-badge is-ongoing">Đang diễn ra</span></c:when>
+                                    <c:when test="${e.timeStatus == 'CANCELLED'}"><span class="sa-badge is-cancelled">Đã hủy</span></c:when>
+                                    <c:otherwise><span class="sa-badge is-ended">Đã kết thúc</span></c:otherwise>
+                                </c:choose>
+                                <div class="sa-stats">
+                                    <div>
+                                        <span class="sa-label">Tổng vé</span>
+                                        <span class="sa-value"><fmt:formatNumber value="${e.ticketTotal}" pattern="#,##0"/></span>
+                                    </div>
+                                    <div>
+                                        <span class="sa-label">Đã check-in</span>
+                                        <span class="sa-value"><fmt:formatNumber value="${e.checkedIn}" pattern="#,##0"/></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sa-act">
+                                <a class="sa-btn" href="${ctx}/staff/event-detail?eventId=${e.eventId}">
+                                    Xem chi tiết <i class="ph ph-arrow-right" style="font-size:18px" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </article>
+                    </c:forEach>
+
+                    <c:if test="${empty events}">
+                        <div class="sa-empty">
+                            <i class="ph ph-calendar-x" aria-hidden="true"></i>
+                            <c:choose>
+                                <c:when test="${totalAssigned == 0}">
+                                    <p>Bạn chưa được phân công sự kiện nào.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p>Không tìm thấy sự kiện phù hợp.</p>
+                                    <c:if test="${hasFilter}">
+                                        <a class="sa-btn is-outline" href="${ctx}/staff">Xóa bộ lọc</a>
+                                    </c:if>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:if>
+                </div>
+            </section>
+
+            <%-- Chân trang: số kết quả + phân trang (giữ nguyên tab, từ khóa, bộ lọc) --%>
+            <c:if test="${totalResults > 0}">
+                <div class="sa-foot">
+                    <span>Hiển thị ${fromItem} - ${toItem} trong ${totalResults} sự kiện</span>
+                    <c:if test="${totalPages > 1}">
+                        <c:url var="pageBase" value="/staff">
+                            <c:param name="tab" value="${selectedTab}"/>
+                            <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
+                            <c:if test="${selectedRange != 'all'}"><c:param name="range" value="${selectedRange}"/></c:if>
+                        </c:url>
+                        <nav class="pager" aria-label="Phân trang">
+                            <a class="${currentPage <= 1 ? 'disabled' : ''}" href="${pageBase}&page=${currentPage - 1}" aria-label="Trang trước"><i class="ph ph-caret-left" style="font-size:20px" aria-hidden="true"></i></a>
+                            <c:forEach var="i" begin="1" end="${totalPages}">
+                                <a class="${i == currentPage ? 'active' : ''}" href="${pageBase}&page=${i}">${i}</a>
+                            </c:forEach>
+                            <a class="${currentPage >= totalPages ? 'disabled' : ''}" href="${pageBase}&page=${currentPage + 1}" aria-label="Trang sau"><i class="ph ph-caret-right" style="font-size:20px" aria-hidden="true"></i></a>
+                        </nav>
+                    </c:if>
+                </div>
+            </c:if>
+        </div>
+    </main>
+
+    <jsp:include page="/WEB-INF/views/staff/_footer.jsp"/>
+    <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
+    <script src="${ctx}/assets/js/event.js"></script>
+</body>
 </html>

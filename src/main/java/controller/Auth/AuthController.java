@@ -21,6 +21,7 @@ import utils.GoogleUtils;
 import utils.GoogleUtils.GoogleProfile;
 import utils.AuthFilter;
 import utils.Constants;
+import utils.SessionUtils;
 
 @WebServlet(name = "AuthServlet", urlPatterns = {"/Auth"})
 public class AuthController extends HttpServlet {
@@ -35,66 +36,36 @@ public class AuthController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-
-        String action = request.getParameter("action");
-        if (action == null || action.isEmpty()) {
-            action = "login";
-        }
-
-        switch (action) {
-            case "register":
-                showRegister(request, response);
-                break;
-            case "forgot":
-                forward(request, response, "forgot.jsp");
-                break;
-            case "otp":
-                showOtp(request, response);
-                break;
-            case "resendOtp":
-                resendOtp(request, response);
-                break;
-            case "changePassword":
-                showChangePassword(request, response);
-                break;
-            default:
-                showLogin(request, response);
-                break;
+        String action = request.getParameter("action") == null ? "login" : request.getParameter("action");
+        try {
+            switch (action) {
+                case "register" -> showRegister(request, response);
+                case "forgot" -> forward(request, response, "forgot.jsp");
+                case "otp" -> showOtp(request, response);
+                case "resendOtp" -> resendOtp(request, response);
+                case "changePassword" -> showChangePassword(request, response);
+                default -> showLogin(request, response);
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "login";
-        }
-
-        switch (action) {
-            case "register":
-                register(request, response);
-                break;
-            case "otp":
-                verifyOtp(request, response);
-                break;
-            case "forgot":
-                forgot(request, response);
-                break;
-            case "changePassword":
-                changePassword(request, response);
-                break;
-            case "googleLogin":
-                googleLogin(request, response);
-                break;     
-            default:
-                login(request, response);
-                break;
+        String action = request.getParameter("action") == null ? "login" : request.getParameter("action");
+        try {
+            switch (action) {
+                case "register" -> register(request, response);
+                case "otp" -> verifyOtp(request, response);
+                case "forgot" -> forgot(request, response);
+                case "changePassword" -> changePassword(request, response);
+                case "googleLogin" -> googleLogin(request, response);
+                default -> login(request, response);
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
     }
 
@@ -104,11 +75,7 @@ public class AuthController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
-        HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute("success") != null) {
-            request.setAttribute("success", session.getAttribute("success"));
-            session.removeAttribute("success");
-        }
+        SessionUtils.moveFlash(request, "success");
         if ("inactive".equals(request.getParameter("reason")) && request.getAttribute("error") == null) {
             request.setAttribute("error", "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên.");
         }
@@ -141,32 +108,22 @@ public class AuthController extends HttpServlet {
     }
 
     private void showChangePassword(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         HttpSession session = request.getSession(false);
         boolean resetFlow = session != null && session.getAttribute("resetUserId") != null;
         if (currentUser(request) == null && !resetFlow) {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
             return;
         }
-        boolean requireOld = false;
-        if (!resetFlow) {
-            try {
-                requireOld = needsOldPassword(currentUser(request));
-            } catch (SQLException e) {
-                e.printStackTrace();
-                requireOld = true; // không đọc được DB thì giữ mặc định an toàn
-            }
-        }
-        request.setAttribute("requireOld", requireOld);
+        request.setAttribute("requireOld", !resetFlow && needsOldPassword(currentUser(request)));
         if (!resetFlow && currentUser(request) != null && currentUser(request).isMustChangePassword()) {
             request.setAttribute("error", "Bạn đang dùng mật khẩu tạm do quản trị viên cấp. Vui lòng đổi mật khẩu để tiếp tục.");
         }
         forward(request, response, "change-password.jsp");
     }
 
-
     private void googleLogin(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         String credential = request.getParameter("credential");
         if (credential == null || credential.isEmpty()) {
             request.setAttribute("error", "Không nhận được thông tin xác thực từ Google.");
@@ -181,72 +138,66 @@ public class AuthController extends HttpServlet {
             return;
         }
 
-        try {
-            Auth user = authDAO.findByEmail(profile.getEmail());
-            
-            // Nếu người dùng chưa tồn tại, tự động tạo tài khoản Customer mới
-            if (user == null) {
-                user = new Auth();
-                user.setEmail(profile.getEmail());
-                // Tự động tạo username từ email (phần trước @)
-                String generatedUsername = profile.getEmail().split("@")[0];
-                
-                // Đảm bảo username không trùng lặp
-                int counter = 1;
-                String finalUsername = generatedUsername;
-                while (authDAO.usernameExists(finalUsername)) {
-                    finalUsername = generatedUsername + counter;
-                    counter++;
-                }
-                
-                user.setUsername(finalUsername);
-                user.setFullName(profile.getName());
-                user.setPhone(""); // Trống do Google không trả về phone
-                // Cột password NOT NULL nên vẫn lưu một chuỗi ngẫu nhiên không ai biết (không đoán được);
-                // password_set = 0 để lần đầu người dùng vào "Thiết lập mật khẩu" mà không cần mật khẩu cũ.
-                String randomPassword = java.util.UUID.randomUUID() + "G@" + EmailService.createOtp();
-                user.setPassword(BCrypt.hashpw(randomPassword, BCrypt.gensalt()));
-                user.setPasswordSet(false);
-                
-                if (!authDAO.insertCustomer(user)) {
-                    request.setAttribute("error", "Lỗi tạo tài khoản từ Google.");
-                    forward(request, response, "login.jsp");
-                    return;
-                }
-                // Lấy lại thông tin user từ DB để có userId
-                user = authDAO.findByEmail(profile.getEmail());
+        Auth user = authDAO.findByEmail(profile.getEmail());
+
+        // Nếu người dùng chưa tồn tại, tự động tạo tài khoản Customer mới
+        if (user == null) {
+            user = new Auth();
+            user.setEmail(profile.getEmail());
+            // Tự động tạo username từ email (phần trước @)
+            String generatedUsername = profile.getEmail().split("@")[0];
+
+            // Đảm bảo username không trùng lặp
+            int counter = 1;
+            String finalUsername = generatedUsername;
+            while (authDAO.usernameExists(finalUsername)) {
+                finalUsername = generatedUsername + counter;
+                counter++;
             }
 
-            if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                request.setAttribute("error", "Tài khoản không thể sử dụng.");
+            user.setUsername(finalUsername);
+            user.setFullName(profile.getName());
+            user.setPhone(""); // Trống do Google không trả về phone
+            // Cột password NOT NULL nên vẫn lưu một chuỗi ngẫu nhiên không ai biết (không đoán được);
+            // password_set = 0 để lần đầu người dùng vào "Thiết lập mật khẩu" mà không cần mật khẩu cũ.
+            String randomPassword = java.util.UUID.randomUUID() + "G@" + EmailService.createOtp();
+            user.setPassword(BCrypt.hashpw(randomPassword, BCrypt.gensalt()));
+            user.setPasswordSet(false);
+
+            if (!authDAO.insertCustomer(user)) {
+                request.setAttribute("error", "Lỗi tạo tài khoản từ Google.");
                 forward(request, response, "login.jsp");
                 return;
             }
-
-            // Reset failed attempts if any
-            if (user.getFailedAttempts() > 0 || user.getLockedUntil() != null) {
-                authDAO.resetFailedAttempts(user.getUserId());
-            }
-
-            HttpSession old = request.getSession(false);
-            if (old != null) {
-                old.invalidate();
-            }
-            HttpSession session = request.getSession(true);
-            user.setPassword(null);
-            session.setAttribute("user", user);
-
-            response.sendRedirect(request.getContextPath() + (user.isMustChangePassword()
-                    ? "/Auth?action=changePassword" : AuthFilter.homeFor(user.getRole())));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
-            forward(request, response, "login.jsp");
+            // Lấy lại thông tin user từ DB để có userId
+            user = authDAO.findByEmail(profile.getEmail());
         }
+
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+            request.setAttribute("error", "Tài khoản không thể sử dụng.");
+            forward(request, response, "login.jsp");
+            return;
+        }
+
+        // Reset failed attempts if any
+        if (user.getFailedAttempts() > 0 || user.getLockedUntil() != null) {
+            authDAO.resetFailedAttempts(user.getUserId());
+        }
+
+        HttpSession old = request.getSession(false);
+        if (old != null) {
+            old.invalidate();
+        }
+        HttpSession session = request.getSession(true);
+        user.setPassword(null);
+        session.setAttribute("user", user);
+
+        response.sendRedirect(request.getContextPath() + (user.isMustChangePassword()
+                ? "/Auth?action=changePassword" : AuthFilter.homeFor(user.getRole())));
     }
 
     private void login(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         String identifier = trim(request.getParameter("identifier"));
         String password = request.getParameter("password");
         String rememberMe = request.getParameter("rememberMe");
@@ -258,75 +209,69 @@ public class AuthController extends HttpServlet {
             return;
         }
 
-        try {
-            Auth user = authDAO.findByUsernameOrEmail(identifier);
-            if (user == null) {
-                request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
-                forward(request, response, "login.jsp");
-                return;
-            }
-
-            if (user.getLockedUntil() != null && user.getLockedUntil().getTime() > System.currentTimeMillis()) {
-                request.setAttribute("error", "Tài khoản tạm khóa 15 phút do nhập sai quá 5 lần.");
-                forward(request, response, "login.jsp");
-                return;
-            }
-
-            // Hết thời gian khóa: bắt đầu đếm lại số lần sai từ 0
-            if (user.getLockedUntil() != null) {
-                authDAO.resetFailedAttempts(user.getUserId());
-                user.setFailedAttempts(0);
-                user.setLockedUntil(null);
-            }
-
-            if (!BCrypt.checkpw(password, user.getPassword())) {
-                int fail = user.getFailedAttempts() + 1;
-                Timestamp lock = null;
-                if (fail >= 5) {
-                    lock = new Timestamp(System.currentTimeMillis() + 15 * 60 * 1000);
-                    request.setAttribute("error", "Tài khoản tạm khóa 15 phút do nhập sai quá 5 lần.");
-                } else {
-                    request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
-                }
-                authDAO.recordFailedAttempt(user.getUserId(), fail, lock);
-                forward(request, response, "login.jsp");
-                return;
-            }
-
-            if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                request.setAttribute("error", "Tài khoản không thể sử dụng.");
-                forward(request, response, "login.jsp");
-                return;
-            }
-
-            if (user.getFailedAttempts() > 0 || user.getLockedUntil() != null) {
-                authDAO.resetFailedAttempts(user.getUserId());
-            }
-
-            HttpSession old = request.getSession(false);
-            if (old != null) {
-                old.invalidate();
-            }
-            HttpSession session = request.getSession(true);
-            user.setPassword(null);
-            session.setAttribute("user", user);
-
-            Cookie cookie = new Cookie("rememberId", identifier);
-            cookie.setMaxAge("on".equals(rememberMe) ? 7 * 24 * 60 * 60 : 0);
-            cookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
-            response.addCookie(cookie);
-
-            response.sendRedirect(request.getContextPath() + (user.isMustChangePassword()
-                    ? "/Auth?action=changePassword" : AuthFilter.homeFor(user.getRole())));
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Hệ thống không thể xác thực. Vui lòng thử lại sau.");
+        Auth user = authDAO.findByUsernameOrEmail(identifier);
+        if (user == null) {
+            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
             forward(request, response, "login.jsp");
+            return;
         }
+
+        if (user.getLockedUntil() != null && user.getLockedUntil().getTime() > System.currentTimeMillis()) {
+            request.setAttribute("error", "Tài khoản tạm khóa 15 phút do nhập sai quá 5 lần.");
+            forward(request, response, "login.jsp");
+            return;
+        }
+
+        // Hết thời gian khóa: bắt đầu đếm lại số lần sai từ 0
+        if (user.getLockedUntil() != null) {
+            authDAO.resetFailedAttempts(user.getUserId());
+            user.setFailedAttempts(0);
+            user.setLockedUntil(null);
+        }
+
+        if (!BCrypt.checkpw(password, user.getPassword())) {
+            int fail = user.getFailedAttempts() + 1;
+            Timestamp lock = null;
+            if (fail >= 5) {
+                lock = new Timestamp(System.currentTimeMillis() + 15 * 60 * 1000);
+                request.setAttribute("error", "Tài khoản tạm khóa 15 phút do nhập sai quá 5 lần.");
+            } else {
+                request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
+            }
+            authDAO.recordFailedAttempt(user.getUserId(), fail, lock);
+            forward(request, response, "login.jsp");
+            return;
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+            request.setAttribute("error", "Tài khoản không thể sử dụng.");
+            forward(request, response, "login.jsp");
+            return;
+        }
+
+        if (user.getFailedAttempts() > 0 || user.getLockedUntil() != null) {
+            authDAO.resetFailedAttempts(user.getUserId());
+        }
+
+        HttpSession old = request.getSession(false);
+        if (old != null) {
+            old.invalidate();
+        }
+        HttpSession session = request.getSession(true);
+        user.setPassword(null);
+        session.setAttribute("user", user);
+
+        Cookie cookie = new Cookie("rememberId", identifier);
+        cookie.setMaxAge("on".equals(rememberMe) ? 7 * 24 * 60 * 60 : 0);
+        cookie.setPath(request.getContextPath().isEmpty() ? "/" : request.getContextPath());
+        response.addCookie(cookie);
+
+        response.sendRedirect(request.getContextPath() + (user.isMustChangePassword()
+                ? "/Auth?action=changePassword" : AuthFilter.homeFor(user.getRole())));
     }
 
     private void register(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         String fullName = trim(request.getParameter("fullName"));
         String username = trim(request.getParameter("username"));
         String email = trim(request.getParameter("email"));
@@ -377,37 +322,31 @@ public class AuthController extends HttpServlet {
             return;
         }
 
-        try {
-            if (authDAO.usernameExists(username) || authDAO.emailExists(email) || authDAO.phoneExists(phone)) {
-                request.setAttribute("error", "Email hoặc số điện thoại đã được đăng ký. Hãy đăng nhập hoặc dùng Quên mật khẩu.");
-                forward(request, response, "register.jsp");
-                return;
-            }
-
-            Auth pending = new Auth();
-            pending.setFullName(fullName);
-            pending.setUsername(username);
-            pending.setEmail(email);
-            pending.setPhone(phone);
-            pending.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-            pending.setRole("Customer");
-            pending.setStatus("ACTIVE");
-
-            if (!startOtp(request, "register", pending, email, true)) {
-                request.setAttribute("error", "Không gửi được OTP. Vui lòng thử lại sau.");
-                forward(request, response, "register.jsp");
-                return;
-            }
-            response.sendRedirect(request.getContextPath() + "/Auth?action=otp");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Không lưu được thông tin. Vui lòng thử lại sau.");
+        if (authDAO.usernameExists(username) || authDAO.emailExists(email) || authDAO.phoneExists(phone)) {
+            request.setAttribute("error", "Email hoặc số điện thoại đã được đăng ký. Hãy đăng nhập hoặc dùng Quên mật khẩu.");
             forward(request, response, "register.jsp");
+            return;
         }
+
+        Auth pending = new Auth();
+        pending.setFullName(fullName);
+        pending.setUsername(username);
+        pending.setEmail(email);
+        pending.setPhone(phone);
+        pending.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        pending.setRole("Customer");
+        pending.setStatus("ACTIVE");
+
+        if (!startOtp(request, "register", pending, email, true)) {
+            request.setAttribute("error", "Không gửi được OTP. Vui lòng thử lại sau.");
+            forward(request, response, "register.jsp");
+            return;
+        }
+        response.sendRedirect(request.getContextPath() + "/Auth?action=otp");
     }
 
     private void forgot(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         String email = trim(request.getParameter("email"));
         request.setAttribute("email", email);
 
@@ -417,31 +356,25 @@ public class AuthController extends HttpServlet {
             return;
         }
 
-        try {
-            // Không tiết lộ email có tồn tại hay không: luôn chuyển sang trang nhập OTP với
-            // cùng một thông báo. Email chưa đăng ký thì không gửi mail và OTP không bao giờ khớp.
-            Auth user = authDAO.findByEmail(email);
-            boolean exists = user != null;
-            if (!exists) {
-                user = new Auth();
-                user.setEmail(email);
-            }
-            if (!startOtp(request, "forgot", user, email, exists)) {
-                request.setAttribute("error", "Không gửi được OTP. Vui lòng thử lại sau.");
-                forward(request, response, "forgot.jsp");
-                return;
-            }
-            request.getSession().setAttribute("otpNotice", FORGOT_NOTICE);
-            response.sendRedirect(request.getContextPath() + "/Auth?action=otp");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
-            forward(request, response, "forgot.jsp");
+        // Không tiết lộ email có tồn tại hay không: luôn chuyển sang trang nhập OTP với
+        // cùng một thông báo. Email chưa đăng ký thì không gửi mail và OTP không bao giờ khớp.
+        Auth user = authDAO.findByEmail(email);
+        boolean exists = user != null;
+        if (!exists) {
+            user = new Auth();
+            user.setEmail(email);
         }
+        if (!startOtp(request, "forgot", user, email, exists)) {
+            request.setAttribute("error", "Không gửi được OTP. Vui lòng thử lại sau.");
+            forward(request, response, "forgot.jsp");
+            return;
+        }
+        request.getSession().setAttribute("otpNotice", FORGOT_NOTICE);
+        response.sendRedirect(request.getContextPath() + "/Auth?action=otp");
     }
 
     private void verifyOtp(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("otpCode") == null) {
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
@@ -486,32 +419,26 @@ public class AuthController extends HttpServlet {
         otpFail.remove(key);
         otpLock.remove(key);
         String purpose = (String) session.getAttribute("otpPurpose");
-        try {
-            if ("register".equals(purpose)) {
-                Auth pending = (Auth) session.getAttribute("pendingUser");
-                if (pending == null || !authDAO.insertCustomer(pending)) {
-                    request.setAttribute("error", "Không tạo được tài khoản. Vui lòng thử lại.");
-                    forward(request, response, "otp.jsp");
-                    return;
-                }
-                clearOtp(session);
-                request.getSession(true).setAttribute("success", "Đăng ký thành công. Vui lòng đăng nhập.");
-                response.sendRedirect(request.getContextPath() + "/Auth?action=login");
+        if ("register".equals(purpose)) {
+            Auth pending = (Auth) session.getAttribute("pendingUser");
+            if (pending == null || !authDAO.insertCustomer(pending)) {
+                request.setAttribute("error", "Không tạo được tài khoản. Vui lòng thử lại.");
+                forward(request, response, "otp.jsp");
                 return;
             }
-            if ("forgot".equals(purpose)) {
-                Auth user = (Auth) session.getAttribute("pendingUser");
-                session.setAttribute("resetUserId", user.getUserId());
-                clearOtp(session);
-                response.sendRedirect(request.getContextPath() + "/Auth?action=changePassword");
-                return;
-            }
+            clearOtp(session);
+            request.getSession(true).setAttribute("success", "Đăng ký thành công. Vui lòng đăng nhập.");
             response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Không lưu được thông tin. Vui lòng thử lại sau.");
-            forward(request, response, "otp.jsp");
+            return;
         }
+        if ("forgot".equals(purpose)) {
+            Auth user = (Auth) session.getAttribute("pendingUser");
+            session.setAttribute("resetUserId", user.getUserId());
+            clearOtp(session);
+            response.sendRedirect(request.getContextPath() + "/Auth?action=changePassword");
+            return;
+        }
+        response.sendRedirect(request.getContextPath() + "/Auth?action=login");
     }
 
     private void resendOtp(HttpServletRequest request, HttpServletResponse response)
@@ -533,7 +460,7 @@ public class AuthController extends HttpServlet {
     }
 
     private void changePassword(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         HttpSession session = request.getSession(false);
         Auth loginUser = currentUser(request);
         Integer resetUserId = session == null ? null : (Integer) session.getAttribute("resetUserId");
@@ -545,16 +472,7 @@ public class AuthController extends HttpServlet {
         }
 
         // Tài khoản Google chưa tự đặt mật khẩu: thiết lập lần đầu, không hỏi mật khẩu hiện tại
-        boolean requireOld;
-        try {
-            requireOld = !resetFlow && needsOldPassword(loginUser);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("requireOld", true);
-            request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
-            forward(request, response, "change-password.jsp");
-            return;
-        }
+        boolean requireOld = !resetFlow && needsOldPassword(loginUser);
         request.setAttribute("requireOld", requireOld);
         String oldPassword = request.getParameter("oldPassword");
         String newPassword = request.getParameter("newPassword");
@@ -576,54 +494,49 @@ public class AuthController extends HttpServlet {
             return;
         }
 
-        try {
-            int userId = resetFlow ? resetUserId : loginUser.getUserId();
-            Auth dbUser = authDAO.findById(userId);
-            if (dbUser == null) {
-                request.setAttribute("error", "Không tìm thấy tài khoản.");
-                forward(request, response, "change-password.jsp");
-                return;
-            }
-            if (requireOld && !BCrypt.checkpw(oldPassword, dbUser.getPassword())) {
-                request.setAttribute("error", "Mật khẩu hiện tại không đúng.");
-                forward(request, response, "change-password.jsp");
-                return;
-            }
-            if (dbUser.isPasswordSet() && BCrypt.checkpw(newPassword, dbUser.getPassword())) {
-                request.setAttribute("error", "Mật khẩu mới không được trùng mật khẩu hiện tại.");
-                forward(request, response, "change-password.jsp");
-                return;
-            }
-            if (!authDAO.updatePassword(userId, BCrypt.hashpw(newPassword, BCrypt.gensalt()))) {
-                request.setAttribute("error", "Không cập nhật được mật khẩu. Vui lòng thử lại.");
-                forward(request, response, "change-password.jsp");
-                return;
-            }
-            if (resetFlow) {
-                session.removeAttribute("resetUserId");
-                session.setAttribute("success", "Đổi mật khẩu thành công. Vui lòng đăng nhập.");
-                response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-                return;
-            }
-            boolean firstTime = !dbUser.isPasswordSet();
-            loginUser.setPasswordSet(true);
-            if (loginUser.isMustChangePassword()) {
-                loginUser.setMustChangePassword(false);
-                response.sendRedirect(request.getContextPath() + AuthFilter.homeFor(loginUser.getRole()));
-                return;
-            }
-            // Từ giờ trang hiển thị dạng "Đổi mật khẩu" (có ô mật khẩu hiện tại)
-            request.setAttribute("requireOld", true);
-            request.setAttribute("success", firstTime
-                    ? "Thiết lập mật khẩu thành công. Từ giờ bạn có thể đăng nhập bằng email hoặc username và mật khẩu này, ngoài đăng nhập Google."
-                    : "Đổi mật khẩu thành công.");
+        int userId = resetFlow ? resetUserId : loginUser.getUserId();
+        Auth dbUser = authDAO.findById(userId);
+        if (dbUser == null) {
+            request.setAttribute("error", "Không tìm thấy tài khoản.");
             forward(request, response, "change-password.jsp");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Hệ thống đang lỗi. Vui lòng thử lại sau.");
-            forward(request, response, "change-password.jsp");
+            return;
         }
-    } 
+        if (requireOld && !BCrypt.checkpw(oldPassword, dbUser.getPassword())) {
+            request.setAttribute("error", "Mật khẩu hiện tại không đúng.");
+            forward(request, response, "change-password.jsp");
+            return;
+        }
+        if (dbUser.isPasswordSet() && BCrypt.checkpw(newPassword, dbUser.getPassword())) {
+            request.setAttribute("error", "Mật khẩu mới không được trùng mật khẩu hiện tại.");
+            forward(request, response, "change-password.jsp");
+            return;
+        }
+        if (!authDAO.updatePassword(userId, BCrypt.hashpw(newPassword, BCrypt.gensalt()))) {
+            request.setAttribute("error", "Không cập nhật được mật khẩu. Vui lòng thử lại.");
+            forward(request, response, "change-password.jsp");
+            return;
+        }
+        if (resetFlow) {
+            session.removeAttribute("resetUserId");
+            session.setAttribute("success", "Đổi mật khẩu thành công. Vui lòng đăng nhập.");
+            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
+            return;
+        }
+        boolean firstTime = !dbUser.isPasswordSet();
+        loginUser.setPasswordSet(true);
+        if (loginUser.isMustChangePassword()) {
+            loginUser.setMustChangePassword(false);
+            response.sendRedirect(request.getContextPath() + AuthFilter.homeFor(loginUser.getRole()));
+            return;
+        }
+        // Từ giờ trang hiển thị dạng "Đổi mật khẩu" (có ô mật khẩu hiện tại)
+        request.setAttribute("requireOld", true);
+        request.setAttribute("success", firstTime
+                ? "Thiết lập mật khẩu thành công. Từ giờ bạn có thể đăng nhập bằng email hoặc username và mật khẩu này, ngoài đăng nhập Google."
+                : "Đổi mật khẩu thành công.");
+        forward(request, response, "change-password.jsp");
+    }
+
     /** @param send false: tạo phiên OTP giả cho email chưa đăng ký (không gửi mail, không bao giờ khớp) */
     private boolean startOtp(HttpServletRequest request, String purpose, Auth pending, String email, boolean send) {
         String key = email.toLowerCase();
@@ -671,11 +584,7 @@ public class AuthController extends HttpServlet {
     }
 
     private Auth currentUser(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return null;
-        }
-        return (Auth) session.getAttribute("user");
+        return SessionUtils.currentUser(request);
     }
 
     private boolean isLocked(Map<String, Long> lockMap, String key) {
@@ -727,10 +636,5 @@ public class AuthController extends HttpServlet {
             }
         }
         request.getRequestDispatcher("/WEB-INF/views/" + folder + page).forward(request, response);
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Auth Controller";
     }
 }

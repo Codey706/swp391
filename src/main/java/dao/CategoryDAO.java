@@ -172,7 +172,8 @@ public class CategoryDAO {
         try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement unlink = connection.prepareStatement(
-                    "DELETE FROM Organizer_Categories WHERE category_id = ?"); PreparedStatement delete = connection.prepareStatement(
+                    "DELETE FROM Organizer_Categories WHERE category_id = ?");
+                    PreparedStatement delete = connection.prepareStatement(
                             "DELETE FROM Categories WHERE category_id = ?")) {
 
                 unlink.setInt(1, categoryId);

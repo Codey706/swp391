@@ -7,69 +7,35 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Venue;
-
+import utils.CsrfUtils;
+import utils.ValidationUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 
 @WebServlet("/admin/venue-detail")
 public class VenueDetailController extends HttpServlet {
 
-    private VenueDAO venueDAO;
+    private final VenueDAO venueDAO = new VenueDAO();
 
     @Override
-    public void init() {
-        venueDAO = new VenueDAO();
-    }
-
-    @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        int venueId;
-
-        try {
-            venueId = Integer.parseInt(request.getParameter("id"));
-        } catch (NumberFormatException e) {
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid venue ID."
-            );
-            return;
-        }
-
+        int venueId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), 0);
         if (venueId <= 0) {
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid venue ID."
-            );
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid venue ID.");
             return;
         }
-
         try {
             Venue venue = venueDAO.getVenueById(venueId);
-
             if (venue == null) {
-                response.sendError(
-                        HttpServletResponse.SC_NOT_FOUND,
-                        "Venue not found."
-                );
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Venue not found.");
                 return;
             }
-
             request.setAttribute("venue", venue);
-            utils.CsrfUtils.expose(request);
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/admin/venue-detail.jsp"
-            ).forward(request, response);
-
+            CsrfUtils.expose(request);
+            request.getRequestDispatcher("/WEB-INF/views/admin/venue-detail.jsp").forward(request, response);
         } catch (SQLException e) {
-            throw new ServletException(
-                    "Cannot retrieve venue details.",
-                    e
-            );
+            throw new ServletException(e);
         }
     }
 }

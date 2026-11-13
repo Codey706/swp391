@@ -11,14 +11,18 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.TreeMap;
 import java.util.UUID;
 import model.Event;
 import model.EventSeat;
 import model.EventTicket;
+import model.EventZone;
 import utils.Constants;
 import utils.DBContext;
 
@@ -172,7 +176,7 @@ public class TicketBookingDAO {
      * trong MỘT transaction. Lỗi nghiệp vụ -> rollback và ném BookingException.
      *
      * @param quantities eventTicketId -> số lượng (>0)
-     * @param seatIds    ghế đã chọn (rỗng nếu vé đứng/không chọn ghế)
+     * @param seatIds    ghế đã chọn; hạng vé thuộc khu ngồi phải có đúng số ghế bằng số vé, khu đứng không có ghế
      * @param voucherCode null/rỗng nếu không dùng
      * @return order_id vừa tạo
      */
@@ -220,7 +224,7 @@ public class TicketBookingDAO {
         Map<Integer, Integer> ordered = new TreeMap<>(quantities);
         List<Object[]> lines = new ArrayList<>(); // {ticketId, qty, unitPrice, subtotal}
         BigDecimal total = BigDecimal.ZERO;
-        int totalQty = 0;
+        Map<Integer, String> ticketNames = new HashMap<>();
 
         for (Map.Entry<Integer, Integer> entry : ordered.entrySet()) {
             int ticketId = entry.getKey();
@@ -236,6 +240,7 @@ public class TicketBookingDAO {
                     if (!rs.next()) {
                         throw new BookingException("Loại vé không hợp lệ hoặc đã ngừng bán.");
                     }
+                    ticketNames.put(ticketId, rs.getString("ticket_name"));
                     int available = rs.getInt("available_quantity");
                     if (available < qty) {
                         throw new BookingException("Loại vé \"" + rs.getString("ticket_name")
@@ -259,13 +264,9 @@ public class TicketBookingDAO {
             BigDecimal subtotal = price.multiply(BigDecimal.valueOf(qty));
             lines.add(new Object[]{ticketId, qty, price, subtotal});
             total = total.add(subtotal);
-            totalQty += qty;
         }
 
-        if (!seatIds.isEmpty() && seatIds.size() != totalQty) {
-            throw new BookingException("Số ghế đã chọn (" + seatIds.size()
-                    + ") phải bằng tổng số vé (" + totalQty + ").");
-        }
+        validateSeatSelection(conn, eventId, seatIds, quantities, ticketNames);
         for (int seatId : seatIds) {
             try (PreparedStatement ps = conn.prepareStatement(
                     "UPDATE Event_Seats SET status = 'Held' "
@@ -277,7 +278,6 @@ public class TicketBookingDAO {
                 }
             }
         }
-        validateSeatTicketTypes(conn, seatIds, quantities);
 
         Integer voucherId = null;
         BigDecimal discount = BigDecimal.ZERO;
@@ -314,33 +314,62 @@ public class TicketBookingDAO {
     }
 
     /**
-     * Ghế thuộc khu có hạng vé (Event_Zones.event_ticket_id) chỉ được chọn khi mua đúng hạng vé đó,
-     * và số ghế mỗi hạng không vượt số vé của hạng. Chặn việc mua vé rẻ rồi chọn ghế khu đắt hơn.
-     * Ghế chưa gắn khu/hạng vé (dữ liệu cũ) được dùng cho bất kỳ hạng nào.
+     * Kiểm tra ghế theo từng hạng vé trong đơn:
+     * - Mỗi ghế phải thuộc sự kiện và thuộc khu của một hạng vé có trong đơn.
+     * - Hạng vé chỉ gắn khu ngồi: số ghế phải đúng bằng số vé.
+     * - Hạng vé khu đứng hoặc chưa có sơ đồ: không cần ghế.
+     * - Hạng vé gắn cả khu ngồi lẫn khu đứng: không bắt buộc, nhưng số ghế không vượt số vé.
      */
-    private void validateSeatTicketTypes(Connection conn, List<Integer> seatIds, Map<Integer, Integer> quantities)
+    private void validateSeatSelection(Connection conn, int eventId, List<Integer> seatIds,
+            Map<Integer, Integer> quantities, Map<Integer, String> ticketNames)
             throws SQLException, BookingException {
-        Map<Integer, Integer> seatsPerTicket = new TreeMap<>();
-        for (int seatId : seatIds) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT z.event_ticket_id FROM Event_Seats es "
-                    + "LEFT JOIN Event_Zones z ON z.zone_id = es.zone_id WHERE es.event_seat_id = ?")) {
+        Set<Integer> seatedTickets = new HashSet<>();
+        Set<Integer> standingTickets = new HashSet<>();
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT event_ticket_id, zone_type FROM Event_Zones "
+                + "WHERE event_id = ? AND event_ticket_id IS NOT NULL")) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (EventZone.TYPE_SEATED.equals(rs.getString("zone_type"))) {
+                        seatedTickets.add(rs.getInt("event_ticket_id"));
+                    } else if (EventZone.TYPE_STANDING.equals(rs.getString("zone_type"))) {
+                        standingTickets.add(rs.getInt("event_ticket_id"));
+                    }
+                }
+            }
+        }
+
+        Map<Integer, Integer> seatsPerTicket = new HashMap<>();
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT z.event_ticket_id FROM Event_Seats es "
+                + "LEFT JOIN Event_Zones z ON z.zone_id = es.zone_id "
+                + "WHERE es.event_seat_id = ? AND es.event_id = ?")) {
+            for (int seatId : seatIds) {
                 ps.setInt(1, seatId);
+                ps.setInt(2, eventId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) {
                         throw new BookingException("Ghế đã chọn không hợp lệ.");
                     }
                     int ticketId = rs.getInt(1);
-                    if (!rs.wasNull()) {
-                        seatsPerTicket.merge(ticketId, 1, Integer::sum);
+                    if (rs.wasNull() || !quantities.containsKey(ticketId)) {
+                        throw new BookingException("Ghế đã chọn không thuộc hạng vé bạn mua. "
+                                + "Vui lòng chọn ghế đúng khu vực của hạng vé.");
                     }
+                    seatsPerTicket.merge(ticketId, 1, Integer::sum);
                 }
             }
         }
-        for (Map.Entry<Integer, Integer> entry : seatsPerTicket.entrySet()) {
-            Integer qty = quantities.get(entry.getKey());
-            if (qty == null || entry.getValue() > qty) {
-                throw new BookingException("Ghế đã chọn không thuộc hạng vé bạn mua. Vui lòng chọn ghế đúng khu vực của hạng vé.");
+
+        for (Map.Entry<Integer, Integer> entry : new TreeMap<>(quantities).entrySet()) {
+            int ticketId = entry.getKey();
+            int qty = entry.getValue();
+            int chosen = seatsPerTicket.getOrDefault(ticketId, 0);
+            boolean mustChooseSeats = seatedTickets.contains(ticketId) && !standingTickets.contains(ticketId);
+            if (chosen > qty || (mustChooseSeats && chosen != qty)) {
+                throw new BookingException("Hạng vé \"" + ticketNames.get(ticketId) + "\" cần chọn đúng "
+                        + qty + " ghế (bạn đã chọn " + chosen + " ghế).");
             }
         }
     }

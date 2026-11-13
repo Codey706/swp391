@@ -1,212 +1,88 @@
 package controller;
 
 import dao.EventDAO;
-import model.Auth;
 import utils.Constants;
 import utils.EmailService;
+import utils.ValidationUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
-import model.Event;
+import java.sql.SQLException;
 
+/** Admin duyệt / từ chối sự kiện đang chờ duyệt. */
 @WebServlet("/admin/events")
 public class AdminEventController extends HttpServlet {
 
-    private EventDAO eventDAO;
+    private static final String LIST_VIEW = "/WEB-INF/views/admin/event-list.jsp";
+    private static final int REASON_MAX_LENGTH = 1000;
 
-    private static final String LIST_VIEW
-            = "/WEB-INF/views/admin/event-list.jsp";
+    private final EventDAO eventDAO = new EventDAO();
 
     @Override
-    public void init() {
-        eventDAO = new EventDAO();
-    }
-
-    // Kiem tra tai khoan Admin dang dang nhap
-    private boolean isAdmin(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-
-        if (session == null) {
-            return false;
-        }
-
-        Object userObject = session.getAttribute(Constants.SESSION_USER);
-
-        if (!(userObject instanceof Auth)) {
-            return false;
-        }
-
-        Auth user = (Auth) userObject;
-
-        return user.getRole() != null
-                && Constants.ROLE_ADMIN.equalsIgnoreCase(user.getRole())
-                && Constants.STATUS_ACTIVE.equalsIgnoreCase(user.getStatus());
-    }
-
-    // Hien thi danh sach su kien dang cho duyet
-    @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        if (!isAdmin(request)) {
-            response.sendError(
-                    HttpServletResponse.SC_FORBIDDEN,
-                    "You do not have permission to access this page."
-            );
-            return;
-        }
-
-        int page = 1;
-
         try {
-            String pageText = request.getParameter("page");
-
-            if (pageText != null && !pageText.trim().isEmpty()) {
-                page = Integer.parseInt(pageText);
+            int pageSize = Constants.EVENT_PAGE_SIZE;
+            int totalEvents = eventDAO.countEventsPendingApproval();
+            int totalPages = (int) Math.ceil((double) totalEvents / pageSize);
+            int page = Math.max(1, ValidationUtils.parseIntOrDefault(request.getParameter("page"), 1));
+            if (totalPages > 0 && page > totalPages) {
+                page = totalPages;
             }
 
-            if (page < 1) {
-                page = 1;
-            }
-        } catch (NumberFormatException e) {
-            page = 1;
+            request.setAttribute("events", eventDAO.getEventsPendingApproval(page, pageSize));
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("totalEvents", totalEvents);
+            request.getRequestDispatcher(LIST_VIEW).forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
-
-        int pageSize = Constants.EVENT_PAGE_SIZE;
-        int totalEvents = eventDAO.countEventsPendingApproval();
-        int totalPages = (int) Math.ceil((double) totalEvents / pageSize);
-
-        if (totalPages > 0 && page > totalPages) {
-            page = totalPages;
-        }
-
-        List<Event> events
-                = eventDAO.getEventsPendingApproval(page, pageSize);
-
-        request.setAttribute("events", events);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("totalEvents", totalEvents);
-
-        request.getRequestDispatcher(LIST_VIEW)
-                .forward(request, response);
     }
 
-    // Xu ly duyet hoac tu choi su kien
     @Override
-    protected void doPost(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
-
-        if (!isAdmin(request)) {
-            response.sendError(
-                    HttpServletResponse.SC_FORBIDDEN,
-                    "You do not have permission to perform this action."
-            );
-            return;
-        }
-
         String action = request.getParameter("action");
-        String eventIdText = request.getParameter("eventId");
+        int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("eventId"), 0);
+        if (eventId <= 0) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid event ID.");
+            return;
+        }
 
-        int eventId;
-
+        String reason = request.getParameter("reason") == null ? "" : request.getParameter("reason").trim();
+        String result;
         try {
-            if (eventIdText == null || eventIdText.trim().isEmpty()) {
-                throw new NumberFormatException();
-            }
-
-            eventId = Integer.parseInt(eventIdText);
-
-            if (eventId <= 0) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid event ID."
-            );
-            return;
-        }
-
-        if ("approve".equals(action)) {
-            boolean success = eventDAO.approveEvent(eventId);
-
-            if (success) {
-                notifyOrganizer(eventId, true, null);
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/admin/events?success=approved"
-                );
+            if ("approve".equals(action)) {
+                result = eventDAO.approveEvent(eventId) ? "success=approved" : "error=action_failed";
+            } else if ("reject".equals(action)) {
+                if (reason.isEmpty()) {
+                    result = "error=reason_required";
+                } else if (reason.length() > REASON_MAX_LENGTH) {
+                    result = "error=reason_too_long";
+                } else {
+                    result = eventDAO.rejectEvent(eventId, reason) ? "success=rejected" : "error=action_failed";
+                }
             } else {
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/admin/events?error=action_failed"
-                );
-            }
-
-            return;
-        }
-
-        if ("reject".equals(action)) {
-            String reason = request.getParameter("reason");
-
-            if (reason == null || reason.trim().isEmpty()) {
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/admin/events?error=reason_required"
-                );
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
                 return;
             }
-
-            reason = reason.trim();
-
-            if (reason.length() > 1000) {
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/admin/events?error=reason_too_long"
-                );
-                return;
+            if (result.startsWith("success")) {
+                notifyOrganizer(eventId, "approve".equals(action), reason);
             }
-
-            boolean success = eventDAO.rejectEvent(eventId, reason);
-
-            if (success) {
-                notifyOrganizer(eventId, false, reason);
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/admin/events?success=rejected"
-                );
-            } else {
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/admin/events?error=action_failed"
-                );
-            }
-
-            return;
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
-
-        response.sendError(
-                HttpServletResponse.SC_BAD_REQUEST,
-                "Invalid action."
-        );
+        response.sendRedirect(request.getContextPath() + "/admin/events?" + result);
     }
 
-    // UC-29: gửi email kết quả duyệt cho Organizer (chạy nền, lỗi gửi mail không ảnh hưởng việc duyệt)
-    private void notifyOrganizer(int eventId, boolean approved, String reason) {
+    /** UC-29: gửi email kết quả duyệt cho Organizer (chạy nền, lỗi gửi mail không ảnh hưởng việc duyệt). */
+    private void notifyOrganizer(int eventId, boolean approved, String reason) throws SQLException {
         String[] contact = eventDAO.getOrganizerContact(eventId);
         if (contact == null || contact[0] == null) {
             return;

@@ -79,9 +79,11 @@ public class VenueDAO {
     }
 
     // ------------------------------------------------------------ UC-31: thêm / sửa / ngừng / xóa
+
     public int createVenue(Venue venue) throws SQLException {
         String sql = "INSERT INTO Venues (venue_name, address, description, capacity, status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = DBContext.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             bindVenue(statement, venue);
             statement.setString(5, venue.getStatus());
             statement.executeUpdate();
@@ -111,16 +113,14 @@ public class VenueDAO {
     }
 
     public boolean deleteVenue(int venueId) throws SQLException {
-        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement("DELETE FROM Venues WHERE venue_id = ?")) {
+        try (Connection connection = DBContext.getConnection();
+                PreparedStatement statement = connection.prepareStatement("DELETE FROM Venues WHERE venue_id = ?")) {
             statement.setInt(1, venueId);
             return statement.executeUpdate() > 0;
         }
     }
 
-    /**
-     * Số sự kiện dùng venue; activeOnly = chỉ đếm sự kiện ACTIVE /
-     * PENDING_APPROVAL.
-     */
+    /** Số sự kiện dùng venue; activeOnly = chỉ đếm sự kiện ACTIVE / PENDING_APPROVAL. */
     public int countEvents(int venueId, boolean activeOnly) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Events WHERE venue_id = ?"
                 + (activeOnly ? " AND UPPER(status) IN ('ACTIVE', 'PENDING_APPROVAL')" : "");
@@ -133,12 +133,10 @@ public class VenueDAO {
         }
     }
 
-    /**
-     * Seat_Maps / Seats cũ (mẫu theo địa điểm, không còn dùng) vẫn tham chiếu
-     * khóa ngoại.
-     */
+    /** Seat_Maps / Seats cũ (mẫu theo địa điểm, không còn dùng) vẫn tham chiếu khóa ngoại. */
     public boolean hasLegacySeatMaps(int venueId) throws SQLException {
-        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM Seat_Maps WHERE venue_id = ?")) {
+        try (Connection connection = DBContext.getConnection();
+                PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM Seat_Maps WHERE venue_id = ?")) {
             statement.setInt(1, venueId);
             try (ResultSet rs = statement.executeQuery()) {
                 return rs.next();

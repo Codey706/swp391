@@ -6,41 +6,19 @@
 
     <%-- ============ Cột trái: công cụ + hạng vé ============ --%>
     <aside class="sm-side">
-        <c:if test="${not readOnly}">
-            <section class="org-card sm-panel">
-                <h2><span class="material-symbols-outlined">add_box</span> Thêm khu</h2>
-                <div class="sm-tools">
-                    <button type="button" class="sm-tool" data-add="STAGE" id="addStage">
-                        <span class="material-symbols-outlined">theater_comedy</span> Sân khấu
-                    </button>
-                    <button type="button" class="sm-tool" data-add="SEATED">
-                        <span class="material-symbols-outlined">event_seat</span> Khu ngồi
-                    </button>
-                    <button type="button" class="sm-tool" data-add="STANDING">
-                        <span class="material-symbols-outlined">groups</span> Khu đứng
-                    </button>
-                </div>
-                <h3>Mẫu sơ đồ có sẵn</h3>
-                <div class="sm-presets">
-                    <button type="button" class="btn-soft" data-preset="hall">Hội trường / Nhà hát</button>
-                    <button type="button" class="btn-soft" data-preset="concert">Concert sân khấu</button>
-                </div>
-            </section>
-        </c:if>
-
         <section class="org-card sm-panel">
-            <h2><span class="material-symbols-outlined">confirmation_number</span> Hạng vé &amp; giá</h2>
+            <h2><i class="ph ph-ticket" aria-hidden="true"></i> Hạng vé &amp; giá</h2>
             <p class="sm-hint">Mỗi khu gán một hạng vé; màu của khu theo màu hạng vé. Số lượng vé tự đồng bộ theo tổng chỗ của các khu.</p>
             <div id="smTicketList" class="sm-ticket-list"></div>
             <c:if test="${not readOnly}">
                 <button type="button" class="btn-soft sm-full" id="smAddTicketBtn">
-                    <span class="material-symbols-outlined">add</span> Thêm hạng vé
+                    <i class="ph ph-plus" aria-hidden="true"></i> Thêm hạng vé
                 </button>
             </c:if>
         </section>
 
         <section class="org-card sm-panel">
-            <h2><span class="material-symbols-outlined">monitoring</span> Tổng quan</h2>
+            <h2><i class="ph ph-chart-line-up" aria-hidden="true"></i> Tổng quan</h2>
             <div class="sm-stats">
                 <div><span id="statZones">0</span><small>Khu</small></div>
                 <div><span id="statSeats">0</span><small>Tổng chỗ</small></div>
@@ -48,7 +26,7 @@
             </div>
             <div class="sm-capbar"><div id="capBar"></div></div>
             <div id="issueBox" class="sm-issues" hidden>
-                <b><span class="material-symbols-outlined">warning</span> Cần chỉnh sửa (<span id="issueCount">0</span>)</b>
+                <b><i class="ph ph-warning" aria-hidden="true"></i> Cần chỉnh sửa (<span id="issueCount">0</span>)</b>
                 <ul id="issueList"></ul>
             </div>
         </section>
@@ -59,12 +37,37 @@
         <div class="sm-canvas-bar">
             <span class="sm-canvas-title">Khung sơ đồ</span>
             <div class="sm-zoom">
-                <button type="button" class="sm-icon-btn" id="zoomOut" aria-label="Thu nhỏ"><span class="material-symbols-outlined">remove</span></button>
+                <button type="button" class="sm-icon-btn" id="zoomOut" aria-label="Thu nhỏ"><i class="ph ph-minus" aria-hidden="true"></i></button>
                 <span id="zoomLabel">100%</span>
-                <button type="button" class="sm-icon-btn" id="zoomIn" aria-label="Phóng to"><span class="material-symbols-outlined">add</span></button>
-                <button type="button" class="sm-icon-btn" id="zoomFit" aria-label="Vừa khung"><span class="material-symbols-outlined">fit_screen</span></button>
+                <button type="button" class="sm-icon-btn" id="zoomIn" aria-label="Phóng to"><i class="ph ph-plus" aria-hidden="true"></i></button>
+                <button type="button" class="sm-icon-btn" id="zoomFit" aria-label="Về 100% (vừa khung)" title="Về 100% (vừa khung)"><i class="ph ph-frame-corners" aria-hidden="true"></i></button>
+                <button type="button" class="sm-icon-btn sm-fs-btn" id="smFullscreen" aria-pressed="false" aria-label="Toàn màn hình" title="Toàn màn hình">
+                    <i class="ph ph-corners-out" aria-hidden="true"></i><span class="sm-fs-text">Thoát toàn màn hình</span>
+                </button>
             </div>
         </div>
+        <%-- Thanh công cụ ngang ngay trên khung vẽ: thêm khu / áp mẫu sơ đồ --%>
+        <c:if test="${not readOnly}">
+            <div class="sm-toolbar" role="toolbar" aria-label="Thêm khu vào sơ đồ">
+                <div class="sm-toolbar-group">
+                    <span class="sm-toolbar-label"><i class="ph ph-plus-square" aria-hidden="true"></i> Thêm khu</span>
+                    <button type="button" class="sm-tool" data-add="STAGE" id="addStage" title="Thêm sân khấu (mỗi sơ đồ tối đa 1)">
+                        <i class="ph ph-mask-happy" aria-hidden="true"></i> Sân khấu
+                    </button>
+                    <button type="button" class="sm-tool" data-add="SEATED" title="Thêm khu ghế ngồi đánh số">
+                        <i class="ph ph-armchair" aria-hidden="true"></i> Khu ngồi
+                    </button>
+                    <button type="button" class="sm-tool" data-add="STANDING" title="Thêm khu đứng tự do">
+                        <i class="ph ph-users-three" aria-hidden="true"></i> Khu đứng
+                    </button>
+                </div>
+                <div class="sm-toolbar-group">
+                    <span class="sm-toolbar-label"><i class="ph ph-layout" aria-hidden="true"></i> Mẫu có sẵn</span>
+                    <button type="button" class="sm-tool sm-tool-soft" data-preset="hall">Hội trường / Nhà hát</button>
+                    <button type="button" class="sm-tool sm-tool-soft" data-preset="concert">Concert sân khấu</button>
+                </div>
+            </div>
+        </c:if>
         <div class="sm-canvas-wrap" id="canvasWrap">
             <svg id="smSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sơ đồ ghế của sự kiện"></svg>
         </div>
@@ -80,12 +83,12 @@
     <%-- ============ Phải: thuộc tính khu ============ --%>
     <aside class="sm-side">
         <section class="org-card sm-panel" id="propsEmpty">
-            <h2><span class="material-symbols-outlined">tune</span> Thuộc tính khu</h2>
+            <h2><i class="ph ph-sliders-horizontal" aria-hidden="true"></i> Thuộc tính khu</h2>
             <p class="sm-hint">Chọn một khu trên sơ đồ để xem hoặc chỉnh sửa.</p>
         </section>
 
         <section class="org-card sm-panel" id="propsPanel" hidden>
-            <h2><span class="material-symbols-outlined">tune</span> Thuộc tính khu <span class="sm-type-pill" id="pType"></span></h2>
+            <h2><i class="ph ph-sliders-horizontal" aria-hidden="true"></i> Thuộc tính khu <span class="sm-type-pill" id="pType"></span></h2>
 
             <div class="sm-field">
                 <label for="pName">Tên khu <span class="req">*</span></label>
@@ -113,7 +116,7 @@
                     <span>Chế độ bỏ ghế / tạo lối đi (nhấp hoặc kéo qua các ghế)</span>
                 </label>
                 <button type="button" class="btn-soft sm-full" id="pResetSeats">
-                    <span class="material-symbols-outlined">restart_alt</span> Khôi phục tất cả ghế
+                    <i class="ph ph-arrow-clockwise" aria-hidden="true"></i> Khôi phục tất cả ghế
                 </button>
             </div>
 
@@ -128,8 +131,8 @@
 
             <c:if test="${not readOnly}">
                 <div class="sm-actions">
-                    <button type="button" class="btn-soft" id="pDuplicate"><span class="material-symbols-outlined">content_copy</span> Nhân bản</button>
-                    <button type="button" class="btn-soft sm-danger" id="pDelete"><span class="material-symbols-outlined">delete</span> Xóa khu</button>
+                    <button type="button" class="btn-soft" id="pDuplicate"><i class="ph ph-copy" aria-hidden="true"></i> Nhân bản</button>
+                    <button type="button" class="btn-soft sm-danger" id="pDelete"><i class="ph ph-trash" aria-hidden="true"></i> Xóa khu</button>
                 </div>
             </c:if>
         </section>

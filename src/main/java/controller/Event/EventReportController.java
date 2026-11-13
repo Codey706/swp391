@@ -27,16 +27,13 @@ public class EventReportController extends EventController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Auth organizer = getAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
-        Event event = loadOwnedEvent(request, organizer);
-        if (event == null) {
-            redirectToList(request, response, "errorMessage", "Không tìm thấy sự kiện của bạn.");
-            return;
-        }
         try {
+            Auth organizer = currentOrganizer(request);
+            Event event = loadOwnedEvent(request, organizer);
+            if (event == null) {
+                redirectToList(request, response, "errorMessage", "Không tìm thấy sự kiện của bạn.");
+                return;
+            }
             List<Map<String, Object>> rows = dashboardDAO.getEventTicketReport(event.getEventId());
             int quantity = 0;
             int sold = 0;
@@ -60,9 +57,9 @@ public class EventReportController extends EventController {
             request.setAttribute("soldPercent", quantity == 0 ? 0 : sold * 100 / quantity);
             request.setAttribute("checkInPercent", sold == 0 ? 0 : checkedIn * 100 / sold);
             request.setAttribute("orderCounts", dashboardDAO.getEventOrderCounts(event.getEventId()));
+            request.getRequestDispatcher(VIEW).forward(request, response);
         } catch (SQLException e) {
-            throw new ServletException("Cannot load event report", e);
+            throw new ServletException(e);
         }
-        request.getRequestDispatcher(VIEW).forward(request, response);
     }
 }

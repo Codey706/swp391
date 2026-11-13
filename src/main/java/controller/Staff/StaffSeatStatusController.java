@@ -7,6 +7,7 @@ import model.Auth;
 import model.EventZone;
 import model.StaffAssignment;
 import utils.Constants;
+import utils.ValidationUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,8 +20,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * GET /staff/seats[?eventId=...] : trạng thái chỗ ngồi (chỉ xem) của sự kiện được phân công
@@ -33,7 +32,6 @@ import java.util.logging.Logger;
 @WebServlet(name = "StaffSeatStatusController", urlPatterns = {"/staff/seats"})
 public class StaffSeatStatusController extends StaffController {
 
-    private static final Logger LOGGER = Logger.getLogger(StaffSeatStatusController.class.getName());
     private static final String VIEW = "/WEB-INF/views/staff/seat-status.jsp";
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -45,28 +43,21 @@ public class StaffSeatStatusController extends StaffController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Auth staff = getAuthenticatedStaff(request, response);
-        if (staff == null) {
-            return;
-        }
-        // Dữ liệu thay đổi theo từng lượt check-in/đặt vé nên không cho cache
-        response.setHeader("Cache-Control", "no-store");
+        try {
+            Auth staff = currentStaff(request);
+            // Dữ liệu thay đổi theo từng lượt check-in/đặt vé nên không cho cache
+            response.setHeader("Cache-Control", "no-store");
 
-        Integer requestedId = null;
-        String raw = request.getParameter("eventId");
-        if (raw != null && !raw.trim().isEmpty()) {
-            try {
-                requestedId = Integer.valueOf(raw.trim());
-            } catch (NumberFormatException e) {
+            String raw = request.getParameter("eventId");
+            Integer requestedId = ValidationUtils.isNullOrBlank(raw) ? null : ValidationUtils.parseIntOrDefault(raw, -1);
+            if (requestedId != null && requestedId < 0) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
-        }
 
-        int staffId = staff.getUserId();
-        LocalDateTime now = LocalDateTime.now(ZoneId.of(Constants.BUSINESS_ZONE_ID));
+            int staffId = staff.getUserId();
+            LocalDateTime now = LocalDateTime.now(ZoneId.of(Constants.BUSINESS_ZONE_ID));
 
-        try {
             // Tab ONGOING = sự kiện ACTIVE, đang trong [start_time, end_time) => diễn ra trong hôm nay
             List<StaffAssignment> events = staffEventDAO.findAssigned(staffId, StaffEventDAO.TAB_ONGOING,
                     "", StaffEventDAO.RANGE_ALL, now, 1, Constants.STAFF_SEAT_MAX_EVENTS);
@@ -119,12 +110,10 @@ public class StaffSeatStatusController extends StaffController {
             request.setAttribute("seatedSold", view.seatedSold);
             request.setAttribute("standingUnknown", view.standingUnknown);
             request.setAttribute("mapJson", view.mapJson);
+            request.getRequestDispatcher(VIEW).forward(request, response);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load seat status, staffId=" + staffId, e);
-            request.setAttribute("loadError", ERROR_GENERIC);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new ServletException(e);
         }
-        request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
     private static String timeText(StaffAssignment e) {

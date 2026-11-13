@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
-/**
- * Sinh ảnh QR (PNG) tại server bằng ZXing; nội dung QR của vé điện tử là
- * ticket_code.
- */
+/** Sinh ảnh QR (PNG) tại server bằng ZXing; nội dung QR của vé điện tử là ticket_code. */
 public final class QrCodes {
 
     static {

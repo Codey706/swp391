@@ -17,9 +17,9 @@ import utils.EmailService;
 import utils.ValidationUtils;
 
 /**
- * UC-34: Admin tạo tài khoản Organizer / Staff. Hệ thống sinh mật khẩu tạm, gửi
- * email cho người dùng và hiển thị một lần cho Admin; người dùng bắt buộc đổi
- * mật khẩu ở lần đăng nhập đầu (Users.must_change_password).
+ * UC-34: Admin tạo tài khoản Organizer / Staff.
+ * Hệ thống sinh mật khẩu tạm, gửi email cho người dùng và hiển thị một lần cho Admin;
+ * người dùng bắt buộc đổi mật khẩu ở lần đăng nhập đầu (Users.must_change_password).
  */
 @WebServlet("/admin/user-create")
 public class UserCreateController extends HttpServlet {
@@ -43,7 +43,6 @@ public class UserCreateController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         if (!CsrfUtils.isValid(request)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -107,14 +106,11 @@ public class UserCreateController extends HttpServlet {
             request.getSession().setAttribute("createdTempPassword", tempPassword);
             response.sendRedirect(request.getContextPath() + "/admin/user-detail?id=" + created.getUserId());
         } catch (SQLException e) {
-            throw new ServletException("Cannot create user account", e);
+            throw new ServletException(e);
         }
     }
 
-    /**
-     * 12 ký tự, luôn có chữ hoa, chữ thường, số và ký tự đặc biệt (thỏa
-     * isStrongPassword).
-     */
+    /** 12 ký tự, luôn có chữ hoa, chữ thường, số và ký tự đặc biệt (thỏa isStrongPassword). */
     static String generateTempPassword() {
         String all = UPPER + LOWER + DIGITS + SPECIAL;
         char[] chars = new char[12];

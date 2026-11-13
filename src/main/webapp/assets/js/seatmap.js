@@ -378,7 +378,7 @@
         select.innerHTML = '';
         var blank = document.createElement('option');
         blank.value = '';
-        blank.textContent = '— Chọn hạng vé —';
+        blank.textContent = '- Chọn hạng vé -';
         select.appendChild(blank);
         tickets.forEach(function (t) {
             var o = document.createElement('option');
@@ -1267,7 +1267,7 @@
             }
         } else if (sum) {
             var general = document.getElementById('ticketSummary');
-            sum.textContent = general ? general.textContent : '—';
+            sum.textContent = general ? general.textContent : '-';
         }
     }
 

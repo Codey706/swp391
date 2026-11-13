@@ -7,7 +7,6 @@ package utils;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,50 +52,41 @@ public final class VnPayUtil {
     private static String hmacSHA512(String key, String data) {
         try {
             Mac hmac = Mac.getInstance("HmacSHA512");
-            SecretKeySpec secretKey = new SecretKeySpec(
-                    key.getBytes(StandardCharsets.UTF_8),
-                    "HmacSHA512"
-            );
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
             hmac.init(secretKey);
 
-            byte[] bytes = hmac.doFinal(
-                    data.getBytes(StandardCharsets.UTF_8)
-            );
+            byte[] bytes = hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
 
             StringBuilder hex = new StringBuilder();
             for (byte b : bytes) {
                 hex.append(String.format("%02x", b & 0xff));
             }
             return hex.toString();
-
         } catch (Exception e) {
-            throw new IllegalStateException(
-                    "Lỗi VNPay: " + e.getMessage()
-            );
+            throw new IllegalStateException("Lỗi VNPay: " + e.getMessage());
         }
     }
 
-    public static String createPaymentUrl(Map<String, String> params) {
-        String tmnCode = VnPayConfig.getTmnCode();
-        String hashSecret = VnPayConfig.getHashSecret();
+   
+public static String createPaymentUrl(Map<String, String> params) {
+    String tmnCode = VnPayConfig.getTmnCode();
+    String hashSecret = VnPayConfig.getHashSecret();
 
-        if (!tmnCode.equals(params.get("vnp_TmnCode"))) {
-            throw new IllegalStateException(
-                    "vnp_TmnCode không khớp cấu hình VNPay."
-            );
-        }
-
-        Map<String, String> data = new TreeMap<>(params);
-        data.remove("vnp_SecureHash");
-        data.remove("vnp_SecureHashType");
-
-        String hashData = buildQueryString(data);
-        String secureHash = hmacSHA512(hashSecret, hashData);
-
-        return VnPayConfig.PAYMENT_URL
-                + "?" + hashData
-                + "&vnp_SecureHash=" + secureHash;
+    if (!tmnCode.equals(params.get("vnp_TmnCode"))) {
+        throw new IllegalStateException("vnp_TmnCode không khớp cấu hình VNPay.");
     }
+
+    Map<String, String> data = new TreeMap<>(params);
+    data.remove("vnp_SecureHash");
+    data.remove("vnp_SecureHashType");
+
+    String hashData = buildQueryString(data);
+    String secureHash = hmacSHA512(hashSecret, hashData);
+
+    return VnPayConfig.PAYMENT_URL
+            + "?" + hashData
+            + "&vnp_SecureHash=" + secureHash;
+}
 
     public static boolean verifySignature(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
@@ -109,10 +99,7 @@ public final class VnPayUtil {
         data.remove("vnp_SecureHash");
         data.remove("vnp_SecureHashType");
 
-        String expectedHash = hmacSHA512(
-                VnPayConfig.getHashSecret(),
-                buildQueryString(data)
-        );
+        String expectedHash = hmacSHA512(VnPayConfig.getHashSecret(), buildQueryString(data));
 
         return MessageDigest.isEqual(
                 expectedHash.toLowerCase().getBytes(StandardCharsets.UTF_8),
@@ -120,9 +107,7 @@ public final class VnPayUtil {
         );
     }
 
-    /**
-     * Lấy các tham số VNPay gửi về (Return URL / IPN), mỗi khóa một giá trị.
-     */
+    /** Lấy các tham số VNPay gửi về (Return URL / IPN), mỗi khóa một giá trị. */
     public static Map<String, String> paramsFrom(jakarta.servlet.http.HttpServletRequest request) {
         Map<String, String> params = new TreeMap<>();
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
@@ -134,9 +119,7 @@ public final class VnPayUtil {
         return params;
     }
 
-    /**
-     * vnp_Amount (VND x 100) -> VND; null nếu sai định dạng.
-     */
+    /** vnp_Amount (VND x 100) -> VND; null nếu sai định dạng. */
     public static java.math.BigDecimal parseAmount(String vnpAmount) {
         if (vnpAmount == null || !vnpAmount.matches("[0-9]{1,18}")) {
             return null;
@@ -144,7 +127,4 @@ public final class VnPayUtil {
         return new java.math.BigDecimal(vnpAmount).movePointLeft(2);
     }
 
-    public static String createDateNow() {
-        return LocalDateTime.now().format(DATE_FORMAT);
-    }
 }

@@ -1,19 +1,25 @@
 package utils;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import com.google.gson.JsonParser;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class GoogleUtils {
+public final class GoogleUtils {
 
-    
-    // Ghi đè bằng biến môi trường LTM_GOOGLE_CLIENT_ID; mặc định là Client ID dùng chung của nhóm
+    private static final Logger LOGGER = Logger.getLogger(GoogleUtils.class.getName());
+
+    /** Ghi đè bằng biến môi trường LTM_GOOGLE_CLIENT_ID; mặc định là Client ID dùng chung của nhóm. */
     public static final String GOOGLE_CLIENT_ID = clientId();
+
+    private GoogleUtils() {
+    }
 
     private static String clientId() {
         String value = System.getenv("LTM_GOOGLE_CLIENT_ID");
@@ -22,61 +28,55 @@ public class GoogleUtils {
                 : value.trim();
     }
 
+    /** Xác minh ID token với Google; null nếu token sai, hết hạn hoặc không cấp cho ứng dụng này. */
     public static GoogleProfile verifyToken(String credential) {
         try {
-            String urlString = "https://oauth2.googleapis.com/tokeninfo?id_token=" + credential;
-            URL url = new URL(urlString);
+            URL url = new URL("https://oauth2.googleapis.com/tokeninfo?id_token="
+                    + URLEncoder.encode(credential, StandardCharsets.UTF_8));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
             conn.setConnectTimeout(5000);
             conn.setReadTimeout(5000);
-
-            int status = conn.getResponseCode();
-            System.out.println("[GoogleUtils] tokeninfo HTTP status: " + status);
-
-           
-            BufferedReader reader;
-            if (status == 200) {
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-            } else {
-                reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8));
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                LOGGER.warning("Google tokeninfo rejected token, HTTP " + conn.getResponseCode());
+                return null;
             }
-            String body = reader.lines().collect(Collectors.joining());
-            reader.close();
-
-            if (status == 200) {
-                JsonObject json = new Gson().fromJson(body, JsonObject.class);
-
-               
-                String aud = json.has("aud") ? json.get("aud").getAsString() : "";
-                System.out.println("[GoogleUtils] aud from token: " + aud);
-                System.out.println("[GoogleUtils] expected client_id: " + GOOGLE_CLIENT_ID);
-
-               
-                if (aud.equals(GOOGLE_CLIENT_ID)) {
-                    GoogleProfile profile = new GoogleProfile();
-                    profile.setEmail(json.has("email") ? json.get("email").getAsString() : null);
-                    profile.setName(json.has("name") ? json.get("name").getAsString() : "Google User");
-                    System.out.println("[GoogleUtils] Verified OK - email: " + profile.getEmail());
-                    return profile;
-                } else {
-                    System.out.println("[GoogleUtils] aud MISMATCH - token rejected");
-                }
+            JsonObject json;
+            try (InputStream in = conn.getInputStream()) {
+                json = JsonParser.parseString(new String(in.readAllBytes(), StandardCharsets.UTF_8)).getAsJsonObject();
             }
-        } catch (Exception e) {
-            System.out.println("[GoogleUtils] Exception: " + e.getMessage());
-            e.printStackTrace();
+            if (!json.has("aud") || !GOOGLE_CLIENT_ID.equals(json.get("aud").getAsString())) {
+                LOGGER.warning("Google token audience mismatch");
+                return null;
+            }
+            GoogleProfile profile = new GoogleProfile();
+            profile.setEmail(json.has("email") ? json.get("email").getAsString() : null);
+            profile.setName(json.has("name") ? json.get("name").getAsString() : "Google User");
+            return profile;
+        } catch (IOException | RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Cannot verify Google token", e);
+            return null;
         }
-        return null;
     }
 
     public static class GoogleProfile {
+
         private String email;
         private String name;
 
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

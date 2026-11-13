@@ -65,7 +65,7 @@ public class OrganizerKycController extends HttpServlet {
             CsrfUtils.expose(request);
             request.getRequestDispatcher(VIEW).forward(request, response);
         } catch (SQLException e) {
-            throw new ServletException("Cannot load organizer KYC", e);
+            throw new ServletException(e);
         }
     }
 
@@ -115,7 +115,7 @@ public class OrganizerKycController extends HttpServlet {
             request.getSession().setAttribute("kycMessage", message);
             response.sendRedirect(request.getContextPath() + "/admin/organizer-kyc?userId=" + userId);
         } catch (SQLException e) {
-            throw new ServletException("Cannot update organizer KYC", e);
+            throw new ServletException(e);
         }
     }
 

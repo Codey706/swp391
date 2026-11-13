@@ -53,21 +53,13 @@ public final class Constants {
     public static final int BOOKING_PAGE_SIZE = 10;
     public static final int BOOKING_KEYWORD_MAX_LENGTH = 50;
 
-    // Booking: Select Event
-    public static final int MAX_TICKETS_PER_ORDER = 10;
-    public static final String SESSION_BOOKING_SELECTION = "bookingSelection";
-    public static final String BOOKING_CHECKOUT_URL = "/booking/checkout";
-
     // Manage My Organizer Profile (khớp Users: full_name NVARCHAR(100), email VARCHAR(255), address NVARCHAR(255))
-    public static final String SESSION_ORGANIZER_PROFILE_CSRF = "organizerProfileCsrf";
-    public static final String SESSION_ORGANIZER_PROFILE_SUCCESS = "organizerProfileSuccess";
     public static final int PROFILE_FULL_NAME_MIN_LENGTH = 2;
     public static final int PROFILE_FULL_NAME_MAX_LENGTH = 100;
     public static final int PROFILE_EMAIL_MAX_LENGTH = 255;
     public static final int PROFILE_ADDRESS_MAX_LENGTH = 255;
 
     // Seat map designer (Organizer)
-    public static final String SESSION_SEATMAP_CSRF = "seatMapCsrf";
     public static final int SEATMAP_CANVAS_WIDTH = 1200;
     public static final int SEATMAP_CANVAS_HEIGHT = 800;
     public static final int SEATMAP_MAX_ZONES = 40;
@@ -78,8 +70,6 @@ public final class Constants {
 
     // Manage My Staff Profile (Users: full_name NVARCHAR(100), email VARCHAR(255), address NVARCHAR(255))
     public static final String ROLE_STAFF = "Staff";
-    public static final String SESSION_STAFF_PROFILE_CSRF = "staffProfileCsrf";
-    public static final String SESSION_STAFF_PROFILE_SUCCESS = "staffProfileSuccess";
     public static final String EVENT_STAFF_ACTIVE = "ACTIVE";
     public static final int STAFF_EVENT_PAGE_SIZE = 5;
     public static final String TICKET_CANCELLED = "Cancelled";
@@ -90,9 +80,7 @@ public final class Constants {
     public static final int PROFILE_SUMMARY_MAX_LENGTH = 300;
     public static final int PROFILE_LEGAL_REP_MIN_LENGTH = 2;
     public static final int PROFILE_LEGAL_REP_MAX_LENGTH = 150;
-    public static final int PROFILE_URL_MAX_LENGTH = 500;
-    // Kích thước hiển thị (%) của ảnh bìa / logo trong khung; 100 = mặc định. Khớp data-min/data-max trong profile.jsp
-    public static final int PROFILE_SCALE_DEFAULT = 100;
+    // Kích thước hiển thị (%) của ảnh bìa / logo trong khung
     public static final int PROFILE_COVER_SCALE_MIN = 100;
     public static final int PROFILE_COVER_SCALE_MAX = 200;
     public static final int PROFILE_LOGO_SCALE_MIN = 50;
@@ -133,9 +121,6 @@ public final class Constants {
     public static final double STANDING_NEAR_FULL_RATIO = 0.8;           // khu đứng "Gần đầy" khi số người đã vào >= 80% sức chứa
 
     // Staff - Check-in vé (Tickets.ticket_code VARCHAR(100))
-    public static final String SESSION_STAFF_CHECKIN_CSRF = "staffCheckInCsrf";
-    public static final String SESSION_STAFF_CHECKIN_RESULT = "staffCheckInResult";
     public static final int TICKET_CODE_MAX_LENGTH = 100;
     public static final int STAFF_CHECKIN_RECENT = 10;                   // số lượt check-in gần nhất hiển thị
-
 }

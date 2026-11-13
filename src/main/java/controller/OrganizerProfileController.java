@@ -10,6 +10,9 @@ import model.OrganizerDocument;
 import model.OrganizerProfile;
 import model.User;
 import utils.Constants;
+import utils.CsrfUtils;
+import utils.DBContext;
+import utils.SessionUtils;
 import utils.PrivateDocuments;
 import utils.ValidationUtils;
 
@@ -19,30 +22,24 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * UC-20: Manage My Organizer Profile. GET /organizer/profile : xem hồ sơ của
@@ -58,17 +55,9 @@ import java.util.logging.Logger;
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 16 * 1024 * 1024)
 public class OrganizerProfileController extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(OrganizerProfileController.class.getName());
-
     private static final String PROFILE_VIEW = "/WEB-INF/views/organizer/profile.jsp";
     private static final String PATH_PROFILE = "/organizer/profile";
-    private static final String PATH_LOGIN = "/Auth?action=login";
 
-    // Mã lỗi SQL Server khi vi phạm UNIQUE constraint / unique index
-    private static final int SQL_ERROR_UNIQUE_CONSTRAINT = 2627;
-    private static final int SQL_ERROR_UNIQUE_INDEX = 2601;
-
-    private static final String ERROR_GENERIC = "Hệ thống đang gặp sự cố. Vui lòng thử lại sau.";
     private static final String ERROR_CHECK_FIELDS = "Vui lòng kiểm tra lại các thông tin được đánh dấu.";
 
     private static final List<String> IMAGE_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "webp");
@@ -88,26 +77,18 @@ public class OrganizerProfileController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-
-        User organizer = loadAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
-
-        if (request.getServletPath().endsWith("/document")) {
-            serveDocument(request, response, organizer);
-            return;
-        }
-
-        moveFlashMessage(request);
         try {
+            User organizer = loadOrganizer(request);
+            if (request.getServletPath().endsWith("/document")) {
+                serveDocument(request, response, organizer);
+                return;
+            }
+            SessionUtils.moveFlash(request, "successMessage");
             OrganizerProfile saved = profileDAO.getProfile(organizer.getUserId());
             Set<Integer> selected = profileDAO.getCategoryIds(organizer.getUserId());
             showProfile(request, response, organizer, organizer, saved, saved, selected, new LinkedHashMap<>());
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load organizer profile, userId=" + organizer.getUserId(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);
+            throw new ServletException(e);
         }
     }
 
@@ -115,36 +96,30 @@ public class OrganizerProfileController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-
-        User organizer = loadAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
-
-        OrganizerProfile saved;
-        Set<Integer> savedCategoryIds;
-        List<Category> activeCategories;
         try {
-            saved = profileDAO.getProfile(organizer.getUserId());
-            savedCategoryIds = profileDAO.getCategoryIds(organizer.getUserId());
-            activeCategories = loadActiveCategories();
+            handlePost(request, response);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load organizer profile, userId=" + organizer.getUserId(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);
-            return;
+            throw new ServletException(e);
         }
+    }
+
+    private void handlePost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+        User organizer = loadOrganizer(request);
+        OrganizerProfile saved = profileDAO.getProfile(organizer.getUserId());
+        Set<Integer> savedCategoryIds = profileDAO.getCategoryIds(organizer.getUserId());
+        List<Category> activeCategories = loadActiveCategories();
 
         // Đọc form multipart; vượt giới hạn dung lượng thì container ném IllegalStateException
-        String csrf;
+        boolean validCsrf;
         try {
-            csrf = request.getParameter("csrfToken");
+            validCsrf = CsrfUtils.isValid(request);
         } catch (IllegalStateException e) {
             request.setAttribute("errorMessage", "Tổng dung lượng tệp tải lên vượt quá giới hạn (mỗi tệp tối đa 5MB).");
             showProfile(request, response, organizer, organizer, saved, saved, savedCategoryIds, new LinkedHashMap<>());
             return;
         }
-        if (!isValidCsrfToken(request, csrf)) {
+        if (!validCsrf) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -162,7 +137,7 @@ public class OrganizerProfileController extends HttpServlet {
                 activeCategories, logoPart, coverPart, documentPart, docType, saved);
 
         if (!errors.isEmpty()) {
-            request.setAttribute("errorMessage", errors.containsKey("system") ? ERROR_GENERIC : ERROR_CHECK_FIELDS);
+            request.setAttribute("errorMessage", ERROR_CHECK_FIELDS);
             showProfile(request, response, organizer, submitted, saved, submittedProfile, submittedCategoryIds, errors);
             return;
         }
@@ -188,7 +163,7 @@ public class OrganizerProfileController extends HttpServlet {
                 newDocumentFile = saveDocument(documentPart, organizer.getUserId());
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Cannot store uploaded files, userId=" + organizer.getUserId(), e);
+            log("Cannot store uploaded files, userId=" + organizer.getUserId(), e);
             deleteQuietly(newLogo, newCover, newDocumentFile);
             restoreForm(submittedProfile, saved);
             request.setAttribute("errorMessage", "Không thể lưu tệp tải lên. Vui lòng thử lại sau.");
@@ -206,19 +181,17 @@ public class OrganizerProfileController extends HttpServlet {
             }
         } catch (SQLException e) {
             deleteQuietly(newLogo, newCover, newDocumentFile);
-            restoreForm(submittedProfile, saved);
-            if (isDuplicateKeyError(e)) {
-                // Có người khác vừa dùng giá trị này giữa lúc kiểm tra và lúc lưu
-                if (e.getMessage() != null && e.getMessage().contains("tax_code")) {
-                    errors.put("taxCode", "Mã số thuế đã được sử dụng bởi tổ chức khác.");
-                } else {
-                    errors.put("email", "Email hoặc số điện thoại đã được sử dụng bởi tài khoản khác.");
-                }
-                request.setAttribute("errorMessage", ERROR_CHECK_FIELDS);
-            } else {
-                LOGGER.log(Level.SEVERE, "Cannot update organizer profile, userId=" + organizer.getUserId(), e);
-                request.setAttribute("errorMessage", ERROR_GENERIC);
+            if (!DBContext.isDuplicateKey(e)) {
+                throw e;
             }
+            // Có người khác vừa dùng giá trị này giữa lúc kiểm tra và lúc lưu
+            restoreForm(submittedProfile, saved);
+            if (e.getMessage() != null && e.getMessage().contains("tax_code")) {
+                errors.put("taxCode", "Mã số thuế đã được sử dụng bởi tổ chức khác.");
+            } else {
+                errors.put("email", "Email hoặc số điện thoại đã được sử dụng bởi tài khoản khác.");
+            }
+            request.setAttribute("errorMessage", ERROR_CHECK_FIELDS);
             showProfile(request, response, organizer, submitted, saved, submittedProfile, submittedCategoryIds, errors);
             return;
         }
@@ -234,7 +207,7 @@ public class OrganizerProfileController extends HttpServlet {
             try {
                 profileDAO.insertDocument(document);
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Cannot save organizer document, userId=" + organizer.getUserId(), e);
+                log("Cannot save organizer document, userId=" + organizer.getUserId(), e);
                 deleteQuietly(null, null, newDocumentFile);
                 successMessage = "Hồ sơ đã được lưu, nhưng không thể lưu tài liệu pháp lý. Vui lòng tải lên lại.";
             }
@@ -251,72 +224,13 @@ public class OrganizerProfileController extends HttpServlet {
         refreshSessionUser(request, submitted);
 
         // Post/Redirect/Get: tránh gửi lại form khi người dùng F5
-        request.getSession().setAttribute(Constants.SESSION_ORGANIZER_PROFILE_SUCCESS, successMessage);
+        request.getSession().setAttribute("successMessage", successMessage);
         response.sendRedirect(request.getContextPath() + PATH_PROFILE);
     }
 
-    // ------------------------------------------------------------------ Xác thực / phân quyền
-    /**
-     * Yêu cầu đã đăng nhập, đúng role Organizer và tài khoản còn ACTIVE. Dữ
-     * liệu luôn được đọc lại từ database bằng userId trong session.
-     *
-     * @return hồ sơ Organizer từ database, hoặc null nếu đã redirect/gửi lỗi.
-     */
-    private User loadAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        HttpSession session = request.getSession(false);
-        Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
-
-        if (!(sessionUser instanceof Auth)) {
-            response.sendRedirect(request.getContextPath() + PATH_LOGIN);
-            return null;
-        }
-
-        Auth authUser = (Auth) sessionUser;
-        if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(authUser.getRole())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return null;
-        }
-
-        try {
-            User organizer = userDAO.getUserById(authUser.getUserId());
-            if (organizer == null
-                    || !Constants.ROLE_ORGANIZER.equalsIgnoreCase(organizer.getRole())
-                    || !Constants.STATUS_ACTIVE.equalsIgnoreCase(organizer.getStatus())) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return null;
-            }
-            return organizer;
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load organizer profile, userId=" + authUser.getUserId(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);
-            return null;
-        }
-    }
-
-    // ------------------------------------------------------------------ CSRF
-    private String getOrCreateCsrfToken(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Object token = session.getAttribute(Constants.SESSION_ORGANIZER_PROFILE_CSRF);
-        if (token instanceof String) {
-            return (String) token;
-        }
-        byte[] randomBytes = new byte[32];
-        secureRandom.nextBytes(randomBytes);
-        String newToken = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-        session.setAttribute(Constants.SESSION_ORGANIZER_PROFILE_CSRF, newToken);
-        return newToken;
-    }
-
-    private boolean isValidCsrfToken(HttpServletRequest request, String actual) {
-        HttpSession session = request.getSession(false);
-        Object expected = session == null ? null : session.getAttribute(Constants.SESSION_ORGANIZER_PROFILE_CSRF);
-        if (!(expected instanceof String) || actual == null) {
-            return false;
-        }
-        return MessageDigest.isEqual(
-                ((String) expected).getBytes(StandardCharsets.UTF_8),
-                actual.getBytes(StandardCharsets.UTF_8));
+    /** Hồ sơ Users của Organizer đang đăng nhập, luôn đọc lại từ database (AuthFilter đã kiểm tra role + ACTIVE). */
+    private User loadOrganizer(HttpServletRequest request) throws SQLException {
+        return userDAO.getUserById(SessionUtils.currentUser(request).getUserId());
     }
 
     // ------------------------------------------------------------------ Đọc form
@@ -401,7 +315,7 @@ public class OrganizerProfileController extends HttpServlet {
      */
     private Map<String, String> validate(User user, OrganizerProfile p, Set<Integer> categoryIds,
             List<Category> activeCategories, Part logo, Part cover, Part document, String docType,
-            OrganizerProfile saved) {
+            OrganizerProfile saved) throws SQLException {
         Map<String, String> errors = new LinkedHashMap<>();
 
         // Tên tổ chức / thương hiệu (Users.full_name)
@@ -504,20 +418,15 @@ public class OrganizerProfileController extends HttpServlet {
         }
 
         // Trùng email / số điện thoại / MST với tài khoản khác - chỉ kiểm tra khi định dạng đã hợp lệ
-        try {
-            if (!errors.containsKey("email") && userDAO.existsEmailOfOtherUser(user.getEmail(), user.getUserId())) {
-                errors.put("email", "Email đã được sử dụng bởi tài khoản khác.");
-            }
-            if (!errors.containsKey("phone") && userDAO.existsPhoneOfOtherUser(user.getPhone(), user.getUserId())) {
-                errors.put("phone", "Số điện thoại đã được sử dụng bởi tài khoản khác.");
-            }
-            if (!saved.isVerified() && !errors.containsKey("taxCode") && p.getTaxCode() != null
-                    && profileDAO.existsTaxCodeOfOther(p.getTaxCode(), user.getUserId())) {
-                errors.put("taxCode", "Mã số thuế đã được sử dụng bởi tổ chức khác.");
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot check duplicate profile data, userId=" + user.getUserId(), e);
-            errors.put("system", ERROR_GENERIC);
+        if (!errors.containsKey("email") && userDAO.existsEmailOfOtherUser(user.getEmail(), user.getUserId())) {
+            errors.put("email", "Email đã được sử dụng bởi tài khoản khác.");
+        }
+        if (!errors.containsKey("phone") && userDAO.existsPhoneOfOtherUser(user.getPhone(), user.getUserId())) {
+            errors.put("phone", "Số điện thoại đã được sử dụng bởi tài khoản khác.");
+        }
+        if (!saved.isVerified() && !errors.containsKey("taxCode") && p.getTaxCode() != null
+                && profileDAO.existsTaxCodeOfOther(p.getTaxCode(), user.getUserId())) {
+            errors.put("taxCode", "Mã số thuế đã được sử dụng bởi tổ chức khác.");
         }
 
         return errors;
@@ -546,10 +455,6 @@ public class OrganizerProfileController extends HttpServlet {
         }
     }
 
-    private boolean isDuplicateKeyError(SQLException e) {
-        return e.getErrorCode() == SQL_ERROR_UNIQUE_CONSTRAINT || e.getErrorCode() == SQL_ERROR_UNIQUE_INDEX;
-    }
-
     // ------------------------------------------------------------------ Hiển thị
     /**
      * @param organizer hồ sơ Users đã lưu trong database
@@ -562,34 +467,29 @@ public class OrganizerProfileController extends HttpServlet {
      */
     private void showProfile(HttpServletRequest request, HttpServletResponse response,
             User organizer, User form, OrganizerProfile saved, OrganizerProfile profileForm,
-            Set<Integer> selectedCategoryIds, Map<String, String> errors) throws ServletException, IOException {
-        try {
-            List<OrganizerDocument> documents = profileDAO.getDocuments(organizer.getUserId());
-            Set<Integer> savedCategoryIds = profileDAO.getCategoryIds(organizer.getUserId());
-            Map<String, BigDecimal> revenue = profileDAO.getRevenueBreakdown(organizer.getUserId());
-            double[] rating = profileDAO.getRatingSummary(organizer.getUserId());
+            Set<Integer> selectedCategoryIds, Map<String, String> errors)
+            throws ServletException, IOException, SQLException {
+        List<OrganizerDocument> documents = profileDAO.getDocuments(organizer.getUserId());
+        Set<Integer> savedCategoryIds = profileDAO.getCategoryIds(organizer.getUserId());
+        Map<String, BigDecimal> revenue = profileDAO.getRevenueBreakdown(organizer.getUserId());
+        double[] rating = profileDAO.getRatingSummary(organizer.getUserId());
 
-            request.setAttribute("organizer", organizer);
-            request.setAttribute("form", form);
-            request.setAttribute("errors", errors);
-            request.setAttribute("profile", saved);
-            request.setAttribute("profileForm", profileForm);
-            request.setAttribute("categories", loadActiveCategories());
-            request.setAttribute("selectedCategoryIds", selectedCategoryIds);
-            request.setAttribute("documents", documents);
-            request.setAttribute("approvedDocTypes", countApprovedRequiredDocTypes(documents));
-            request.setAttribute("revenueSettled", revenue.get("settled"));
-            request.setAttribute("revenueEscrow", revenue.get("escrow"));
-            request.setAttribute("ratingAvg", rating[0]);
-            request.setAttribute("ratingCount", (int) rating[1]);
-            request.setAttribute("csrfToken", getOrCreateCsrfToken(request));
-            applyChecklist(request, organizer, saved, savedCategoryIds, documents);
-            loadEventStatistics(request, organizer.getUserId());
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load profile page data, userId=" + organizer.getUserId(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);
-            return;
-        }
+        request.setAttribute("organizer", organizer);
+        request.setAttribute("form", form);
+        request.setAttribute("errors", errors);
+        request.setAttribute("profile", saved);
+        request.setAttribute("profileForm", profileForm);
+        request.setAttribute("categories", loadActiveCategories());
+        request.setAttribute("selectedCategoryIds", selectedCategoryIds);
+        request.setAttribute("documents", documents);
+        request.setAttribute("approvedDocTypes", countApprovedRequiredDocTypes(documents));
+        request.setAttribute("revenueSettled", revenue.get("settled"));
+        request.setAttribute("revenueEscrow", revenue.get("escrow"));
+        request.setAttribute("ratingAvg", rating[0]);
+        request.setAttribute("ratingCount", (int) rating[1]);
+        CsrfUtils.expose(request);
+        applyChecklist(request, organizer, saved, savedCategoryIds, documents);
+        loadEventStatistics(request, organizer.getUserId());
         request.getRequestDispatcher(PROFILE_VIEW).forward(request, response);
     }
 
@@ -663,7 +563,7 @@ public class OrganizerProfileController extends HttpServlet {
     /**
      * Số liệu thật của Organizer, dùng lại các hàm có sẵn trong EventDAO.
      */
-    private void loadEventStatistics(HttpServletRequest request, int organizerId) {
+    private void loadEventStatistics(HttpServletRequest request, int organizerId) throws SQLException {
         Map<String, Integer> statusCounts = eventDAO.countEventsByStatus(organizerId);
         int totalEvents = 0;
         for (Integer count : statusCounts.values()) {
@@ -672,13 +572,10 @@ public class OrganizerProfileController extends HttpServlet {
         Integer activeEvents = statusCounts.get(Constants.EVENT_ACTIVE);
 
         Map<String, Number> sales = eventDAO.getOrganizerSalesSummary(organizerId);
-        int ticketSold = sales.getOrDefault("ticketSold", 0).intValue();
-        int ticketTotal = sales.getOrDefault("ticketTotal", 0).intValue();
-
         request.setAttribute("totalEvents", totalEvents);
         request.setAttribute("activeEvents", activeEvents == null ? 0 : activeEvents);
-        request.setAttribute("ticketSold", ticketSold);
-        request.setAttribute("ticketTotal", ticketTotal);
+        request.setAttribute("ticketSold", sales.get("ticketSold"));
+        request.setAttribute("ticketTotal", sales.get("ticketTotal"));
     }
 
     // ------------------------------------------------------------------ Tệp tải lên
@@ -730,16 +627,12 @@ public class OrganizerProfileController extends HttpServlet {
      * @return tên tệp đã lưu (không phải đường dẫn)
      */
     private String saveDocument(Part part, int userId) throws IOException {
-        Path directory = getPrivateDocumentDir();
+        Path directory = PrivateDocuments.directory();
         Files.createDirectories(directory);
         String fileName = "doc-" + userId + "-" + System.currentTimeMillis() + "-"
                 + Long.toHexString(secureRandom.nextLong()) + "." + getExtension(part.getSubmittedFileName());
         part.write(directory.resolve(fileName).toString());
         return fileName;
-    }
-
-    private Path getPrivateDocumentDir() {
-        return PrivateDocuments.directory();
     }
 
     /**
@@ -754,14 +647,14 @@ public class OrganizerProfileController extends HttpServlet {
                 deletePublicImage(coverUrl);
             }
             if (documentFile != null) {
-                Path directory = getPrivateDocumentDir();
+                Path directory = PrivateDocuments.directory();
                 Path file = directory.resolve(Paths.get(documentFile).getFileName().toString()).normalize();
                 if (file.startsWith(directory)) {
                     Files.deleteIfExists(file);
                 }
             }
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Cannot clean up uploaded file", e);
+            log("Cannot clean up uploaded file", e);
         }
     }
 
@@ -773,7 +666,7 @@ public class OrganizerProfileController extends HttpServlet {
             try {
                 deletePublicImage(relativePath);
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Cannot delete old image", e);
+                log("Cannot delete old image", e);
             }
         }
     }
@@ -801,19 +694,14 @@ public class OrganizerProfileController extends HttpServlet {
      * liệu.
      */
     private void serveDocument(HttpServletRequest request, HttpServletResponse response, User organizer)
-            throws IOException {
+            throws IOException, SQLException {
         int documentId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), -1);
-        try {
-            OrganizerDocument document = documentId > 0 ? profileDAO.getDocument(documentId, organizer.getUserId()) : null;
-            if (document == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-            PrivateDocuments.serve(response, document.getFileName());
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load organizer document, userId=" + organizer.getUserId(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);
+        OrganizerDocument document = documentId > 0 ? profileDAO.getDocument(documentId, organizer.getUserId()) : null;
+        if (document == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
+        PrivateDocuments.serve(response, document.getFileName());
     }
 
     // ------------------------------------------------------------------ Tiện ích
@@ -822,28 +710,11 @@ public class OrganizerProfileController extends HttpServlet {
      * đúng ngay sau khi lưu. Không đụng tới role, status, password.
      */
     private void refreshSessionUser(HttpServletRequest request, User updated) {
-        HttpSession session = request.getSession(false);
-        Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
-        if (sessionUser instanceof Auth) {
-            Auth authUser = (Auth) sessionUser;
-            authUser.setFullName(updated.getFullName());
-            authUser.setEmail(updated.getEmail());
-            authUser.setPhone(updated.getPhone());
-            authUser.setAddress(updated.getAddress());
-        }
-    }
-
-    // Chuyển thông báo flash trong session sang request để JSP hiển thị một lần
-    private void moveFlashMessage(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return;
-        }
-        Object message = session.getAttribute(Constants.SESSION_ORGANIZER_PROFILE_SUCCESS);
-        if (message != null) {
-            request.setAttribute("successMessage", message);
-            session.removeAttribute(Constants.SESSION_ORGANIZER_PROFILE_SUCCESS);
-        }
+        Auth authUser = SessionUtils.currentUser(request);
+        authUser.setFullName(updated.getFullName());
+        authUser.setEmail(updated.getEmail());
+        authUser.setPhone(updated.getPhone());
+        authUser.setAddress(updated.getAddress());
     }
 
     private static String trimToEmpty(String value) {

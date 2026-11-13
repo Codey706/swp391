@@ -1,5 +1,6 @@
 package controller;
 
+import utils.SessionUtils;
 import dao.TicketDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,9 +14,8 @@ import utils.Constants;
 import utils.QrCodes;
 
 /**
- * UC-18: ảnh QR (PNG) của một vé, sinh tại server. GET
- * /customer/ticket-qr?code=... Chỉ trả về cho chủ vé (đơn Paid); mã vé không
- * rời khỏi hệ thống như khi dùng dịch vụ QR bên ngoài.
+ * UC-18: ảnh QR (PNG) của một vé, sinh tại server. GET /customer/ticket-qr?code=...
+ * Chỉ trả về cho chủ vé (đơn Paid); mã vé không rời khỏi hệ thống như khi dùng dịch vụ QR bên ngoài.
  */
 @WebServlet("/customer/ticket-qr")
 public class TicketQrController extends HttpServlet {
@@ -26,7 +26,7 @@ public class TicketQrController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String code = request.getParameter("code");
-        Auth customer = (Auth) request.getSession().getAttribute(Constants.SESSION_USER);
+        Auth customer = SessionUtils.currentUser(request);
         if (code == null || code.isBlank() || code.length() > Constants.TICKET_CODE_MAX_LENGTH) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -37,7 +37,7 @@ public class TicketQrController extends HttpServlet {
                 return;
             }
         } catch (SQLException e) {
-            throw new ServletException("Cannot verify ticket owner", e);
+            throw new ServletException(e);
         }
         byte[] png = QrCodes.png(code, 360);
         response.setContentType("image/png");
