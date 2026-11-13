@@ -16,15 +16,15 @@
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="events"/>
@@ -65,7 +65,7 @@
 
             <c:if test="${not empty errors.general}">
                 <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errors.general}"/></span></div>
-            </c:if>
+                    </c:if>
 
             <%-- Banner lưu ý --%>
             <c:choose>

@@ -431,9 +431,19 @@ public class EventDAO {
             params.add("%" + escaped + "%");
         }
         if (status != null && !status.isBlank()) {
-            where.append(" AND e.status = ?");
-            params.add(status.trim());
-        }
+    if ("ENDED".equalsIgnoreCase(status)) {
+        where.append(
+            " AND e.status = 'ACTIVE' AND e.end_time < GETDATE()"
+        );
+    } else if ("ACTIVE".equalsIgnoreCase(status)) {
+        where.append(
+            " AND e.status = 'ACTIVE' AND e.end_time >= GETDATE()"
+        );
+    } else {
+        where.append(" AND e.status = ?");
+        params.add(status.trim());
+    }
+}
         return where.toString();
     }
 

@@ -13,15 +13,15 @@
         <link rel="stylesheet" href="${ctx}/assets/css/seatmap.css">
         <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="events"/>
@@ -55,10 +55,10 @@
 
             <c:if test="${not empty successMessage}">
                 <div class="lt-alert success"><i class="ph ph-check-circle" aria-hidden="true"></i><span><c:out value="${successMessage}"/></span></div>
-            </c:if>
-            <c:if test="${not empty errors.general}">
+                    </c:if>
+                    <c:if test="${not empty errors.general}">
                 <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errors.general}"/></span></div>
-            </c:if>
+                    </c:if>
 
             <%-- Các bước --%>
             <div class="org-card stepper" id="stepper">
@@ -226,14 +226,14 @@
 
                             <c:if test="${not empty errors.tickets}">
                                 <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errors.tickets}"/></span></div>
-                            </c:if>
-                            <c:if test="${not empty seatErrors}">
+                                    </c:if>
+                                    <c:if test="${not empty seatErrors}">
                                 <div class="lt-alert error">
                                     <i class="ph ph-warning-circle" aria-hidden="true"></i>
                                     <ul class="sm-server-errors">
                                         <c:forEach var="msg" items="${seatErrors}"><li><c:out value="${msg}"/></li></c:forEach>
-                                    </ul>
-                                </div>
+                                        </ul>
+                                    </div>
                             </c:if>
                             <div class="lt-alert error" id="seatStepAlert" hidden>
                                 <i class="ph ph-warning-circle" aria-hidden="true"></i><span id="seatStepAlertText"></span>
@@ -328,8 +328,8 @@
                             <div class="note-box">
                                 <span class="ico"><i class="ph ph-shield-check" aria-hidden="true"></i></span>
                                 <div>
-                                    <h3>Sự kiện chỉ được công khai sau khi Admin duyệt</h3>
-                                    <p>Dù chọn cách nào, sự kiện mới chưa bán vé ngay. Sau khi được duyệt, sự kiện sẽ chuyển sang “Đang mở bán”.</p>
+                                    <h3>Sự kiện cần được Admin phê duyệt trước khi mở bán</h3>
+                                    <p>Nếu chọn "Lưu bản nháp", sự kiện sẽ chưa được gửi duyệt. Nếu chọn "Gửi Admin duyệt", sự kiện sẽ chờ xét duyệt và chỉ có thể mở bán sau khi được chấp thuận.</p>
                                 </div>
                             </div>
                         </section>
@@ -441,5 +441,29 @@
         <script src="${ctx}/assets/js/image-cropper.js"></script>
         <script src="${ctx}/assets/js/event.js"></script>
         <script src="${ctx}/assets/js/seatmap.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                ['startTime', 'endTime'].forEach(function (id) {
+                    const input = document.getElementById(id);
+                    if (!input)
+                        return;
+
+                    const wrapper = input.closest('.lt-icon-wrap') || input;
+
+                    wrapper.addEventListener('click', function () {
+                        input.focus();
+
+                        if (typeof input.showPicker === 'function') {
+                            try {
+                                input.showPicker();
+                            } catch (e) {
+                                // Trình duyệt không hỗ trợ mở picker
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
     </body>
 </html>

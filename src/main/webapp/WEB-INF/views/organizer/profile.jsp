@@ -18,15 +18,15 @@
         <link rel="stylesheet" href="${ctx}/assets/css/organizer-profile.css">
         <link rel="stylesheet" href="${ctx}/assets/css/image-cropper.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
     <body class="org-body op-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="profile"/>
@@ -494,7 +494,7 @@
                                 <span class="op-card-tags">
                                     <span class="op-chip is-accent">Nhà tổ chức</span>
                                     <c:if test="${not empty profile.partnerTier}"><span class="op-chip is-dark"><c:out value="${profile.partnerTier}"/></span></c:if>
-                                </span>
+                                    </span>
                                 <c:if test="${profile.kycLevel > 0}">
                                     <span class="op-card-kyc"><i class="ph ph-seal-check" aria-hidden="true"></i>Đã định danh KYC</span>
                                 </c:if>
@@ -509,8 +509,8 @@
                                         <div>
                                             <h3 id="opPvName" data-empty="Tên tổ chức"><c:out value="${form.fullName}"/></h3>
                                             <c:if test="${profile.verified}"><i class="ph ph-seal-check is-ok" aria-hidden="true"></i></c:if>
-                                        </div>
-                                        <small>Trụ sở: <span id="opPvAddress" data-empty="Chưa cập nhật"><c:out value="${empty form.address ? 'Chưa cập nhật' : form.address}"/></span></small>
+                                            </div>
+                                            <small>Trụ sở: <span id="opPvAddress" data-empty="Chưa cập nhật"><c:out value="${empty form.address ? 'Chưa cập nhật' : form.address}"/></span></small>
                                     </div>
                                 </div>
                                 <p class="op-card-summary" id="opPvSummary" data-empty="Chưa có mô tả giới thiệu."><c:out value="${empty profileForm.summary ? 'Chưa có mô tả giới thiệu.' : profileForm.summary}"/></p>
@@ -588,32 +588,32 @@
             <div class="op-modal-dialog">
                 <div class="op-modal-cover">
                     <c:if test="${not empty profile.coverUrl}"><img alt="" src="<c:out value='${ctx}/${profile.coverUrl}'/>"></c:if>
-                    <button type="button" class="op-modal-close" data-close-modal aria-label="Đóng"><i class="ph ph-x" aria-hidden="true"></i></button>
-                </div>
-                <div class="op-modal-body">
-                    <div class="op-modal-id">
-                        <span class="op-modal-logo">
+                        <button type="button" class="op-modal-close" data-close-modal aria-label="Đóng"><i class="ph ph-x" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="op-modal-body">
+                        <div class="op-modal-id">
+                            <span class="op-modal-logo">
                             <c:choose>
                                 <c:when test="${not empty profile.logoUrl}"><img alt="" src="<c:out value='${ctx}/${profile.logoUrl}'/>"></c:when>
                                 <c:otherwise><span><c:out value="${orgInitial}"/></span></c:otherwise>
                             </c:choose>
                         </span>
                         <c:if test="${profile.kycLevel > 0}"><span class="op-chip is-ok-solid">Đã thẩm duyệt KYC</span></c:if>
-                    </div>
-                    <h2 id="opModalTitle"><c:out value="${organizer.fullName}"/></h2>
+                        </div>
+                        <h2 id="opModalTitle"><c:out value="${organizer.fullName}"/></h2>
                     <p class="op-modal-meta">
                         <c:out value="${empty organizer.address ? 'Chưa cập nhật địa chỉ' : organizer.address}"/>
                         <c:if test="${not empty organizer.phone}"> • Hotline: <c:out value="${organizer.phone}"/></c:if>
-                    </p>
+                        </p>
                     <c:if test="${not empty profile.summary}"><p class="op-modal-summary"><c:out value="${profile.summary}"/></p></c:if>
-                    <div class="op-modal-stats">
-                        <div><strong><c:out value="${totalEvents}"/></strong><span>Sự kiện tổ chức</span></div>
+                        <div class="op-modal-stats">
+                            <div><strong><c:out value="${totalEvents}"/></strong><span>Sự kiện tổ chức</span></div>
                         <div><strong><fmt:formatNumber value="${ticketSold}" pattern="#,##0"/></strong><span>Vé phục vụ</span></div>
                         <div>
                             <strong class="is-star"><c:choose>
-                                <c:when test="${ratingCount > 0}"><fmt:formatNumber value="${ratingAvg}" minFractionDigits="1" maxFractionDigits="1"/>★</c:when>
-                                <c:otherwise>-</c:otherwise>
-                            </c:choose></strong>
+                                    <c:when test="${ratingCount > 0}"><fmt:formatNumber value="${ratingAvg}" minFractionDigits="1" maxFractionDigits="1"/>★</c:when>
+                                    <c:otherwise>-</c:otherwise>
+                                </c:choose></strong>
                             <span><c:out value="${ratingCount}"/> Đánh giá</span>
                         </div>
                     </div>

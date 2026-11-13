@@ -9,15 +9,15 @@
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/seatmap.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="events"/>
@@ -58,23 +58,23 @@
 
             <c:if test="${not empty successMessage}">
                 <div class="lt-alert success"><i class="ph ph-check-circle" aria-hidden="true"></i><span><c:out value="${successMessage}"/></span></div>
-            </c:if>
-            <c:if test="${not empty errorMessage}">
+                    </c:if>
+                    <c:if test="${not empty errorMessage}">
                 <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errorMessage}"/></span></div>
-            </c:if>
-            <c:if test="${readOnly}">
+                    </c:if>
+                    <c:if test="${readOnly}">
                 <div class="lt-alert error"><i class="ph ph-lock" aria-hidden="true"></i><span>Chế độ chỉ xem: <c:out value="${lockedReason}"/></span></div>
-            </c:if>
-            <c:if test="${not empty errorList}">
+                    </c:if>
+                    <c:if test="${not empty errorList}">
                 <div class="lt-alert error">
                     <i class="ph ph-warning-circle" aria-hidden="true"></i>
                     <div>
                         <b>Chưa lưu được sơ đồ. Vui lòng kiểm tra:</b>
                         <ul class="sm-server-errors">
                             <c:forEach var="msg" items="${errorList}"><li><c:out value="${msg}"/></li></c:forEach>
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
-                </div>
             </c:if>
 
             <form method="post" action="${ctx}/organizer/event/seatmap" id="seatmap-form" novalidate>
