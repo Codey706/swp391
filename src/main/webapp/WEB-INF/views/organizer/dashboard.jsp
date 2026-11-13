@@ -22,15 +22,15 @@
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <link rel="stylesheet" href="${ctx}/assets/css/organizer-dashboard.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="dashboard"/>
@@ -121,16 +121,6 @@
                         <div class="dash-stat-foot"><fmt:formatNumber value="${orderPending}" pattern="#,##0"/> đơn đang chờ xử lý</div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-xl-3">
-                    <div class="dash-stat">
-                        <div class="dash-stat-top">
-                            <span class="dash-stat-label">Check-in</span>
-                            <span class="dash-stat-icon"><i class="ph ph-scan" aria-hidden="true"></i></span>
-                        </div>
-                        <div class="dash-stat-value"><fmt:formatNumber value="${checkedInTotal}" pattern="#,##0"/></div>
-                        <div class="dash-stat-foot">trên <fmt:formatNumber value="${issuedTotal}" pattern="#,##0"/> vé đã phát hành</div>
-                    </div>
-                </div>
             </section>
 
             <%-- Hàng 1: biểu đồ doanh thu + tình hình bán vé --%>
@@ -210,8 +200,8 @@
                                                         </c:when>
                                                         <c:otherwise>
                                                             <span class="ev-thumb"><i class="ph ph-image" aria-hidden="true"></i></span>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     <div>
                                                         <p class="ev-name"><c:out value="${e.eventName}"/></p>
                                                         <span class="ev-cat"><c:out value="${e.categoryName}"/></span>

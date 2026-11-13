@@ -23,21 +23,36 @@
         <title>Quản lý sự kiện - Light Ticket Organizer Portal</title>
         <jsp:include page="/WEB-INF/views/organizer/_head.jsp"/>
         <style>
-        /* Cột thao tác: tối đa 3 nút mỗi hàng để bảng không tràn ngang trên màn hình laptop */
-        .lt-table .row-actions { flex-wrap: wrap; max-width: calc(36px * 3 + 0.4rem * 2); }
-        .ev-cancel-form { border-radius: 12px; }
-        .ev-cancel-form textarea { border: 1px solid #d4d4d8; border-radius: 8px; padding: 8px; font: inherit; width: 100%; }
-        .ev-cancel-form textarea:focus { outline: none; border-color: #d93a27; box-shadow: 0 0 0 3px rgba(217, 58, 39, .18); }    </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+            /* Cột thao tác: tối đa 3 nút mỗi hàng để bảng không tràn ngang trên màn hình laptop */
+            .lt-table .row-actions {
+                flex-wrap: wrap;
+                max-width: calc(36px * 3 + 0.4rem * 2);
+            }
+            .ev-cancel-form {
+                border-radius: 12px;
+            }
+            .ev-cancel-form textarea {
+                border: 1px solid #d4d4d8;
+                border-radius: 8px;
+                padding: 8px;
+                font: inherit;
+                width: 100%;
+            }
+            .ev-cancel-form textarea:focus {
+                outline: none;
+                border-color: #d93a27;
+                box-shadow: 0 0 0 3px rgba(217, 58, 39, .18);
+            }    </style>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
     <body class="org-body">
         <jsp:include page="/WEB-INF/views/organizer/_header.jsp">
             <jsp:param name="active" value="events"/>
@@ -60,10 +75,10 @@
 
             <c:if test="${not empty successMessage}">
                 <div class="lt-alert success"><i class="ph ph-check-circle" aria-hidden="true"></i><span><c:out value="${successMessage}"/></span></div>
-            </c:if>
-            <c:if test="${not empty errorMessage}">
+                    </c:if>
+                    <c:if test="${not empty errorMessage}">
                 <div class="lt-alert error"><i class="ph ph-warning-circle" aria-hidden="true"></i><span><c:out value="${errorMessage}"/></span></div>
-            </c:if>
+                    </c:if>
 
             <%-- Thẻ thống kê --%>
 
@@ -247,8 +262,8 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <span class="ev-thumb"><i class="ph ph-image" aria-hidden="true"></i></span>
-                                                </c:otherwise>
-                                            </c:choose>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             <div>
                                                 <span class="ev-cat"><c:out value="${e.categoryName}"/></span>
                                                 <p class="ev-name"><c:out value="${e.eventName}"/></p>
@@ -378,7 +393,7 @@
                         <c:set var="joiner" value="${fn:contains(pageBase, '?') ? '&' : '?'}"/>
                         <nav class="pager" aria-label="Phân trang">
                             <a class="${page <= 1 ? 'disabled' : ''}" href="${pageBase}${joiner}page=${page - 1}" aria-label="Trang trước"><i class="ph ph-caret-left" style="font-size:20px" aria-hidden="true"></i></a>
-                            <c:forEach var="i" begin="1" end="${totalPages}">
+                                <c:forEach var="i" begin="1" end="${totalPages}">
                                 <a class="${i == page ? 'active' : ''}" href="${pageBase}${joiner}page=${i}">${i}</a>
                             </c:forEach>
                             <a class="${page >= totalPages ? 'disabled' : ''}" href="${pageBase}${joiner}page=${page + 1}" aria-label="Trang sau"><i class="ph ph-caret-right" style="font-size:20px" aria-hidden="true"></i></a>
@@ -418,19 +433,20 @@
         <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
         <script src="${ctx}/assets/js/event.js"></script>
         <script>
-            (function () {
-                var modal = document.getElementById('cancelEventModal');
-                if (!modal) return;
-                modal.addEventListener('show.bs.modal', function (e) {
-                    var btn = e.relatedTarget;
-                    document.getElementById('cancelEventId').value = btn ? btn.getAttribute('data-event-id') : '';
-                    document.getElementById('cancelEventName').textContent = btn ? btn.getAttribute('data-event-name') : '';
-                    document.getElementById('cancelReason').value = '';
-                });
-                modal.addEventListener('shown.bs.modal', function () {
-                    document.getElementById('cancelReason').focus();
-                });
-            })();
+                        (function () {
+                            var modal = document.getElementById('cancelEventModal');
+                            if (!modal)
+                                return;
+                            modal.addEventListener('show.bs.modal', function (e) {
+                                var btn = e.relatedTarget;
+                                document.getElementById('cancelEventId').value = btn ? btn.getAttribute('data-event-id') : '';
+                                document.getElementById('cancelEventName').textContent = btn ? btn.getAttribute('data-event-name') : '';
+                                document.getElementById('cancelReason').value = '';
+                            });
+                            modal.addEventListener('shown.bs.modal', function () {
+                                document.getElementById('cancelReason').focus();
+                            });
+                        })();
         </script>
     </body>
 </html>

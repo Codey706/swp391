@@ -26,9 +26,16 @@ import java.util.Locale;
 @WebServlet(name = "EventListController", urlPatterns = {"/organizer/event/list"})
 public class EventListController extends EventController {
 
+    private static final String EVENT_ENDED = "ENDED";
+
     private static final List<String> LIST_STATUSES = Arrays.asList(
-            Constants.EVENT_DRAFT, Constants.EVENT_PENDING_APPROVAL, Constants.EVENT_ACTIVE,
-            Constants.EVENT_REJECTED, Constants.EVENT_CANCELLED);
+            Constants.EVENT_DRAFT,
+            Constants.EVENT_PENDING_APPROVAL,
+            Constants.EVENT_ACTIVE,
+            EVENT_ENDED,
+            Constants.EVENT_REJECTED,
+            Constants.EVENT_CANCELLED
+    );
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -66,6 +73,7 @@ public class EventListController extends EventController {
             request.setAttribute("pageSize", Constants.EVENT_PAGE_SIZE);
             SessionUtils.moveFlash(request, "successMessage", "errorMessage");
             CsrfUtils.expose(request);
+            request.setAttribute("nowMillis", System.currentTimeMillis());
             request.getRequestDispatcher(EVENT_LIST_VIEW).forward(request, response);
         } catch (SQLException e) {
             throw new ServletException(e);
