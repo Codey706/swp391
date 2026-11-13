@@ -17,15 +17,15 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=5">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
 
     <body class="admin-portal-page">
 
@@ -258,13 +258,10 @@
                                 </p>
                             </div>
 
-                            <a href="${ctx}/admin/venue-create"
-                               style="display: inline-flex; align-items: center; justify-content: center;
-                               background: #FF5B49; color: white; padding: 13px 20px;
-                               border-radius: 10px; font-weight: bold; text-decoration: none;
-                               white-space: nowrap; cursor: pointer;">
+                            <button class="add-button" type="button"
+                                    onclick="window.location.href = '${ctx}/admin/venue-create'">
                                 Add New Venue
-                            </a>
+                            </button>
                         </div>
 
                         <!-- Table -->
@@ -298,7 +295,7 @@
                                         <td><%= venue.getVenueId()%></td>
 
                                         <td>
-                                            <strong><%= HtmlUtils.escape(venue.getVenueName(), "")%></strong>
+                                                <strong><%= HtmlUtils.escape(venue.getVenueName(), "")%></strong>
                                         </td>
 
                                         <td>

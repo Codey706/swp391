@@ -39,12 +39,12 @@ public class OrganizerDocument {
      */
     public String getIcon() {
         if ("PERFORMANCE_PERMIT".equals(docType)) {
-            return "theater_comedy";
+            return "mask-happy";
         }
         if ("COPYRIGHT_CONTRACT".equals(docType)) {
             return "gavel";
         }
-        return "description";
+        return "file-text";
     }
 
     public String getStatusLabel() {

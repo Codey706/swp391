@@ -7,104 +7,51 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.User;
-
+import utils.ValidationUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/** Admin xem chi tiết tài khoản và đổi nhanh trạng thái ACTIVE / INACTIVE. */
 @WebServlet("/admin/user-detail")
 public class UserDetailController extends HttpServlet {
 
-    private UserDAO userDAO;
-
-    @Override
-    public void init() {
-        userDAO = new UserDAO();
-    }
+    private final UserDAO userDAO = new UserDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        String id = request.getParameter("id");
-
+        int userId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), 0);
+        if (userId <= 0) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID");
+            return;
+        }
         try {
-            int userId = Integer.parseInt(id);
-
             User user = userDAO.getUserById(userId);
-
             if (user == null) {
-                response.sendError(
-                        HttpServletResponse.SC_NOT_FOUND,
-                        "User not found"
-                );
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
                 return;
             }
-
             request.setAttribute("user", user);
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/admin/user-detail.jsp"
-            ).forward(request, response);
-
-        } catch (NumberFormatException e) {
-
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid user ID"
-            );
-
+            request.getRequestDispatcher("/WEB-INF/views/admin/user-detail.jsp").forward(request, response);
         } catch (SQLException e) {
-
-            throw new ServletException(
-                    "Cannot load user detail",
-                    e
-            );
+            throw new ServletException(e);
         }
     }
 
-    // Đổi status nhanh
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        String id = request.getParameter("id");
+        int userId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), 0);
         String status = request.getParameter("status");
-
+        if (userId <= 0 || !("ACTIVE".equalsIgnoreCase(status) || "INACTIVE".equalsIgnoreCase(status))) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
         try {
-
-            int userId = Integer.parseInt(id);
-
-            if (!"ACTIVE".equalsIgnoreCase(status)
-                    && !"INACTIVE".equalsIgnoreCase(status)) {
-
-                response.sendError(
-                        HttpServletResponse.SC_BAD_REQUEST,
-                        "Invalid status"
-                );
-                return;
-            }
-
             userDAO.updateUserStatus(userId, status.toUpperCase());
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/admin/user-detail?id="
-                    + userId
-            );
-
-        } catch (NumberFormatException e) {
-
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid user ID"
-            );
-
+            response.sendRedirect(request.getContextPath() + "/admin/user-detail?id=" + userId);
         } catch (SQLException e) {
-
-            throw new ServletException(
-                    "Cannot update user status",
-                    e
-            );
+            throw new ServletException(e);
         }
     }
 }

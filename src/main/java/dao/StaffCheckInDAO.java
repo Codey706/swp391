@@ -12,9 +12,8 @@ import utils.Constants;
 import utils.DBContext;
 
 /**
- * Staff - Check-in vé: soát vé theo mã (nội dung QR trên vé điện tử chính là
- * ticket_code). Quyền của staff với sự kiện được controller kiểm tra trước khi
- * gọi DAO.
+ * Staff - Check-in vé: soát vé theo mã (nội dung QR trên vé điện tử chính là ticket_code).
+ * Quyền của staff với sự kiện được controller kiểm tra trước khi gọi DAO.
  */
 public class StaffCheckInDAO {
 
@@ -22,9 +21,7 @@ public class StaffCheckInDAO {
         CHECKED_IN, NOT_FOUND, WRONG_EVENT, ALREADY_CHECKED_IN, CANCELLED, NOT_PAID
     }
 
-    /**
-     * Kết quả một lượt soát vé (cũng dùng cho danh sách lượt check-in gần đây).
-     */
+    /** Kết quả một lượt soát vé (cũng dùng cho danh sách lượt check-in gần đây). */
     public static class Result implements java.io.Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -36,16 +33,8 @@ public class StaffCheckInDAO {
         private String customerName;
         private LocalDateTime checkInTime;
 
-        public Outcome getOutcome() {
-            return outcome;
-        }
-
         public String getOutcomeName() {
             return outcome == null ? "" : outcome.name();
-        }
-
-        public boolean isSuccess() {
-            return outcome == Outcome.CHECKED_IN;
         }
 
         public String getTicketCode() {
@@ -80,8 +69,8 @@ public class StaffCheckInDAO {
             + "LEFT JOIN Event_Seats es ON es.event_seat_id = tk.event_seat_id ";
 
     /**
-     * Soát một vé cho sự kiện eventId. Khóa dòng vé (UPDLOCK) để hai cổng quét
-     * cùng lúc không check-in một vé hai lần.
+     * Soát một vé cho sự kiện eventId. Khóa dòng vé (UPDLOCK) để hai cổng quét cùng lúc
+     * không check-in một vé hai lần.
      */
     public Result checkIn(int eventId, String ticketCode) throws SQLException {
         try (Connection conn = DBContext.getConnection()) {
@@ -147,15 +136,14 @@ public class StaffCheckInDAO {
         return result;
     }
 
-    /**
-     * Các lượt check-in mới nhất của sự kiện.
-     */
+    /** Các lượt check-in mới nhất của sự kiện. */
     public List<Result> findRecentCheckIns(int eventId, int limit) throws SQLException {
         String sql = SELECT_TICKET.replace("SELECT ", "SELECT TOP (?) ")
                 + "WHERE tk.event_id = ? AND tk.ticket_status = ? "
                 + "ORDER BY tk.check_in_time DESC, tk.ticket_id DESC";
         List<Result> list = new ArrayList<>();
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             ps.setInt(2, eventId);
             ps.setString(3, Constants.TICKET_CHECKED_IN);

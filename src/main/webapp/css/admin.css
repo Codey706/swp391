@@ -313,6 +313,26 @@ body {
     font-size: 13px;
 }
 
+/* =========================
+   Add User Button
+   ========================= */
+
+.add-button {
+    background: #d93a27;
+    color: white;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.add-button:hover {
+    background: #d93a27;
+    transform: translateY(-1px);
+}
 
 /* =========================
    Table
@@ -3040,218 +3060,68 @@ tbody tr:hover {
 
 /* ---- Manage Events: thời gian, nút thao tác, modal từ chối, bảng không cuộn ngang ---- */
 /* admin.css đặt table { white-space: nowrap } cho mọi bảng; bảng sự kiện cần xuống dòng để không tràn ngang */
-.event-table td {
-    white-space: normal;
-    padding: 14px 12px;
-}
-.event-table th {
-    padding: 14px 12px;
-}
-.event-table td.event-actions {
-    white-space: nowrap;
-}
-.event-time span {
-    display: block;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-}
-.event-time span + span {
-    margin-top: 4px;
-}
+.event-table td { white-space: normal; padding: 14px 12px; }
+.event-table th { padding: 14px 12px; }
+.event-table td.event-actions { white-space: nowrap; }
+.event-time span { display: block; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.event-time span + span { margin-top: 4px; }
 .event-time small {
-    display: inline-block;
-    min-width: 36px;
-    margin-right: 6px;
-    color: #77777e;
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .4px;
+    display: inline-block; min-width: 36px; margin-right: 6px;
+    color: #77777e; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
 }
-.event-action-buttons {
-    flex-wrap: nowrap;
-    align-items: center;
-}
-.event-action-buttons form {
-    margin: 0;
-}
-.event-btn-ghost {
-    background: #efeff1;
-    color: #36363b;
-}
-.event-btn-ghost:hover {
-    background: #e4e4e7;
-}
-.event-btn-reject-solid {
-    background: #b42e1d;
-    color: #fff;
-}
-.event-btn-reject-solid:hover {
-    background: #8a2315;
-}
-.event-btn:focus-visible {
-    outline: 2px solid #d93a27;
-    outline-offset: 2px;
-}
+.event-action-buttons { flex-wrap: nowrap; align-items: center; }
+.event-action-buttons form { margin: 0; }
+.event-btn-ghost { background: #efeff1; color: #36363b; }
+.event-btn-ghost:hover { background: #e4e4e7; }
+.event-btn-reject-solid { background: #b42e1d; color: #fff; }
+.event-btn-reject-solid:hover { background: #8a2315; }
+.event-btn:focus-visible { outline: 2px solid #d93a27; outline-offset: 2px; }
 
-body.event-modal-open {
-    overflow: hidden;
-}
-.event-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-}
-.event-modal[hidden] {
-    display: none;
-}
-.event-modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(20, 20, 20, .55);
-}
+body.event-modal-open { overflow: hidden; }
+.event-modal { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.event-modal[hidden] { display: none; }
+.event-modal-backdrop { position: absolute; inset: 0; background: rgba(20, 20, 20, .55); }
 .event-modal-dialog {
-    position: relative;
-    width: min(520px, 100%);
-    max-height: calc(100vh - 32px);
-    overflow: auto;
-    background: #fff;
-    border-radius: 14px;
-    padding: 20px 22px;
-    margin: 0;
+    position: relative; width: min(520px, 100%); max-height: calc(100vh - 32px); overflow: auto;
+    background: #fff; border-radius: 14px; padding: 20px 22px; margin: 0;
     box-shadow: 0 24px 60px rgba(20, 20, 20, .3);
 }
-.event-modal-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-.event-modal-head h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #141414;
-}
-.event-modal-head p {
-    margin: 4px 0 0;
-    color: #66666d;
-    font-size: 13px;
-    overflow-wrap: anywhere;
-}
+.event-modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.event-modal-head h2 { margin: 0; font-size: 18px; font-weight: 700; color: #141414; }
+.event-modal-head p { margin: 4px 0 0; color: #66666d; font-size: 13px; overflow-wrap: anywhere; }
 .event-modal-close {
-    display: inline-flex;
-    padding: 4px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: #66666d;
-    font-size: 20px;
-    cursor: pointer;
+    display: inline-flex; padding: 4px; border: 0; border-radius: 8px; background: transparent;
+    color: #66666d; font-size: 20px; cursor: pointer;
 }
-.event-modal-close:hover {
-    background: #efeff1;
-}
-.event-modal-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #36363b;
-}
-.event-req {
-    color: #b42e1d;
-}
+.event-modal-close:hover { background: #efeff1; }
+.event-modal-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #36363b; }
+.event-req { color: #b42e1d; }
 .event-modal-dialog textarea {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 120px;
-    resize: vertical;
-    padding: 10px 12px;
-    border: 1px solid #e4e4e7;
-    border-radius: 8px;
-    font: inherit;
-    font-size: 13.5px;
-    outline: none;
+    display: block; width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical;
+    padding: 10px 12px; border: 1px solid #e4e4e7; border-radius: 8px; font: inherit; font-size: 13.5px; outline: none;
 }
-.event-modal-dialog textarea:focus {
-    border-color: #d93a27;
-    box-shadow: 0 0 0 3px rgba(217, 58, 39, .12);
-}
-.event-modal-dialog textarea.is-invalid {
-    border-color: #b42e1d;
-    box-shadow: 0 0 0 3px rgba(180, 46, 29, .12);
-}
-.event-modal-help {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 6px;
-    font-size: 12px;
-    color: #66666d;
-}
-.event-modal-error {
-    color: #b42e1d;
-    font-weight: 600;
-}
-.event-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 18px;
-}
-.event-modal-actions .event-btn {
-    padding: 9px 14px;
-    font-size: 13px;
-}
+.event-modal-dialog textarea:focus { border-color: #d93a27; box-shadow: 0 0 0 3px rgba(217, 58, 39, .12); }
+.event-modal-dialog textarea.is-invalid { border-color: #b42e1d; box-shadow: 0 0 0 3px rgba(180, 46, 29, .12); }
+.event-modal-help { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 12px; color: #66666d; }
+.event-modal-error { color: #b42e1d; font-weight: 600; }
+.event-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.event-modal-actions .event-btn { padding: 9px 14px; font-size: 13px; }
 
 /* Vùng nội dung hẹp (sidebar 260px chiếm chỗ): mỗi sự kiện là một thẻ nhãn / giá trị, không cuộn ngang */
 @media (max-width: 1299.98px) {
-    .event-table thead {
-        display: none;
-    }
-    .event-table, .event-table tbody, .event-table tr, .event-table td {
-        display: block;
-        width: 100%;
-    }
-    .event-table tr {
-        padding: 12px 16px;
-        border-bottom: 1px solid #e4e4e7;
-    }
-    .event-table tbody tr:last-child {
-        border-bottom: none;
-    }
+    .event-table thead { display: none; }
+    .event-table, .event-table tbody, .event-table tr, .event-table td { display: block; width: 100%; }
+    .event-table tr { padding: 12px 16px; border-bottom: 1px solid #e4e4e7; }
+    .event-table tbody tr:last-child { border-bottom: none; }
     .event-table td {
-        position: relative;
-        min-height: 28px;
-        padding: 6px 0 6px 120px;
-        border-bottom: none;
+        position: relative; min-height: 28px; padding: 6px 0 6px 120px; border-bottom: none;
     }
     .event-table td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 0;
-        top: 8px;
-        width: 110px;
-        color: #77777e;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .4px;
+        position: absolute; left: 0; top: 8px; width: 110px;
+        color: #77777e; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
     }
-    .event-name {
-        max-width: none;
-    }
-    .event-actions {
-        white-space: normal;
-    }
-    .event-action-buttons {
-        flex-wrap: wrap;
-    }
+    .event-name { max-width: none; }
+    .event-actions { white-space: normal; }
+    .event-action-buttons { flex-wrap: wrap; }
 }

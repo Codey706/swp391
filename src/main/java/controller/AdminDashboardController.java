@@ -11,20 +11,15 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 
-/**
- * UC-35 View System Dashboard.
- */
+/** UC-35 View System Dashboard. */
 @WebServlet("/admin")
 public class AdminDashboardController extends HttpServlet {
 
     private final AdminDashboardDAO dashboardDAO = new AdminDashboardDAO();
 
     @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         try {
             Map<String, Integer> users = dashboardDAO.countUsersByRole();
             Map<String, Integer> events = dashboardDAO.countEventsByStatus();
@@ -38,11 +33,9 @@ public class AdminDashboardController extends HttpServlet {
             request.setAttribute("revenue", sales[1]);
             request.setAttribute("refundPending", sales[2]);
         } catch (SQLException e) {
-            throw new ServletException("Cannot load admin dashboard", e);
+            throw new ServletException(e);
         }
 
-        request.getRequestDispatcher(
-                "/WEB-INF/views/admin/dashboard.jsp"
-        ).forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/dashboard.jsp").forward(request, response);
     }
 }

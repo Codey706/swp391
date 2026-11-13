@@ -20,8 +20,7 @@ import utils.DBContext;
 
 public class PaymentDAO {
 
-    public boolean createPayment(Payment payment) {
-
+    public void createPayment(Payment payment) throws SQLException {
         String sql = """
             INSERT INTO Payments
             (order_id, payment_method, transaction_code,
@@ -30,81 +29,41 @@ public class PaymentDAO {
             """;
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, payment.getOrderId());
             ps.setString(2, payment.getPaymentMethod());
             ps.setString(3, payment.getTransactionCode());
             ps.setBigDecimal(4, payment.getAmount());
             ps.setString(5, payment.getPaymentStatus());
             ps.setTimestamp(6, null);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            ps.executeUpdate();
         }
     }
 
-    public boolean validatePaymentRequest(int orderId, BigDecimal amount) {
-
-        String sql = """
-            SELECT final_amount, status
-            FROM Orders
-            WHERE order_id = ?
-            """;
-
+    /** Đơn còn Pending và số tiền gửi lên khớp final_amount. */
+    public boolean validatePaymentRequest(int orderId, BigDecimal amount) throws SQLException {
+        if (amount == null || amount.signum() <= 0) {
+            return false;
+        }
+        String sql = "SELECT final_amount, status FROM Orders WHERE order_id = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, orderId);
-
             try (ResultSet rs = ps.executeQuery()) {
-
-                if (!rs.next()) {
-                    return false;
-                }
-
-                BigDecimal finalAmount = rs.getBigDecimal("final_amount");
-                String status = rs.getString("status");
-
-                if (!"Pending".equalsIgnoreCase(status)) {
-                    return false;
-                }
-
-                if (amount == null
-                        || amount.compareTo(BigDecimal.ZERO) <= 0) {
-                    return false;
-                }
-
-                return amount.compareTo(finalAmount) == 0;
+                return rs.next()
+                        && "Pending".equalsIgnoreCase(rs.getString("status"))
+                        && amount.compareTo(rs.getBigDecimal("final_amount")) == 0;
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
-    /**
-     * Kết quả xử lý một thông báo thanh toán từ VNPay (Return URL hoặc IPN).
-     */
+    /** Kết quả xử lý một thông báo thanh toán từ VNPay (Return URL hoặc IPN). */
     public enum VnPayOutcome {
-        /**
-         * Lần đầu xác nhận thành công: đơn Paid, đã cấp vé.
-         */
+        /** Lần đầu xác nhận thành công: đơn Paid, đã cấp vé. */
         PAID,
-        /**
-         * Lần đầu nhận kết quả không thành công: Payment Failed.
-         */
+        /** Lần đầu nhận kết quả không thành công: Payment Failed. */
         FAILED,
-        /**
-         * Tiền về nhưng đơn đã hủy (hết giữ chỗ) hoặc sự kiện không còn ACTIVE:
-         * không cấp vé, hoàn tiền thủ công.
-         */
+        /** Tiền về nhưng đơn đã hủy (hết giữ chỗ) hoặc sự kiện không còn ACTIVE: không cấp vé, hoàn tiền thủ công. */
         REFUND_REQUIRED,
-        /**
-         * Giao dịch đã có kết quả từ trước (gọi lại / IPN gửi lặp).
-         */
+        /** Giao dịch đã có kết quả từ trước (gọi lại / IPN gửi lặp). */
         ALREADY_PROCESSED,
         NOT_FOUND,
         AMOUNT_MISMATCH
@@ -118,15 +77,13 @@ public class PaymentDAO {
     private static final Logger LOGGER = Logger.getLogger(PaymentDAO.class.getName());
 
     /**
-     * Xử lý kết quả VNPay trong MỘT transaction, khóa dòng Payments/Orders
-     * (UPDLOCK) nên Return URL và IPN đến cùng lúc, hoặc IPN gửi lặp lại, chỉ
-     * được xử lý đúng một lần. Chữ ký phải được kiểm tra ở controller trước khi
-     * gọi.
+     * Xử lý kết quả VNPay trong MỘT transaction, khóa dòng Payments/Orders (UPDLOCK) nên
+     * Return URL và IPN đến cùng lúc, hoặc IPN gửi lặp lại, chỉ được xử lý đúng một lần.
+     * Chữ ký phải được kiểm tra ở controller trước khi gọi.
      *
-     * @param amount số tiền VNPay báo (VND, đã chia 100)
+     * @param amount  số tiền VNPay báo (VND, đã chia 100)
      * @param success vnp_ResponseCode = 00 và vnp_TransactionStatus = 00
-     * @param vnpTransactionNo vnp_TransactionNo của VNPay (có thể null), để đối
-     * soát khi hoàn tiền
+     * @param vnpTransactionNo vnp_TransactionNo của VNPay (có thể null), để đối soát khi hoàn tiền
      */
     public VnPayOutcome applyVnPayResult(String transactionCode, BigDecimal amount, boolean success,
             String vnpTransactionNo) throws SQLException {
@@ -225,12 +182,11 @@ public class PaymentDAO {
         }
     }
 
-    /**
-     * order_id của giao dịch, -1 nếu không có.
-     */
+    /** order_id của giao dịch, -1 nếu không có. */
     public int findOrderIdByTransactionCode(String transactionCode) throws SQLException {
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(
-                "SELECT order_id FROM Payments WHERE transaction_code = ?")) {
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        "SELECT order_id FROM Payments WHERE transaction_code = ?")) {
             ps.setString(1, transactionCode);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getInt(1) : -1;
@@ -239,13 +195,14 @@ public class PaymentDAO {
     }
 
     /**
-     * Thông tin đơn để hiển thị trang kết quả thanh toán: [order_id,
-     * order_code, final_amount, status], null nếu không tìm thấy giao dịch.
+     * Thông tin đơn để hiển thị trang kết quả thanh toán: [order_id, order_code, final_amount, status],
+     * null nếu không tìm thấy giao dịch.
      */
     public Object[] findOrderSummaryByTransactionCode(String transactionCode) throws SQLException {
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(
-                "SELECT o.order_id, o.order_code, o.final_amount, o.status FROM Payments p "
-                + "JOIN Orders o ON o.order_id = p.order_id WHERE p.transaction_code = ?")) {
+        try (Connection conn = DBContext.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        "SELECT o.order_id, o.order_code, o.final_amount, o.status FROM Payments p "
+                        + "JOIN Orders o ON o.order_id = p.order_id WHERE p.transaction_code = ?")) {
             ps.setString(1, transactionCode);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next()
@@ -391,7 +348,7 @@ public class PaymentDAO {
         return seats == null ? null : seats.poll();
     }
 
-    public Payment getPaymentByTransactionCode(String transactionCode) {
+    public Payment getPaymentByTransactionCode(String transactionCode) throws SQLException {
         String sql = """
         SELECT TOP 1 payment_id, order_id, payment_method,
                transaction_code, amount, payment_status,
@@ -401,14 +358,11 @@ public class PaymentDAO {
         """;
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, transactionCode);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
                     return null;
                 }
-
                 Payment payment = new Payment();
                 payment.setPaymentId(rs.getInt("payment_id"));
                 payment.setOrderId(rs.getInt("order_id"));
@@ -416,13 +370,8 @@ public class PaymentDAO {
                 payment.setTransactionCode(rs.getString("transaction_code"));
                 payment.setAmount(rs.getBigDecimal("amount"));
                 payment.setPaymentStatus(rs.getString("payment_status"));
-
                 return payment;
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }

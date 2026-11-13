@@ -34,7 +34,7 @@ public class OrganizerDashboardDAO {
      * Doanh thu từng ngày trong {@code days} ngày gần nhất (ngày không có đơn = 0),
      * sắp xếp từ cũ đến mới.
      */
-    public Map<LocalDate, BigDecimal> getDailyRevenue(int organizerId, int days) {
+    public Map<LocalDate, BigDecimal> getDailyRevenue(int organizerId, int days) throws SQLException {
         Map<LocalDate, BigDecimal> result = new LinkedHashMap<>();
         LocalDate today = LocalDate.now();
         for (int i = days - 1; i >= 0; i--) {
@@ -56,8 +56,6 @@ public class OrganizerDashboardDAO {
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return result;
     }
@@ -66,7 +64,7 @@ public class OrganizerDashboardDAO {
      * So sánh kỳ hiện tại (PERIOD_DAYS ngày gần nhất) với kỳ liền trước: doanh
      * thu và số vé. Các khóa: revenueCurrent, revenuePrevious, soldCurrent, soldPrevious.
      */
-    public Map<String, BigDecimal> getPeriodComparison(int organizerId) {
+    public Map<String, BigDecimal> getPeriodComparison(int organizerId) throws SQLException {
         int p = Constants.DASHBOARD_PERIOD_DAYS;
         String cut = "DATEADD(DAY, " + (-(p - 1)) + ", CAST(GETDATE() AS DATE))";
         String sql = "SELECT "
@@ -92,8 +90,6 @@ public class OrganizerDashboardDAO {
                     map.put("soldPrevious", rs.getBigDecimal(4));
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return map;
     }
@@ -103,7 +99,7 @@ public class OrganizerDashboardDAO {
      *
      * @return {total, pending}
      */
-    public int[] getOrderCounts(int organizerId) {
+    public int[] getOrderCounts(int organizerId) throws SQLException {
         String sql = "SELECT COUNT(DISTINCT o.order_id), "
                 + "COUNT(DISTINCT CASE WHEN o.status = 'Pending' THEN o.order_id END) "
                 + FROM_SALES + "WHERE e.organizer_id = ?";
@@ -111,17 +107,13 @@ public class OrganizerDashboardDAO {
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, organizerId);
             try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return new int[]{rs.getInt(1), rs.getInt(2)};
-                }
+                rs.next(); // COUNT luôn trả 1 dòng
+                return new int[]{rs.getInt(1), rs.getInt(2)};
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return new int[]{0, 0};
     }
 
-    public List<RecentOrder> getRecentOrders(int organizerId, int limit) {
+    public List<RecentOrder> getRecentOrders(int organizerId, int limit) throws SQLException {
         List<RecentOrder> orders = new ArrayList<>();
         String sql = "SELECT TOP (?) o.order_id, o.order_code, u.full_name, e.event_name, "
                 + "SUM(od.quantity), SUM(od.subtotal), o.status, o.created_at "
@@ -148,8 +140,6 @@ public class OrganizerDashboardDAO {
                     orders.add(order);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return orders;
     }
@@ -158,7 +148,7 @@ public class OrganizerDashboardDAO {
      * Các sự kiện vừa thay đổi (mới tạo / đổi trạng thái) để hiển thị "Hoạt động gần đây".
      * Chỉ điền eventId, eventName, status, updatedAt.
      */
-    public List<Event> getRecentlyUpdatedEvents(int organizerId, int limit) {
+    public List<Event> getRecentlyUpdatedEvents(int organizerId, int limit) throws SQLException {
         List<Event> events = new ArrayList<>();
         String sql = "SELECT TOP (?) event_id, event_name, status, updated_at FROM Events "
                 + "WHERE organizer_id = ? ORDER BY updated_at DESC, event_id DESC";
@@ -178,8 +168,6 @@ public class OrganizerDashboardDAO {
                     events.add(event);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return events;
     }
@@ -187,18 +175,16 @@ public class OrganizerDashboardDAO {
     // ------------------------------------------------------------ UC-24: check-in & báo cáo từng sự kiện
 
     /** {số vé đã check-in, số vé đã phát hành (không tính vé hủy)} trên mọi sự kiện của organizer. */
-    public int[] getCheckInStats(int organizerId) {
+    public int[] getCheckInStats(int organizerId) throws SQLException {
         String sql = "SELECT ISNULL(SUM(CASE WHEN t.ticket_status = 'CheckedIn' THEN 1 ELSE 0 END), 0), "
                 + "COUNT(*) FROM Tickets t JOIN Events e ON e.event_id = t.event_id "
                 + "WHERE e.organizer_id = ? AND t.ticket_status <> 'Cancelled'";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, organizerId);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? new int[]{rs.getInt(1), rs.getInt(2)} : new int[]{0, 0};
+                rs.next(); // SUM/COUNT luôn trả 1 dòng
+                return new int[]{rs.getInt(1), rs.getInt(2)};
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new int[]{0, 0};
         }
     }
 

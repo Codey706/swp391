@@ -21,15 +21,15 @@
               href="${pageContext.request.contextPath}/assets/css/payment-result.css">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
 
     <body>
         <jsp:include page="/WEB-INF/views/common/site-header.jsp"/>
@@ -111,11 +111,11 @@
                     <span class="label">Mã giao dịch VNPay</span>
                     <span class="value">
                         <c:out value="${transactionCode}" default="Không có"/><c:if test="${not empty transactionCode and not empty bankCode}"> (<c:out value="${bankCode}"/>)</c:if>
-                        </span>
-                    </div>
+                    </span>
+                </div>
 
-                    <div class="info-row">
-                        <span class="label">${ok ? 'Tổng thanh toán' : 'Giá trị đơn hàng'}</span>
+                <div class="info-row">
+                    <span class="label">${ok ? 'Tổng thanh toán' : 'Giá trị đơn hàng'}</span>
                     <span class="value total-amount">
                         <c:choose>
                             <c:when test="${not empty finalAmount}"><fmt:formatNumber value="${finalAmount}" pattern="#,##0"/> đ</c:when>

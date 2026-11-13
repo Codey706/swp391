@@ -1,8 +1,6 @@
 package controller.Event;
 
 import dao.EventDAO.CancelResult;
-import static dao.EventDAO.CancelResult.CANCELLED;
-import static dao.EventDAO.CancelResult.HAS_PAID_ORDERS;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,8 +13,8 @@ import utils.ValidationUtils;
 
 /**
  * UC-20: Organizer hủy sự kiện. POST /organizer/event/cancel (eventId, reason).
- * Chỉ sự kiện ACTIVE của chính mình và chưa có đơn Paid; lý do bắt buộc, tối đa
- * 1000 ký tự (Events.cancellation_reason).
+ * Chỉ sự kiện ACTIVE của chính mình và chưa có đơn Paid; lý do bắt buộc, tối đa 1000 ký tự
+ * (Events.cancellation_reason).
  */
 @WebServlet(name = "EventCancelController", urlPatterns = {"/organizer/event/cancel"})
 public class EventCancelController extends EventController {
@@ -26,11 +24,7 @@ public class EventCancelController extends EventController {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        Auth organizer = getAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
+        Auth organizer = currentOrganizer(request);
         if (!CsrfUtils.isValid(request)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -59,7 +53,7 @@ public class EventCancelController extends EventController {
                     redirectToList(request, response, "errorMessage", "Chỉ sự kiện đang mở bán (ACTIVE) của bạn mới có thể hủy.");
             }
         } catch (SQLException e) {
-            throw new ServletException("Cannot cancel event", e);
+            throw new ServletException(e);
         }
     }
 }

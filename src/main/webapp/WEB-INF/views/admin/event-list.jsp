@@ -20,15 +20,15 @@
         <link rel="stylesheet" href="${ctx}/css/admin.css?v=7">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
 
     <body class="admin-portal-page">
 
@@ -417,110 +417,110 @@
 
         <!-- Modal từ chối sự kiện -->
         <script>
-                                                                      (function () {
-                                                                          var modal = document.getElementById('rejectModal');
-                                                                          if (!modal) {
-                                                                              return;
-                                                                          }
-                                                                          var form = document.getElementById('rejectForm');
-                                                                          var reason = document.getElementById('rejectReason');
-                                                                          var count = document.getElementById('rejectReasonCount');
-                                                                          var error = document.getElementById('rejectReasonError');
-                                                                          var MAX = 1000;
-                                                                          var opener = null;
+            (function () {
+                var modal = document.getElementById('rejectModal');
+                if (!modal) {
+                    return;
+                }
+                var form = document.getElementById('rejectForm');
+                var reason = document.getElementById('rejectReason');
+                var count = document.getElementById('rejectReasonCount');
+                var error = document.getElementById('rejectReasonError');
+                var MAX = 1000;
+                var opener = null;
 
-                                                                          function setError(message) {
-                                                                              error.textContent = message || '';
-                                                                              reason.classList.toggle('is-invalid', !!message);
-                                                                              reason.setAttribute('aria-invalid', message ? 'true' : 'false');
-                                                                          }
-                                                                          function updateCount() {
-                                                                              count.textContent = reason.value.length;
-                                                                          }
-                                                                          function open(button) {
-                                                                              opener = button;
-                                                                              document.getElementById('rejectEventId').value = button.getAttribute('data-event-id');
-                                                                              document.getElementById('rejectEventName').textContent =
-                                                                                      '#' + button.getAttribute('data-event-id') + ' · ' + (button.getAttribute('data-event-name') || '');
-                                                                              reason.value = '';
-                                                                              setError('');
-                                                                              updateCount();
-                                                                              modal.hidden = false;
-                                                                              document.body.classList.add('event-modal-open');
-                                                                              reason.focus();
-                                                                          }
-                                                                          function close() {
-                                                                              modal.hidden = true;
-                                                                              document.body.classList.remove('event-modal-open');
-                                                                              if (opener) {
-                                                                                  opener.focus();
-                                                                              }
-                                                                          }
+                function setError(message) {
+                    error.textContent = message || '';
+                    reason.classList.toggle('is-invalid', !!message);
+                    reason.setAttribute('aria-invalid', message ? 'true' : 'false');
+                }
+                function updateCount() {
+                    count.textContent = reason.value.length;
+                }
+                function open(button) {
+                    opener = button;
+                    document.getElementById('rejectEventId').value = button.getAttribute('data-event-id');
+                    document.getElementById('rejectEventName').textContent =
+                            '#' + button.getAttribute('data-event-id') + ' · ' + (button.getAttribute('data-event-name') || '');
+                    reason.value = '';
+                    setError('');
+                    updateCount();
+                    modal.hidden = false;
+                    document.body.classList.add('event-modal-open');
+                    reason.focus();
+                }
+                function close() {
+                    modal.hidden = true;
+                    document.body.classList.remove('event-modal-open');
+                    if (opener) {
+                        opener.focus();
+                    }
+                }
 
-                                                                          document.querySelectorAll('[data-reject-event]').forEach(function (button) {
-                                                                              button.addEventListener('click', function () {
-                                                                                  open(button);
-                                                                              });
-                                                                          });
-                                                                          modal.querySelectorAll('[data-reject-close]').forEach(function (el) {
-                                                                              el.addEventListener('click', close);
-                                                                          });
-                                                                          document.addEventListener('keydown', function (e) {
-                                                                              if (e.key === 'Escape' && !modal.hidden) {
-                                                                                  close();
-                                                                              }
-                                                                          });
-                                                                          reason.addEventListener('input', function () {
-                                                                              updateCount();
-                                                                              if (error.textContent) {
-                                                                                  setError('');
-                                                                              }
-                                                                          });
-                                                                          form.addEventListener('submit', function (e) {
-                                                                              var value = reason.value.trim();
-                                                                              if (!value) {
-                                                                                  e.preventDefault();
-                                                                                  setError('Vui lòng nhập lý do từ chối sự kiện.');
-                                                                                  reason.focus();
-                                                                              } else if (value.length > MAX) {
-                                                                                  e.preventDefault();
-                                                                                  setError('Lý do từ chối không được vượt quá 1000 ký tự.');
-                                                                                  reason.focus();
-                                                                              }
-                                                                          });
-                                                                      })();
+                document.querySelectorAll('[data-reject-event]').forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        open(button);
+                    });
+                });
+                modal.querySelectorAll('[data-reject-close]').forEach(function (el) {
+                    el.addEventListener('click', close);
+                });
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && !modal.hidden) {
+                        close();
+                    }
+                });
+                reason.addEventListener('input', function () {
+                    updateCount();
+                    if (error.textContent) {
+                        setError('');
+                    }
+                });
+                form.addEventListener('submit', function (e) {
+                    var value = reason.value.trim();
+                    if (!value) {
+                        e.preventDefault();
+                        setError('Vui lòng nhập lý do từ chối sự kiện.');
+                        reason.focus();
+                    } else if (value.length > MAX) {
+                        e.preventDefault();
+                        setError('Lý do từ chối không được vượt quá 1000 ký tự.');
+                        reason.focus();
+                    }
+                });
+            })();
         </script>
 
         <!-- Điều khiển sidebar trên màn hình nhỏ -->
         <script>
-            (function () {
-                const sidebar = document.getElementById('adminSidebar');
-                const backdrop = document.getElementById('adminSidebarBackdrop');
-                const openButton = document.getElementById('adminSidebarOpen');
-                const closeButton = document.getElementById('adminSidebarClose');
+                                                                      (function () {
+                                                                          const sidebar = document.getElementById('adminSidebar');
+                                                                          const backdrop = document.getElementById('adminSidebarBackdrop');
+                                                                          const openButton = document.getElementById('adminSidebarOpen');
+                                                                          const closeButton = document.getElementById('adminSidebarClose');
 
-                function openSidebar() {
-                    sidebar.classList.add('is-open');
-                    backdrop.classList.add('is-visible');
-                    openButton.setAttribute('aria-expanded', 'true');
-                }
+                                                                          function openSidebar() {
+                                                                              sidebar.classList.add('is-open');
+                                                                              backdrop.classList.add('is-visible');
+                                                                              openButton.setAttribute('aria-expanded', 'true');
+                                                                          }
 
-                function closeSidebar() {
-                    sidebar.classList.remove('is-open');
-                    backdrop.classList.remove('is-visible');
-                    openButton.setAttribute('aria-expanded', 'false');
-                }
+                                                                          function closeSidebar() {
+                                                                              sidebar.classList.remove('is-open');
+                                                                              backdrop.classList.remove('is-visible');
+                                                                              openButton.setAttribute('aria-expanded', 'false');
+                                                                          }
 
-                openButton.addEventListener('click', openSidebar);
-                closeButton.addEventListener('click', closeSidebar);
-                backdrop.addEventListener('click', closeSidebar);
+                                                                          openButton.addEventListener('click', openSidebar);
+                                                                          closeButton.addEventListener('click', closeSidebar);
+                                                                          backdrop.addEventListener('click', closeSidebar);
 
-                document.addEventListener('keydown', function (event) {
-                    if (event.key === 'Escape') {
-                        closeSidebar();
-                    }
-                });
-            })();
+                                                                          document.addEventListener('keydown', function (event) {
+                                                                              if (event.key === 'Escape') {
+                                                                                  closeSidebar();
+                                                                              }
+                                                                          });
+                                                                      })();
         </script>
 
     </body>

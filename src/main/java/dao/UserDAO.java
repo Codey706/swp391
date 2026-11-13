@@ -174,35 +174,6 @@ public class UserDAO {
     // ------------------------------------------------------------------
     // Manage My Organizer Profile
     // ------------------------------------------------------------------
-    /**
-     * Cập nhật hồ sơ của chính Organizer. Chỉ ghi full_name, email, phone,
-     * address; không bao giờ đụng tới role, status, password. Điều kiện WHERE
-     * chặn cập nhật nếu tài khoản không phải Organizer đang ACTIVE.
-     */
-    public boolean updateOrganizerProfile(User user) throws SQLException {
-        String sql = "UPDATE Users "
-                + "SET full_name = ?, email = ?, phone = ?, address = ?, "
-                + "updated_at = GETDATE() "
-                + "WHERE user_id = ? AND UPPER(role) = 'ORGANIZER' AND UPPER(status) = 'ACTIVE'";
-
-        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setString(1, user.getFullName());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPhone());
-
-            if (user.getAddress() == null) {
-                statement.setNull(4, Types.NVARCHAR);
-            } else {
-                statement.setString(4, user.getAddress());
-            }
-
-            statement.setInt(5, user.getUserId());
-
-            return statement.executeUpdate() > 0;
-        }
-    }
-
     public boolean updateCustomerProfile(User user) throws SQLException {
         String sql = "UPDATE Users "
                 + "SET full_name = ?, email = ?, phone = ?, address = ?, "

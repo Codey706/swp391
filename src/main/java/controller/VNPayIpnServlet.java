@@ -10,26 +10,22 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import utils.VnPayConfig;
 import utils.VnPayUtil;
 
 /**
  * IPN (Instant Payment Notification): VNPay gọi server-to-server tới /vnpay-ipn
- * để báo kết quả giao dịch, kể cả khi khách đóng trình duyệt không quay về
- * Return URL. URL này phải được khai báo trong trang quản trị merchant VNPay.
+ * để báo kết quả giao dịch, kể cả khi khách đóng trình duyệt không quay về Return URL.
+ * URL này phải được khai báo trong trang quản trị merchant VNPay.
  *
- * Phản hồi JSON theo tài liệu VNPay: 00 Confirm Success · 01 Order not found ·
- * 02 Order already confirmed · 04 Invalid amount · 97 Invalid signature · 99
- * Unknown error. VNPay sẽ gửi lại IPN cho tới khi nhận 00 hoặc 02, nên xử lý
- * phải idempotent (PaymentDAO.applyVnPayResult khóa dòng và chỉ xử lý giao dịch
- * còn Pending).
+ * Phản hồi JSON theo tài liệu VNPay:
+ * 00 Confirm Success · 01 Order not found · 02 Order already confirmed ·
+ * 04 Invalid amount · 97 Invalid signature · 99 Unknown error.
+ * VNPay sẽ gửi lại IPN cho tới khi nhận 00 hoặc 02, nên xử lý phải idempotent
+ * (PaymentDAO.applyVnPayResult khóa dòng và chỉ xử lý giao dịch còn Pending).
  */
 @WebServlet(name = "VNPayIpnServlet", urlPatterns = {"/vnpay-ipn"})
 public class VNPayIpnServlet extends HttpServlet {
-
-    private static final Logger LOGGER = Logger.getLogger(VNPayIpnServlet.class.getName());
 
     private final PaymentDAO paymentDAO = new PaymentDAO();
 
@@ -58,7 +54,7 @@ public class VNPayIpnServlet extends HttpServlet {
 
             VnPayOutcome outcome = paymentDAO.applyVnPayResult(
                     transactionCode, amount, success, params.get("vnp_TransactionNo"));
-            LOGGER.info("VNPay IPN txnRef=" + transactionCode + ", success=" + success + " -> " + outcome);
+            log("VNPay IPN txnRef=" + transactionCode + ", success=" + success + " -> " + outcome);
 
             switch (outcome) {
                 case PAID -> {
@@ -78,7 +74,7 @@ public class VNPayIpnServlet extends HttpServlet {
             }
         } catch (Exception e) {
             // Lỗi tạm thời (DB...): trả 99 để VNPay gửi lại IPN sau
-            LOGGER.log(Level.SEVERE, "VNPay IPN failed, txnRef=" + transactionCode, e);
+            log("VNPay IPN failed, txnRef=" + transactionCode, e);
             reply(response, "99", "Unknown error");
         }
     }

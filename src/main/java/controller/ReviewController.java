@@ -1,5 +1,6 @@
 package controller;
 
+import utils.SessionUtils;
 import dao.ReviewDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import model.Auth;
-import utils.Constants;
 import utils.CsrfUtils;
 import utils.ValidationUtils;
 
@@ -26,12 +26,11 @@ public class ReviewController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         if (!CsrfUtils.isValid(request)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        Auth customer = (Auth) request.getSession().getAttribute(Constants.SESSION_USER);
+        Auth customer = SessionUtils.currentUser(request);
         int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("eventId"), -1);
         if (eventId <= 0) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -58,7 +57,7 @@ public class ReviewController extends HttpServlet {
                 ok = true;
             }
         } catch (SQLException e) {
-            throw new ServletException("Cannot save review", e);
+            throw new ServletException(e);
         }
         request.getSession().setAttribute("reviewMessage", message);
         request.getSession().setAttribute("reviewOk", ok);

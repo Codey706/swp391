@@ -210,22 +210,10 @@ select.sa-input {
     border-radius: 50%;
     background: currentColor;
 }
-.sa-badge.is-upcoming {
-    background: #e7f6ee;
-    color: #13804b;
-}
-.sa-badge.is-ongoing {
-    background: #bfe3cf;
-    color: #0e6b3e;
-}
-.sa-badge.is-ended {
-    background: #e4e4e7;
-    color: #55555c;
-}
-.sa-badge.is-cancelled {
-    background: #fff4f2;
-    color: #b42e1d;
-}
+.sa-badge.is-upcoming { background: #e7f6ee; color: #13804b; }
+.sa-badge.is-ongoing { background: #bfe3cf; color: #0e6b3e; }
+.sa-badge.is-ended { background: #e4e4e7; color: #55555c; }
+.sa-badge.is-cancelled { background: #fff4f2; color: #b42e1d; }
 
 /* ---------- Nút ---------- */
 .sa-btn {

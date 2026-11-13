@@ -172,8 +172,6 @@ public class OrganizerProfileDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
-            } finally {
-                connection.setAutoCommit(true);
             }
         }
     }
@@ -209,9 +207,7 @@ public class OrganizerProfileDAO {
         }
     }
 
-    /**
-     * UC-34 (KYC): Admin duyệt / từ chối một tài liệu pháp lý.
-     */
+    /** UC-34 (KYC): Admin duyệt / từ chối một tài liệu pháp lý. */
     public boolean setDocumentStatus(int documentId, int userId, String status) throws SQLException {
         String sql = "UPDATE Organizer_Documents SET status = ?, reviewed_at = GETDATE() "
                 + "WHERE document_id = ? AND user_id = ?";
@@ -225,8 +221,8 @@ public class OrganizerProfileDAO {
 
     /**
      * UC-34 (KYC): Admin xác minh / từ chối hồ sơ tổ chức. Trigger
-     * TR_Organizer_Profiles_RequireBusinessLicense chặn VERIFIED khi chưa có
-     * Giấy phép kinh doanh được duyệt (SQLException).
+     * TR_Organizer_Profiles_RequireBusinessLicense chặn VERIFIED khi chưa có Giấy phép
+     * kinh doanh được duyệt (SQLException).
      *
      * @return false nếu Organizer chưa tạo hồ sơ mở rộng
      */
@@ -240,7 +236,8 @@ public class OrganizerProfileDAO {
     }
 
     public boolean hasProfileRow(int userId) throws SQLException {
-        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM Organizer_Profiles WHERE user_id = ?")) {
+        try (Connection connection = DBContext.getConnection();
+                PreparedStatement statement = connection.prepareStatement("SELECT 1 FROM Organizer_Profiles WHERE user_id = ?")) {
             statement.setInt(1, userId);
             try (ResultSet rs = statement.executeQuery()) {
                 return rs.next();
@@ -249,8 +246,9 @@ public class OrganizerProfileDAO {
     }
 
     public boolean hasApprovedBusinessLicense(int userId) throws SQLException {
-        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(
-                "SELECT 1 FROM Organizer_Documents WHERE user_id = ? AND doc_type = 'BUSINESS_LICENSE' AND status = 'APPROVED'")) {
+        try (Connection connection = DBContext.getConnection();
+                PreparedStatement statement = connection.prepareStatement(
+                        "SELECT 1 FROM Organizer_Documents WHERE user_id = ? AND doc_type = 'BUSINESS_LICENSE' AND status = 'APPROVED'")) {
             statement.setInt(1, userId);
             try (ResultSet rs = statement.executeQuery()) {
                 return rs.next();

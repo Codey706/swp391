@@ -66,7 +66,7 @@ public class ReviewDAO {
             }
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            if (e.getErrorCode() == 2601 || e.getErrorCode() == 2627) { // duplicate key
+            if (DBContext.isDuplicateKey(e)) {
                 return false;
             }
             throw e;

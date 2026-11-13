@@ -14,8 +14,8 @@ import utils.QrCodes;
 
 /**
  * Việc cần làm sau khi một đơn vừa chuyển sang Paid. Chỉ được gọi khi
- * PaymentDAO.applyVnPayResult() trả về PAID, tức đúng một lần cho mỗi đơn dù cả
- * Return URL và IPN cùng về — nên email e-ticket chỉ gửi một lần.
+ * PaymentDAO.applyVnPayResult() trả về PAID, tức đúng một lần cho mỗi đơn
+ * dù cả Return URL và IPN cùng về — nên email e-ticket chỉ gửi một lần.
  */
 final class PaymentNotifier {
 
@@ -33,9 +33,7 @@ final class PaymentNotifier {
         EmailService.sendAsync(() -> sendETickets(orderId));
     }
 
-    /**
-     * UC-18: email vé điện tử, mỗi vé một ảnh QR (PNG nhúng cid:qrN).
-     */
+    /** UC-18: email vé điện tử, mỗi vé một ảnh QR (PNG nhúng cid:qrN). */
     private static void sendETickets(int orderId) {
         try {
             TicketDAO ticketDAO = new TicketDAO();

@@ -19,11 +19,10 @@ import utils.DBContext;
  * @author ADMIN
  */
 public class TicketDAO {
-
     public List<Ticket> getTicketsByCustomerId(int customerId)
-            throws SQLException {
+        throws SQLException {
 
-        String sql = """
+    String sql = """
         SELECT
             t.ticket_id,
             o.order_id,
@@ -54,46 +53,45 @@ public class TicketDAO {
         ORDER BY e.start_time, t.ticket_id
         """;
 
-        List<Ticket> tickets = new ArrayList<>();
+    List<Ticket> tickets = new ArrayList<>();
 
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, customerId);
+        ps.setInt(1, customerId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Ticket ticket = new Ticket();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Ticket ticket = new Ticket();
 
-                    ticket.setTicketId(rs.getInt("ticket_id"));
-                    ticket.setOrderId(rs.getInt("order_id"));
-                    ticket.setTicketCode(rs.getString("ticket_code"));
-                    ticket.setQrCode(rs.getString("qr_code"));
-                    ticket.setTicketStatus(
-                            rs.getString("ticket_status")
+                ticket.setTicketId(rs.getInt("ticket_id"));
+                ticket.setOrderId(rs.getInt("order_id"));
+                ticket.setTicketCode(rs.getString("ticket_code"));
+                ticket.setQrCode(rs.getString("qr_code"));
+                ticket.setTicketStatus(
+                    rs.getString("ticket_status")
+                );
+                ticket.setEventName(rs.getString("event_name"));
+                ticket.setVenueName(rs.getString("venue_name"));
+                ticket.setTicketName(rs.getString("ticket_name"));
+                ticket.setSeatLabel(rs.getString("seat_label"));
+
+                Timestamp startTime = rs.getTimestamp("start_time");
+                if (startTime != null) {
+                    ticket.setEventStartTime(
+                        startTime.toLocalDateTime()
                     );
-                    ticket.setEventName(rs.getString("event_name"));
-                    ticket.setVenueName(rs.getString("venue_name"));
-                    ticket.setTicketName(rs.getString("ticket_name"));
-                    ticket.setSeatLabel(rs.getString("seat_label"));
-
-                    Timestamp startTime = rs.getTimestamp("start_time");
-                    if (startTime != null) {
-                        ticket.setEventStartTime(
-                                startTime.toLocalDateTime()
-                        );
-                    }
-
-                    tickets.add(ticket);
                 }
+
+                tickets.add(ticket);
             }
         }
-
-        return tickets;
     }
 
-    /**
-     * Vé đã phát hành của một đơn (dùng cho email e-ticket).
-     */
+    return tickets;
+}
+
+    /** Vé đã phát hành của một đơn (dùng cho email e-ticket). */
     public List<Ticket> getTicketsByOrderId(int orderId) throws SQLException {
         String sql = """
             SELECT t.ticket_id, o.order_id, t.ticket_code, t.qr_code, t.ticket_status,
@@ -134,9 +132,7 @@ public class TicketDAO {
         return tickets;
     }
 
-    /**
-     * Vé (đơn Paid) có thuộc khách hàng này không — dùng trước khi trả ảnh QR.
-     */
+    /** Vé (đơn Paid) có thuộc khách hàng này không — dùng trước khi trả ảnh QR. */
     public boolean isTicketOwnedBy(String ticketCode, int customerId) throws SQLException {
         String sql = """
             SELECT 1 FROM Tickets t
@@ -153,9 +149,7 @@ public class TicketDAO {
         }
     }
 
-    /**
-     * {email, họ tên, mã đơn} của người mua; null nếu không có đơn.
-     */
+    /** {email, họ tên, mã đơn} của người mua; null nếu không có đơn. */
     public String[] getOrderRecipient(int orderId) throws SQLException {
         String sql = "SELECT u.email, u.full_name, o.order_code FROM Orders o JOIN Users u ON u.user_id = o.customer_id WHERE o.order_id = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {

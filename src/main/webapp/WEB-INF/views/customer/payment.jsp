@@ -2,15 +2,15 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %><fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Thanh toán | Light Ticket</title><link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/checkout.css">    <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head><body><c:set var="customer" value="${customer}"/><jsp:include page="booking-header.jsp"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head><body><c:set var="customer" value="${customer}"/><jsp:include page="booking-header.jsp"/>
         <main class="ck-wrap"><div class="ck-steps"><span class="done">✓ <b>Chọn vé</b></span><i></i><span class="done">✓ <b>Thông tin</b></span><i></i><span class="active">3 <b>Thanh toán</b></span><i></i><span>4 <b>Hoàn tất</b></span></div>
             <c:if test="${not empty errorMessage}"><div class="ck-alert"><c:out value="${errorMessage}"/></div></c:if><c:if test="${not empty paymentMessage}"><div class="ck-info-note"><c:out value="${paymentMessage}"/></div></c:if>
             <div class="ck-layout"><section class="ck-panel"><p class="ck-eyebrow">BƯỚC 3 / 3</p><h1>Phương thức thanh toán</h1><p class="ck-muted">Chọn phương thức được hỗ trợ trong phiên bản hiện tại.</p><form method="post" action="${pageContext.request.contextPath}/booking/payment"><input type="hidden" name="orderId" value="${booking.bookingId}"><label class="ck-payment-option selected"><input type="radio" name="paymentMethod" value="VNPAY" checked><span class="ck-payment-icon">V</span><span><strong>VNPay</strong><small>QR, ATM nội địa và thẻ quốc tế qua cổng VNPay</small></span><span class="ck-radio-mark"></span></label><div class="ck-info-note">

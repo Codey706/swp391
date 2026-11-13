@@ -9,355 +9,355 @@
 <c:set var="seatUrl" value="${ctx}/staff/seats"/>
 <!DOCTYPE html>
 <html lang="vi">
-    <head>
-        <title>Thông tin khách hàng - Light Ticket</title>
-        <jsp:include page="/WEB-INF/views/staff/_head.jsp"/>
-        <link rel="stylesheet" href="${ctx}/assets/css/staff-customers.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
-    <body class="org-body">
-        <jsp:include page="/WEB-INF/views/staff/_header.jsp">
-            <jsp:param name="active" value="customers"/>
-            <jsp:param name="current" value="Customer Information"/>
-        </jsp:include>
+<head>
+    <title>Thông tin khách hàng - Light Ticket</title>
+    <jsp:include page="/WEB-INF/views/staff/_head.jsp"/>
+    <link rel="stylesheet" href="${ctx}/assets/css/staff-customers.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
+<body class="org-body">
+    <jsp:include page="/WEB-INF/views/staff/_header.jsp">
+        <jsp:param name="active" value="customers"/>
+        <jsp:param name="current" value="Customer Information"/>
+    </jsp:include>
 
-        <main class="org-main">
-            <div class="sc-page">
-                <div class="sc-head">
-                    <h1>Thông tin khách hàng</h1>
-                    <p>Xem thông tin khách hàng và vé liên quan đến sự kiện được phân công.</p>
-                </div>
+    <main class="org-main">
+        <div class="sc-page">
+            <div class="sc-head">
+                <h1>Thông tin khách hàng</h1>
+                <p>Xem thông tin khách hàng và vé liên quan đến sự kiện được phân công.</p>
+            </div>
 
-                <div class="sc-layout">
+            <div class="sc-layout">
 
-                    <%-- ===================== Trái: danh sách khách hàng ===================== --%>
-                    <aside>
-                        <section class="sc-panel">
-                            <form class="sc-search" method="get" action="${ctx}/staff/customers">
-                                <input type="hidden" name="tab" value="${selectedTab}">
-                                <input type="text" name="keyword" class="sc-input" maxlength="100"
-                                       placeholder="Tìm kiếm khách hàng (tên, SĐT, email...)" value="<c:out value='${keyword}'/>">
-                                <button type="submit" class="sc-icon-btn" aria-label="Tìm kiếm"><i class="ph ph-magnifying-glass" aria-hidden="true"></i></button>
-                            </form>
+                <%-- ===================== Trái: danh sách khách hàng ===================== --%>
+                <aside>
+                    <section class="sc-panel">
+                        <form class="sc-search" method="get" action="${ctx}/staff/customers">
+                            <input type="hidden" name="tab" value="${selectedTab}">
+                            <input type="text" name="keyword" class="sc-input" maxlength="100"
+                                   placeholder="Tìm kiếm khách hàng (tên, SĐT, email...)" value="<c:out value='${keyword}'/>">
+                            <button type="submit" class="sc-icon-btn" aria-label="Tìm kiếm"><i class="ph ph-magnifying-glass" aria-hidden="true"></i></button>
+                        </form>
 
-                            <nav class="sc-tabs" aria-label="Lọc theo trạng thái check-in">
-                                <c:forEach var="t" items="${tabLabels}">
-                                    <c:url var="tabUrl" value="/staff/customers">
-                                        <c:param name="tab" value="${t.key}"/>
-                                        <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
-                                    </c:url>
-                                    <a class="sc-tab ${selectedTab == t.key ? 'is-active' : ''}" href="${tabUrl}">
-                                        <c:out value="${t.value}"/> (${tabCounts[t.key]})
-                                    </a>
-                                </c:forEach>
-                            </nav>
-
-                            <c:forEach var="c" items="${customers}">
-                                <c:url var="selectUrl" value="/staff/customers">
-                                    <c:param name="customerId" value="${c.userId}"/>
-                                    <c:param name="tab" value="${selectedTab}"/>
+                        <nav class="sc-tabs" aria-label="Lọc theo trạng thái check-in">
+                            <c:forEach var="t" items="${tabLabels}">
+                                <c:url var="tabUrl" value="/staff/customers">
+                                    <c:param name="tab" value="${t.key}"/>
                                     <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
-                                    <c:if test="${currentPage > 1}"><c:param name="page" value="${currentPage}"/></c:if>
                                 </c:url>
-                                <c:set var="sk" value="${c.statusKey}"/>
-                                <a class="sc-row ${not empty customer && customer.userId == c.userId ? 'is-active' : ''}" href="${selectUrl}"
-                                   ${not empty customer && customer.userId == c.userId ? 'aria-current="true"' : ''}>
-                                    <span class="sc-avatar ${sk == 'CHECKED_IN' || sk == 'PARTIAL' ? 'is-ok' : ''}"><c:out value="${c.initials}"/></span>
-                                    <span class="sc-row-main">
-                                        <span class="sc-row-name d-block"><c:out value="${c.fullName}"/></span>
-                                        <span class="sc-row-sub">
-                                            <span>
-                                                <i class="ph ${not empty c.phone ? 'ph-phone' : 'ph-envelope-simple'}" aria-hidden="true"></i>
-                                                <c:out value="${not empty c.phone ? c.phone : c.email}"/>
-                                            </span>
-                                        </span>
-                                        <span class="sc-row-sub">
-                                            <span>
-                                                <i class="ph ph-ticket" aria-hidden="true"></i>
-                                                ${c.activeTickets} vé<c:if test="${c.eventCount > 1}"> · ${c.eventCount} sự kiện</c:if>
-                                                </span>
-                                            <c:choose>
-                                                <c:when test="${sk == 'CHECKED_IN'}"><span class="sc-badge is-ok">Đã check-in</span></c:when>
-                                                <c:when test="${sk == 'NOT_CHECKED_IN'}"><span class="sc-badge is-none">Chưa check-in</span></c:when>
-                                                <c:when test="${sk == 'PARTIAL'}"><span class="sc-badge is-partial">${c.checkedIn}/${c.activeTickets} đã check-in</span></c:when>
-                                                <c:otherwise><span class="sc-badge is-cancelled">Vé đã hủy</span></c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                    </span>
-                                    <i class="ph ph-caret-right sc-chevron" aria-hidden="true"></i>
+                                <a class="sc-tab ${selectedTab == t.key ? 'is-active' : ''}" href="${tabUrl}">
+                                    <c:out value="${t.value}"/> (${tabCounts[t.key]})
                                 </a>
                             </c:forEach>
+                        </nav>
 
-                            <c:if test="${empty customers}">
-                                <div class="sc-empty">
-                                    <i class="ph ph-user-focus" aria-hidden="true"></i>
-                                    <c:choose>
-                                        <c:when test="${totalAll == 0}">Chưa có khách hàng nào có vé trong các sự kiện được phân công cho bạn.</c:when>
-                                        <c:otherwise>Không tìm thấy khách hàng phù hợp.</c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </c:if>
+                        <c:forEach var="c" items="${customers}">
+                            <c:url var="selectUrl" value="/staff/customers">
+                                <c:param name="customerId" value="${c.userId}"/>
+                                <c:param name="tab" value="${selectedTab}"/>
+                                <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
+                                <c:if test="${currentPage > 1}"><c:param name="page" value="${currentPage}"/></c:if>
+                            </c:url>
+                            <c:set var="sk" value="${c.statusKey}"/>
+                            <a class="sc-row ${not empty customer && customer.userId == c.userId ? 'is-active' : ''}" href="${selectUrl}"
+                               ${not empty customer && customer.userId == c.userId ? 'aria-current="true"' : ''}>
+                                <span class="sc-avatar ${sk == 'CHECKED_IN' || sk == 'PARTIAL' ? 'is-ok' : ''}"><c:out value="${c.initials}"/></span>
+                                <span class="sc-row-main">
+                                    <span class="sc-row-name d-block"><c:out value="${c.fullName}"/></span>
+                                    <span class="sc-row-sub">
+                                        <span>
+                                            <i class="ph ${not empty c.phone ? 'ph-phone' : 'ph-envelope-simple'}" aria-hidden="true"></i>
+                                            <c:out value="${not empty c.phone ? c.phone : c.email}"/>
+                                        </span>
+                                    </span>
+                                    <span class="sc-row-sub">
+                                        <span>
+                                            <i class="ph ph-ticket" aria-hidden="true"></i>
+                                            ${c.activeTickets} vé<c:if test="${c.eventCount > 1}"> · ${c.eventCount} sự kiện</c:if>
+                                        </span>
+                                        <c:choose>
+                                            <c:when test="${sk == 'CHECKED_IN'}"><span class="sc-badge is-ok">Đã check-in</span></c:when>
+                                            <c:when test="${sk == 'NOT_CHECKED_IN'}"><span class="sc-badge is-none">Chưa check-in</span></c:when>
+                                            <c:when test="${sk == 'PARTIAL'}"><span class="sc-badge is-partial">${c.checkedIn}/${c.activeTickets} đã check-in</span></c:when>
+                                            <c:otherwise><span class="sc-badge is-cancelled">Vé đã hủy</span></c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </span>
+                                <i class="ph ph-caret-right sc-chevron" aria-hidden="true"></i>
+                            </a>
+                        </c:forEach>
 
-                            <c:if test="${totalPages > 1}">
-                                <c:url var="pageBase" value="/staff/customers">
-                                    <c:param name="tab" value="${selectedTab}"/>
-                                    <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
-                                </c:url>
-                                <div class="sc-foot">
-                                    <nav class="pager" aria-label="Phân trang">
-                                        <a class="${currentPage <= 1 ? 'disabled' : ''}" href="${pageBase}&page=${currentPage - 1}" aria-label="Trang trước"><i class="ph ph-caret-left" style="font-size:20px" aria-hidden="true"></i></a>
-                                            <c:forEach var="i" begin="1" end="${totalPages}">
-                                            <a class="${i == currentPage ? 'active' : ''}" href="${pageBase}&page=${i}">${i}</a>
-                                        </c:forEach>
-                                        <a class="${currentPage >= totalPages ? 'disabled' : ''}" href="${pageBase}&page=${currentPage + 1}" aria-label="Trang sau"><i class="ph ph-caret-right" style="font-size:20px" aria-hidden="true"></i></a>
-                                    </nav>
-                                    <span>${totalResults} khách hàng</span>
-                                </div>
-                            </c:if>
-                        </section>
-                    </aside>
-
-                    <%-- ===================== Giữa: chi tiết khách hàng ===================== --%>
-                    <section class="sc-main">
-                        <c:choose>
-                            <c:when test="${empty customer}">
-                                <div class="sc-panel">
-                                    <div class="sc-empty">
-                                        <i class="ph ph-identification-badge" aria-hidden="true"></i>
-                                        Chọn một khách hàng trong danh sách để xem thông tin và vé.
-                                    </div>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <%-- Thông tin khách hàng + thống kê vé --%>
-                                <div class="sc-panel">
-                                    <div class="sc-profile">
-                                        <span class="sc-avatar is-lg ${contextStatus == 'CHECKED_IN' || contextStatus == 'PARTIAL' ? 'is-ok' : ''}"><c:out value="${customer.initials}"/></span>
-                                        <div>
-                                            <div>
-                                                <h2><c:out value="${customer.fullName}"/></h2>
-                                                <c:choose>
-                                                    <c:when test="${contextStatus == 'CHECKED_IN'}"><span class="sc-badge is-ok">Đã check-in</span></c:when>
-                                                    <c:when test="${contextStatus == 'NOT_CHECKED_IN'}"><span class="sc-badge is-none">Chưa check-in</span></c:when>
-                                                    <c:when test="${contextStatus == 'PARTIAL'}"><span class="sc-badge is-partial">${ticketChecked}/${ticketActive} đã check-in</span></c:when>
-                                                    <c:otherwise><span class="sc-badge is-cancelled">Vé đã hủy</span></c:otherwise>
-                                                </c:choose>
-                                            </div>
-                                            <span class="sc-line"><i class="ph ph-phone" aria-hidden="true"></i><c:out value="${empty customer.phone ? 'Chưa cập nhật' : customer.phone}"/></span>
-                                            <span class="sc-line"><i class="ph ph-envelope-simple" aria-hidden="true"></i><c:out value="${empty customer.email ? 'Chưa cập nhật' : customer.email}"/></span>
-                                            <span class="sc-line"><i class="ph ph-map-pin" aria-hidden="true"></i><c:out value="${empty customer.address ? 'Chưa cập nhật' : customer.address}"/></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="sc-stats">
-                                        <div class="sc-stat"><span>Tổng số vé</span><b>${ticketActive}</b></div>
-                                        <div class="sc-stat"><span>Đã check-in</span><b>${ticketChecked}</b></div>
-                                        <div class="sc-stat"><span>Chưa check-in</span><b>${ticketNotChecked}</b></div>
-                                    </div>
-                                    <c:if test="${ticketCancelled > 0}">
-                                        <p class="sc-note">Chưa tính ${ticketCancelled} vé đã hủy.</p>
-                                    </c:if>
-
-                                    <c:if test="${fn:length(customerEvents) > 1}">
-                                        <div class="sc-events">
-                                            <span>Khách có vé ở ${fn:length(customerEvents)} sự kiện, chọn sự kiện:</span>
-                                            <c:forEach var="ev" items="${customerEvents}">
-                                                <c:url var="evUrl" value="/staff/customers">
-                                                    <c:param name="customerId" value="${customer.userId}"/>
-                                                    <c:param name="eventId" value="${ev.eventId}"/>
-                                                    <c:param name="tab" value="${selectedTab}"/>
-                                                    <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
-                                                    <c:if test="${currentPage > 1}"><c:param name="page" value="${currentPage}"/></c:if>
-                                                </c:url>
-                                                <a class="sc-event-pill ${ev.eventId == selectedEvent.eventId ? 'is-active' : ''}" href="${evUrl}"><c:out value="${ev.eventName}"/></a>
-                                            </c:forEach>
-                                        </div>
-                                    </c:if>
-                                </div>
-
-                                <%-- Thông tin vé --%>
-                                <div class="sc-panel">
-                                    <h3 class="sc-title">Thông tin vé</h3>
-                                    <c:choose>
-                                        <c:when test="${empty tickets}">
-                                            <div class="sc-empty"><i class="ph ph-ticket" aria-hidden="true"></i>Khách hàng chưa có vé trong sự kiện này.</div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="sc-table-wrap">
-                                                <table class="sc-table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Mã vé</th><th>Loại vé</th><th>Sự kiện</th><th>Thời gian</th><th>Trạng thái</th><th>Thao tác</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <c:forEach var="t" items="${tickets}">
-                                                            <c:set var="ts" value="${fn:toLowerCase(t.status)}"/>
-                                                            <c:set var="es" value="${t.eventStartTime}"/>
-                                                            <c:set var="ci" value="${t.checkInTime}"/>
-                                                            <c:set var="statusText" value="${ts == 'checkedin' ? 'Đã check-in' : (ts == 'valid' ? 'Chưa check-in' : (ts == 'cancelled' ? 'Đã hủy' : t.status))}"/>
-                                                            <tr>
-                                                                <td><b><c:out value="${t.ticketCode}"/></b></td>
-                                                                <td><c:out value="${t.ticketName}"/></td>
-                                                                <td><c:out value="${t.eventName}"/></td>
-                                                                <td>${fn:substring(es, 8, 10)}/${fn:substring(es, 5, 7)}/${fn:substring(es, 0, 4)} ${fn:substring(es, 11, 16)}</td>
-                                                                <td>
-                                                                    <c:choose>
-                                                                        <c:when test="${ts == 'checkedin'}"><span class="sc-badge is-ok">Đã check-in</span></c:when>
-                                                                        <c:when test="${ts == 'valid'}"><span class="sc-badge is-none">Chưa check-in</span></c:when>
-                                                                        <c:when test="${ts == 'cancelled'}"><span class="sc-badge is-cancelled">Đã hủy</span></c:when>
-                                                                        <c:otherwise><span class="sc-badge is-none"><c:out value="${t.status}"/></span></c:otherwise>
-                                                                    </c:choose>
-                                                                </td>
-                                                                <td>
-                                                                    <button type="button" class="sc-btn" data-bs-toggle="modal" data-bs-target="#ticketModal"
-                                                                            data-code="<c:out value='${t.ticketCode}'/>"
-                                                                            data-type="<c:out value='${t.ticketName}'/>"
-                                                                            data-seat="<c:out value='${t.seatLabel}'/>"
-                                                                            data-order="<c:out value='${t.orderCode}'/>"
-                                                                            data-event="<c:out value='${t.eventName}'/>"
-                                                                            data-status="<c:out value='${statusText}'/>"
-                                                                            data-checkin="<c:if test='${not empty ci}'>${fn:substring(ci, 11, 16)} - ${fn:substring(ci, 8, 10)}/${fn:substring(ci, 5, 7)}/${fn:substring(ci, 0, 4)}</c:if>">Xem</button>
-                                                                    </td>
-                                                                </tr>
-                                                        </c:forEach>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-
-                                <%-- Lịch sử check-in (từ Tickets.check_in_time) --%>
-                                <div class="sc-panel">
-                                    <h3 class="sc-title">Lịch sử check-in</h3>
-                                    <c:choose>
-                                        <c:when test="${empty history}">
-                                            <div class="sc-empty"><i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>Chưa có lượt check-in nào.</div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <ul class="sc-timeline">
-                                                <c:forEach var="h" items="${history}">
-                                                    <c:set var="hc" value="${h.checkInTime}"/>
-                                                    <li class="sc-tl-item">
-                                                        <span class="sc-tl-dot"><i class="ph ph-check" aria-hidden="true"></i></span>
-                                                        <div class="sc-tl-body">
-                                                            <div>
-                                                                <b><c:out value="${h.eventName}"/></b>
-                                                                <small><i class="ph ph-map-pin" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> <c:out value="${h.venueName}"/>
-                                                                    · <c:out value="${h.ticketCode}"/> (<c:out value="${h.ticketName}"/>)</small>
-                                                            </div>
-                                                            <div class="sc-tl-time">
-                                                                ${fn:substring(hc, 8, 10)}/${fn:substring(hc, 5, 7)}/${fn:substring(hc, 0, 4)} ${fn:substring(hc, 11, 16)}
-                                                                <span class="ok">Check-in thành công</span>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </c:forEach>
-                                            </ul>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </section>
-
-                    <%-- ===================== Phải: sự kiện + thao tác nhanh ===================== --%>
-                    <aside class="sc-side">
-                        <c:if test="${not empty selectedEvent}">
-                            <c:set var="st" value="${selectedEvent.startTime}"/>
-                            <c:set var="en" value="${selectedEvent.endTime}"/>
-                            <div class="sc-panel">
-                                <h3 class="sc-title">Thông tin sự kiện</h3>
-                                <div class="sc-event-img">
-                                    <c:choose>
-                                        <c:when test="${not empty selectedEvent.eventImage}">
-                                            <img alt="" src="${ctx}/<c:out value='${selectedEvent.eventImage}'/>">
-                                        </c:when>
-                                        <c:otherwise><i class="ph ph-image" style="font-size:44px" aria-hidden="true"></i></c:otherwise>
-                                    </c:choose>
-                                    <span class="sc-badge"><c:out value="${selectedEvent.categoryName}"/></span>
-                                </div>
-                                <h4 class="sc-event-name"><c:out value="${selectedEvent.eventName}"/></h4>
-                                <span class="sc-line"><i class="ph ph-clock" aria-hidden="true"></i>${fn:substring(st, 11, 16)} - ${fn:substring(en, 11, 16)} (${fn:substring(st, 8, 10)}/${fn:substring(st, 5, 7)}/${fn:substring(st, 0, 4)})</span>
-                                <span class="sc-line"><i class="ph ph-map-pin" aria-hidden="true"></i><c:out value="${selectedEvent.venueName}"/></span>
-                                <div class="mt-3">
-                                    <c:choose>
-                                        <c:when test="${selectedEvent.timeStatus == 'UPCOMING'}"><span class="sc-badge is-soon">Sắp diễn ra</span></c:when>
-                                        <c:when test="${selectedEvent.timeStatus == 'ONGOING'}"><span class="sc-badge is-live">Đang diễn ra</span></c:when>
-                                        <c:when test="${selectedEvent.timeStatus == 'CANCELLED'}"><span class="sc-badge is-cancelled">Đã hủy</span></c:when>
-                                        <c:otherwise><span class="sc-badge is-ended">Đã kết thúc</span></c:otherwise>
-                                    </c:choose>
-                                </div>
+                        <c:if test="${empty customers}">
+                            <div class="sc-empty">
+                                <i class="ph ph-user-focus" aria-hidden="true"></i>
+                                <c:choose>
+                                    <c:when test="${totalAll == 0}">Chưa có khách hàng nào có vé trong các sự kiện được phân công cho bạn.</c:when>
+                                    <c:otherwise>Không tìm thấy khách hàng phù hợp.</c:otherwise>
+                                </c:choose>
                             </div>
                         </c:if>
 
-                        <div class="sc-panel">
-                            <h3 class="sc-title">Thao tác nhanh</h3>
+                        <c:if test="${totalPages > 1}">
+                            <c:url var="pageBase" value="/staff/customers">
+                                <c:param name="tab" value="${selectedTab}"/>
+                                <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
+                            </c:url>
+                            <div class="sc-foot">
+                                <nav class="pager" aria-label="Phân trang">
+                                    <a class="${currentPage <= 1 ? 'disabled' : ''}" href="${pageBase}&page=${currentPage - 1}" aria-label="Trang trước"><i class="ph ph-caret-left" style="font-size:20px" aria-hidden="true"></i></a>
+                                    <c:forEach var="i" begin="1" end="${totalPages}">
+                                        <a class="${i == currentPage ? 'active' : ''}" href="${pageBase}&page=${i}">${i}</a>
+                                    </c:forEach>
+                                    <a class="${currentPage >= totalPages ? 'disabled' : ''}" href="${pageBase}&page=${currentPage + 1}" aria-label="Trang sau"><i class="ph ph-caret-right" style="font-size:20px" aria-hidden="true"></i></a>
+                                </nav>
+                                <span>${totalResults} khách hàng</span>
+                            </div>
+                        </c:if>
+                    </section>
+                </aside>
 
-                            <c:choose>
-                                <c:when test="${not empty qrUrl}"><a class="sc-action" href="${qrUrl}"><i class="ph ph-scan" aria-hidden="true"></i>Quét mã QR<i class="ph ph-caret-right go" aria-hidden="true"></i></a></c:when>
-                                <c:otherwise><span class="sc-action is-disabled" aria-disabled="true"><i class="ph ph-scan" aria-hidden="true"></i>Quét mã QR<small>Sắp ra mắt</small></span></c:otherwise>
-                            </c:choose>
-                            <c:choose>
-                                <c:when test="${not empty verifyUrl}"><a class="sc-action" href="${verifyUrl}"><i class="ph ph-list-checks" aria-hidden="true"></i>Kiểm tra mã vé<i class="ph ph-caret-right go" aria-hidden="true"></i></a></c:when>
-                                <c:otherwise><span class="sc-action is-disabled" aria-disabled="true"><i class="ph ph-list-checks" aria-hidden="true"></i>Kiểm tra mã vé<small>Sắp ra mắt</small></span></c:otherwise>
-                            </c:choose>
-                            <c:choose>
-                                <c:when test="${not empty seatUrl}"><a class="sc-action" href="${seatUrl}"><i class="ph ph-armchair" aria-hidden="true"></i>Xem sơ đồ chỗ ngồi<i class="ph ph-caret-right go" aria-hidden="true"></i></a></c:when>
-                                <c:otherwise><span class="sc-action is-disabled" aria-disabled="true"><i class="ph ph-armchair" aria-hidden="true"></i>Xem sơ đồ chỗ ngồi<small>Sắp ra mắt</small></span></c:otherwise>
-                            </c:choose>
-                            <c:choose>
-                                <c:when test="${not empty selectedEvent}">
-                                    <a class="sc-action" href="${ctx}/staff/event-detail?eventId=${selectedEvent.eventId}"><i class="ph ph-notepad" aria-hidden="true"></i>Chi tiết sự kiện<i class="ph ph-caret-right go" aria-hidden="true"></i></a>
+                <%-- ===================== Giữa: chi tiết khách hàng ===================== --%>
+                <section class="sc-main">
+                    <c:choose>
+                        <c:when test="${empty customer}">
+                            <div class="sc-panel">
+                                <div class="sc-empty">
+                                    <i class="ph ph-identification-badge" aria-hidden="true"></i>
+                                    Chọn một khách hàng trong danh sách để xem thông tin và vé.
+                                </div>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <%-- Thông tin khách hàng + thống kê vé --%>
+                            <div class="sc-panel">
+                                <div class="sc-profile">
+                                    <span class="sc-avatar is-lg ${contextStatus == 'CHECKED_IN' || contextStatus == 'PARTIAL' ? 'is-ok' : ''}"><c:out value="${customer.initials}"/></span>
+                                    <div>
+                                        <div>
+                                            <h2><c:out value="${customer.fullName}"/></h2>
+                                            <c:choose>
+                                                <c:when test="${contextStatus == 'CHECKED_IN'}"><span class="sc-badge is-ok">Đã check-in</span></c:when>
+                                                <c:when test="${contextStatus == 'NOT_CHECKED_IN'}"><span class="sc-badge is-none">Chưa check-in</span></c:when>
+                                                <c:when test="${contextStatus == 'PARTIAL'}"><span class="sc-badge is-partial">${ticketChecked}/${ticketActive} đã check-in</span></c:when>
+                                                <c:otherwise><span class="sc-badge is-cancelled">Vé đã hủy</span></c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                        <span class="sc-line"><i class="ph ph-phone" aria-hidden="true"></i><c:out value="${empty customer.phone ? 'Chưa cập nhật' : customer.phone}"/></span>
+                                        <span class="sc-line"><i class="ph ph-envelope-simple" aria-hidden="true"></i><c:out value="${empty customer.email ? 'Chưa cập nhật' : customer.email}"/></span>
+                                        <span class="sc-line"><i class="ph ph-map-pin" aria-hidden="true"></i><c:out value="${empty customer.address ? 'Chưa cập nhật' : customer.address}"/></span>
+                                    </div>
+                                </div>
+
+                                <div class="sc-stats">
+                                    <div class="sc-stat"><span>Tổng số vé</span><b>${ticketActive}</b></div>
+                                    <div class="sc-stat"><span>Đã check-in</span><b>${ticketChecked}</b></div>
+                                    <div class="sc-stat"><span>Chưa check-in</span><b>${ticketNotChecked}</b></div>
+                                </div>
+                                <c:if test="${ticketCancelled > 0}">
+                                    <p class="sc-note">Chưa tính ${ticketCancelled} vé đã hủy.</p>
+                                </c:if>
+
+                                <c:if test="${fn:length(customerEvents) > 1}">
+                                    <div class="sc-events">
+                                        <span>Khách có vé ở ${fn:length(customerEvents)} sự kiện, chọn sự kiện:</span>
+                                        <c:forEach var="ev" items="${customerEvents}">
+                                            <c:url var="evUrl" value="/staff/customers">
+                                                <c:param name="customerId" value="${customer.userId}"/>
+                                                <c:param name="eventId" value="${ev.eventId}"/>
+                                                <c:param name="tab" value="${selectedTab}"/>
+                                                <c:if test="${not empty keyword}"><c:param name="keyword" value="${keyword}"/></c:if>
+                                                <c:if test="${currentPage > 1}"><c:param name="page" value="${currentPage}"/></c:if>
+                                            </c:url>
+                                            <a class="sc-event-pill ${ev.eventId == selectedEvent.eventId ? 'is-active' : ''}" href="${evUrl}"><c:out value="${ev.eventName}"/></a>
+                                        </c:forEach>
+                                    </div>
+                                </c:if>
+                            </div>
+
+                            <%-- Thông tin vé --%>
+                            <div class="sc-panel">
+                                <h3 class="sc-title">Thông tin vé</h3>
+                                <c:choose>
+                                    <c:when test="${empty tickets}">
+                                        <div class="sc-empty"><i class="ph ph-ticket" aria-hidden="true"></i>Khách hàng chưa có vé trong sự kiện này.</div>
                                     </c:when>
                                     <c:otherwise>
-                                    <a class="sc-action" href="${ctx}/staff"><i class="ph ph-calendar" aria-hidden="true"></i>Sự kiện được phân công<i class="ph ph-caret-right go" aria-hidden="true"></i></a>
+                                        <div class="sc-table-wrap">
+                                            <table class="sc-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Mã vé</th><th>Loại vé</th><th>Sự kiện</th><th>Thời gian</th><th>Trạng thái</th><th>Thao tác</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <c:forEach var="t" items="${tickets}">
+                                                        <c:set var="ts" value="${fn:toLowerCase(t.status)}"/>
+                                                        <c:set var="es" value="${t.eventStartTime}"/>
+                                                        <c:set var="ci" value="${t.checkInTime}"/>
+                                                        <c:set var="statusText" value="${ts == 'checkedin' ? 'Đã check-in' : (ts == 'valid' ? 'Chưa check-in' : (ts == 'cancelled' ? 'Đã hủy' : t.status))}"/>
+                                                        <tr>
+                                                            <td><b><c:out value="${t.ticketCode}"/></b></td>
+                                                            <td><c:out value="${t.ticketName}"/></td>
+                                                            <td><c:out value="${t.eventName}"/></td>
+                                                            <td>${fn:substring(es, 8, 10)}/${fn:substring(es, 5, 7)}/${fn:substring(es, 0, 4)} ${fn:substring(es, 11, 16)}</td>
+                                                            <td>
+                                                                <c:choose>
+                                                                    <c:when test="${ts == 'checkedin'}"><span class="sc-badge is-ok">Đã check-in</span></c:when>
+                                                                    <c:when test="${ts == 'valid'}"><span class="sc-badge is-none">Chưa check-in</span></c:when>
+                                                                    <c:when test="${ts == 'cancelled'}"><span class="sc-badge is-cancelled">Đã hủy</span></c:when>
+                                                                    <c:otherwise><span class="sc-badge is-none"><c:out value="${t.status}"/></span></c:otherwise>
+                                                                </c:choose>
+                                                            </td>
+                                                            <td>
+                                                                <button type="button" class="sc-btn" data-bs-toggle="modal" data-bs-target="#ticketModal"
+                                                                        data-code="<c:out value='${t.ticketCode}'/>"
+                                                                        data-type="<c:out value='${t.ticketName}'/>"
+                                                                        data-seat="<c:out value='${t.seatLabel}'/>"
+                                                                        data-order="<c:out value='${t.orderCode}'/>"
+                                                                        data-event="<c:out value='${t.eventName}'/>"
+                                                                        data-status="<c:out value='${statusText}'/>"
+                                                                        data-checkin="<c:if test='${not empty ci}'>${fn:substring(ci, 11, 16)} - ${fn:substring(ci, 8, 10)}/${fn:substring(ci, 5, 7)}/${fn:substring(ci, 0, 4)}</c:if>">Xem</button>
+                                                            </td>
+                                                        </tr>
+                                                    </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </c:otherwise>
                                 </c:choose>
+                            </div>
 
-                            <div class="sc-warning">
-                                <i class="ph ph-info" aria-hidden="true"></i>
-                                <div><b>Lưu ý</b>Chỉ xem được thông tin khách hàng của các sự kiện được phân công cho bạn.</div>
+                            <%-- Lịch sử check-in (từ Tickets.check_in_time) --%>
+                            <div class="sc-panel">
+                                <h3 class="sc-title">Lịch sử check-in</h3>
+                                <c:choose>
+                                    <c:when test="${empty history}">
+                                        <div class="sc-empty"><i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>Chưa có lượt check-in nào.</div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <ul class="sc-timeline">
+                                            <c:forEach var="h" items="${history}">
+                                                <c:set var="hc" value="${h.checkInTime}"/>
+                                                <li class="sc-tl-item">
+                                                    <span class="sc-tl-dot"><i class="ph ph-check" aria-hidden="true"></i></span>
+                                                    <div class="sc-tl-body">
+                                                        <div>
+                                                            <b><c:out value="${h.eventName}"/></b>
+                                                            <small><i class="ph ph-map-pin" style="font-size:14px;vertical-align:-2px" aria-hidden="true"></i> <c:out value="${h.venueName}"/>
+                                                                · <c:out value="${h.ticketCode}"/> (<c:out value="${h.ticketName}"/>)</small>
+                                                        </div>
+                                                        <div class="sc-tl-time">
+                                                            ${fn:substring(hc, 8, 10)}/${fn:substring(hc, 5, 7)}/${fn:substring(hc, 0, 4)} ${fn:substring(hc, 11, 16)}
+                                                            <span class="ok">Check-in thành công</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </section>
+
+                <%-- ===================== Phải: sự kiện + thao tác nhanh ===================== --%>
+                <aside class="sc-side">
+                    <c:if test="${not empty selectedEvent}">
+                        <c:set var="st" value="${selectedEvent.startTime}"/>
+                        <c:set var="en" value="${selectedEvent.endTime}"/>
+                        <div class="sc-panel">
+                            <h3 class="sc-title">Thông tin sự kiện</h3>
+                            <div class="sc-event-img">
+                                <c:choose>
+                                    <c:when test="${not empty selectedEvent.eventImage}">
+                                        <img alt="" src="${ctx}/<c:out value='${selectedEvent.eventImage}'/>">
+                                    </c:when>
+                                    <c:otherwise><i class="ph ph-image" style="font-size:44px" aria-hidden="true"></i></c:otherwise>
+                                </c:choose>
+                                <span class="sc-badge"><c:out value="${selectedEvent.categoryName}"/></span>
+                            </div>
+                            <h4 class="sc-event-name"><c:out value="${selectedEvent.eventName}"/></h4>
+                            <span class="sc-line"><i class="ph ph-clock" aria-hidden="true"></i>${fn:substring(st, 11, 16)} - ${fn:substring(en, 11, 16)} (${fn:substring(st, 8, 10)}/${fn:substring(st, 5, 7)}/${fn:substring(st, 0, 4)})</span>
+                            <span class="sc-line"><i class="ph ph-map-pin" aria-hidden="true"></i><c:out value="${selectedEvent.venueName}"/></span>
+                            <div class="mt-3">
+                                <c:choose>
+                                    <c:when test="${selectedEvent.timeStatus == 'UPCOMING'}"><span class="sc-badge is-soon">Sắp diễn ra</span></c:when>
+                                    <c:when test="${selectedEvent.timeStatus == 'ONGOING'}"><span class="sc-badge is-live">Đang diễn ra</span></c:when>
+                                    <c:when test="${selectedEvent.timeStatus == 'CANCELLED'}"><span class="sc-badge is-cancelled">Đã hủy</span></c:when>
+                                    <c:otherwise><span class="sc-badge is-ended">Đã kết thúc</span></c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
-                    </aside>
-                </div>
-            </div>
-        </main>
+                    </c:if>
 
-        <%-- Modal xem vé (dữ liệu điền từ nút "Xem" bằng staff-customers.js) --%>
-        <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius:12px">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="ticketModalLabel">Thông tin vé</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    <div class="sc-panel">
+                        <h3 class="sc-title">Thao tác nhanh</h3>
+
+                        <c:choose>
+                            <c:when test="${not empty qrUrl}"><a class="sc-action" href="${qrUrl}"><i class="ph ph-scan" aria-hidden="true"></i>Quét mã QR<i class="ph ph-caret-right go" aria-hidden="true"></i></a></c:when>
+                            <c:otherwise><span class="sc-action is-disabled" aria-disabled="true"><i class="ph ph-scan" aria-hidden="true"></i>Quét mã QR<small>Sắp ra mắt</small></span></c:otherwise>
+                        </c:choose>
+                        <c:choose>
+                            <c:when test="${not empty verifyUrl}"><a class="sc-action" href="${verifyUrl}"><i class="ph ph-list-checks" aria-hidden="true"></i>Kiểm tra mã vé<i class="ph ph-caret-right go" aria-hidden="true"></i></a></c:when>
+                            <c:otherwise><span class="sc-action is-disabled" aria-disabled="true"><i class="ph ph-list-checks" aria-hidden="true"></i>Kiểm tra mã vé<small>Sắp ra mắt</small></span></c:otherwise>
+                        </c:choose>
+                        <c:choose>
+                            <c:when test="${not empty seatUrl}"><a class="sc-action" href="${seatUrl}"><i class="ph ph-armchair" aria-hidden="true"></i>Xem sơ đồ chỗ ngồi<i class="ph ph-caret-right go" aria-hidden="true"></i></a></c:when>
+                            <c:otherwise><span class="sc-action is-disabled" aria-disabled="true"><i class="ph ph-armchair" aria-hidden="true"></i>Xem sơ đồ chỗ ngồi<small>Sắp ra mắt</small></span></c:otherwise>
+                        </c:choose>
+                        <c:choose>
+                            <c:when test="${not empty selectedEvent}">
+                                <a class="sc-action" href="${ctx}/staff/event-detail?eventId=${selectedEvent.eventId}"><i class="ph ph-notepad" aria-hidden="true"></i>Chi tiết sự kiện<i class="ph ph-caret-right go" aria-hidden="true"></i></a>
+                            </c:when>
+                            <c:otherwise>
+                                <a class="sc-action" href="${ctx}/staff"><i class="ph ph-calendar" aria-hidden="true"></i>Sự kiện được phân công<i class="ph ph-caret-right go" aria-hidden="true"></i></a>
+                            </c:otherwise>
+                        </c:choose>
+
+                        <div class="sc-warning">
+                            <i class="ph ph-info" aria-hidden="true"></i>
+                            <div><b>Lưu ý</b>Chỉ xem được thông tin khách hàng của các sự kiện được phân công cho bạn.</div>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <div class="sc-modal-row"><span>Mã vé</span><b data-field="code"></b></div>
-                        <div class="sc-modal-row"><span>Loại vé</span><b data-field="type"></b></div>
-                        <div class="sc-modal-row"><span>Ghế</span><b data-field="seat"></b></div>
-                        <div class="sc-modal-row"><span>Mã đơn hàng</span><b data-field="order"></b></div>
-                        <div class="sc-modal-row"><span>Sự kiện</span><b data-field="event"></b></div>
-                        <div class="sc-modal-row"><span>Trạng thái</span><b data-field="status"></b></div>
-                        <div class="sc-modal-row"><span>Thời gian check-in</span><b data-field="checkin"></b></div>
-                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <%-- Modal xem vé (dữ liệu điền từ nút "Xem" bằng staff-customers.js) --%>
+    <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:12px">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="ticketModalLabel">Thông tin vé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="sc-modal-row"><span>Mã vé</span><b data-field="code"></b></div>
+                    <div class="sc-modal-row"><span>Loại vé</span><b data-field="type"></b></div>
+                    <div class="sc-modal-row"><span>Ghế</span><b data-field="seat"></b></div>
+                    <div class="sc-modal-row"><span>Mã đơn hàng</span><b data-field="order"></b></div>
+                    <div class="sc-modal-row"><span>Sự kiện</span><b data-field="event"></b></div>
+                    <div class="sc-modal-row"><span>Trạng thái</span><b data-field="status"></b></div>
+                    <div class="sc-modal-row"><span>Thời gian check-in</span><b data-field="checkin"></b></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <jsp:include page="/WEB-INF/views/staff/_footer.jsp"/>
-        <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
-        <script src="${ctx}/assets/js/event.js"></script>
-        <script src="${ctx}/assets/js/staff-customers.js"></script>
-    </body>
+    <jsp:include page="/WEB-INF/views/staff/_footer.jsp"/>
+    <script src="${ctx}/assets/js/bootstrap.bundle.js"></script>
+    <script src="${ctx}/assets/js/event.js"></script>
+    <script src="${ctx}/assets/js/staff-customers.js"></script>
+</body>
 </html>
