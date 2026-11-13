@@ -119,7 +119,7 @@ public class AuthFilter implements Filter {
             return "/staff";
         }
         if (Constants.ROLE_ORGANIZER.equalsIgnoreCase(role)) {
-            return "/organizer/event/list";
+            return "/organizer/dashboard";
         }
         return "/home";
     }
