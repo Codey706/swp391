@@ -223,7 +223,43 @@ body.sg-home { background: #fff; }
   border-color: var(--text-main);
   color: #fff !important;
 }
+/* ---- Nút cuộn trái/phải cho thanh thể loại ---- */
+.cat-scroller { position: relative; }
+.cat-track { overflow-x: auto; scroll-behavior: smooth; }
 
+.cat-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 40px; height: 40px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--sg-line-strong, #d4d4d8);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--text-main);
+  font-size: 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
+  cursor: pointer;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.cat-arrow[hidden] { display: none; }
+.cat-arrow:hover { background: var(--text-main); border-color: var(--text-main); color: #fff; }
+.cat-arrow-left  { left: -6px; }
+.cat-arrow-right { right: -6px; }
+
+/* Mờ dần ở mép để biết còn nội dung phía sau nút */
+.cat-arrow-left::before,
+.cat-arrow-right::before {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 28px;
+  pointer-events: none; z-index: -1;
+}
+.cat-arrow-left::before  { left: 20px;  background: linear-gradient(to right, rgba(255,255,255,.96), rgba(255,255,255,0)); }
+.cat-arrow-right::before { right: 20px; background: linear-gradient(to left,  rgba(255,255,255,.96), rgba(255,255,255,0)); }
+
+@media (max-width: 575.98px) {
+  .cat-arrow { display: none !important; }   /* mobile: vuốt tay, không cần nút */
+}
 /* ---- 4. Lưới thẻ sự kiện: ảnh trước, chữ bên dưới, cả thẻ bấm được ---- */
 .sg-events { padding: 36px 0 8px; }
 .sg-events-head {

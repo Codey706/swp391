@@ -19,7 +19,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
         <!-- External CSS -->
-        <link href="${pageContext.request.contextPath}/assets/css/home.css?v=20261108" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/assets/css/home.css?v=20261114" rel="stylesheet"/>
         <link href="${pageContext.request.contextPath}/assets/css/stitch-custom.css" rel="stylesheet"/>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,17 +158,32 @@
             </section>
 
             <!-- 4. Danh mục -->
-            <section class="category-pills-bar"><div class="container px-3 px-lg-5">
-                    <div class="d-flex align-items-center gap-2 overflow-x-auto no-scrollbar py-1" id="categoryGroup">
-                        <c:url var="allCategoryUrl" value="/home"><c:param name="keyword" value="${keyword}"/><c:param name="venueId" value="${venueId}"/><c:param name="dateFrom" value="${dateFrom}"/><c:param name="dateTo" value="${dateTo}"/><c:param name="priceMin" value="${priceMin}"/><c:param name="priceMax" value="${priceMax}"/></c:url>
-                        <a class="cat-btn text-decoration-none ${empty categoryId ? 'active' : ''}" href="${allCategoryUrl}">Tất cả (${totalEvents})</a>
-                        <c:forEach var="cat" items="${categories}">
-                            <c:url var="catUrl" value="/home"><c:param name="keyword" value="${keyword}"/><c:param name="venueId" value="${venueId}"/><c:param name="categoryId" value="${cat.id}"/><c:param name="dateFrom" value="${dateFrom}"/><c:param name="dateTo" value="${dateTo}"/><c:param name="priceMin" value="${priceMin}"/><c:param name="priceMax" value="${priceMax}"/></c:url>
-                            <a class="cat-btn text-decoration-none ${categoryId == cat.id ? 'active' : ''}" href="${catUrl}"><c:out value="${cat.name}"/> (${cat.total})</a>
-                        </c:forEach>
-                    </div>
-                </div></section>
+<section class="category-pills-bar">
+    <div class="container px-3 px-lg-5">
+        <div class="cat-scroller" id="catScroller">
 
+            <button type="button" class="cat-arrow cat-arrow-left" id="catPrev"
+                    aria-label="Cuộn sang trái" hidden>
+                <i class="ph ph-caret-left"></i>
+            </button>
+
+            <div class="cat-track d-flex align-items-center gap-2 no-scrollbar py-1" id="categoryGroup">
+                <c:url var="allCategoryUrl" value="/home"><c:param name="keyword" value="${keyword}"/><c:param name="venueId" value="${venueId}"/><c:param name="dateFrom" value="${dateFrom}"/><c:param name="dateTo" value="${dateTo}"/><c:param name="priceMin" value="${priceMin}"/><c:param name="priceMax" value="${priceMax}"/></c:url>
+                <a class="cat-btn text-decoration-none ${empty categoryId ? 'active' : ''}" href="${allCategoryUrl}">Tất cả (${totalEvents})</a>
+                <c:forEach var="cat" items="${categories}">
+                    <c:url var="catUrl" value="/home"><c:param name="keyword" value="${keyword}"/><c:param name="venueId" value="${venueId}"/><c:param name="categoryId" value="${cat.id}"/><c:param name="dateFrom" value="${dateFrom}"/><c:param name="dateTo" value="${dateTo}"/><c:param name="priceMin" value="${priceMin}"/><c:param name="priceMax" value="${priceMax}"/></c:url>
+                    <a class="cat-btn text-decoration-none ${categoryId == cat.id ? 'active' : ''}" href="${catUrl}"><c:out value="${cat.name}"/> (${cat.total})</a>
+                </c:forEach>
+            </div>
+
+            <button type="button" class="cat-arrow cat-arrow-right" id="catNext"
+                    aria-label="Cuộn sang phải" hidden>
+                <i class="ph ph-caret-right"></i>
+            </button>
+
+        </div>
+    </div>
+</section>
             <!-- 5. Lưới sự kiện (dữ liệu từ DB) -->
             <section class="sg-events" id="events"><div class="container px-3 px-lg-5">
                     <div class="sg-events-head">
@@ -415,5 +430,35 @@
                                     });
                                 });
         </script>
+        <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var track = document.getElementById('categoryGroup');
+        var prev  = document.getElementById('catPrev');
+        var next  = document.getElementById('catNext');
+        if (!track || !prev || !next) return;
+
+        function updateArrows() {
+            var max = track.scrollWidth - track.clientWidth;
+            prev.hidden = track.scrollLeft <= 4;          // đang ở đầu -> ẩn nút trái
+            next.hidden = track.scrollLeft >= max - 4;    // đang ở cuối / không tràn -> ẩn nút phải
+        }
+
+        function scrollByStep(dir) {
+            track.scrollBy({ left: dir * track.clientWidth * 0.7, behavior: 'smooth' });
+        }
+
+        prev.addEventListener('click', function () { scrollByStep(-1); });
+        next.addEventListener('click', function () { scrollByStep(1); });
+        track.addEventListener('scroll', updateArrows, { passive: true });
+        window.addEventListener('resize', updateArrows);
+
+        // Cuộn sẵn tới chip đang chọn (để thể loại active luôn nhìn thấy)
+        var active = track.querySelector('.cat-btn.active');
+        if (active) {
+            track.scrollLeft = active.offsetLeft - (track.clientWidth - active.offsetWidth) / 2;
+        }
+        updateArrows();
+    });
+</script>
     </body>
 </html>
