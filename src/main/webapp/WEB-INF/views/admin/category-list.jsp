@@ -15,17 +15,17 @@
 
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=5">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=6">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
 
     <body class="admin-portal-page">
 
@@ -35,7 +35,7 @@
 
         <%
             List<Category> categories
-                    = (List<Category>) request.getAttribute("categories");
+                    = (List<Category>) request.getAttribute("allCategories");
 
             int totalCategories = categories != null
                     ? categories.size() : 0;
@@ -53,6 +53,7 @@
                 }
             }
 
+            List<Category> listedItems = (List<Category>) request.getAttribute("categories");
             String contextPath = request.getContextPath();
         %>
 
@@ -247,10 +248,25 @@
                             <button class="add-button"
                                     type="button"
                                     onclick="window.location.href = '<%= contextPath%>/admin/category-create'">
-                                
+
                                 Add New Category
                             </button>
                         </div>
+
+                        <form method="get" action="${ctx}/admin/categories" class="admin-list-filter" role="search">
+                            <label class="admin-filter-search">
+                                <span class="visually-hidden">Search</span>
+                                <input type="search" name="keyword" maxlength="100" class="form-control" placeholder="Search name or description..." value="${fn:escapeXml(keyword)}">
+                            </label>
+                            <select name="status" class="form-select" aria-label="Filter status">
+                                <option value="ALL" ${(selectedStatus eq 'ALL' or (empty selectedStatus and 'ALL' eq 'ALL')) ? 'selected' : ''}>All statuses</option>
+                                <option value="ACTIVE" ${selectedStatus eq 'ACTIVE' ? 'selected' : ''}>Active</option>
+                                <option value="INACTIVE" ${selectedStatus eq 'INACTIVE' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                            <button type="submit" class="add-button">Filter</button>
+                            <a href="${ctx}/admin/categories" class="view-button admin-filter-reset">Reset</a>
+                            <span class="admin-filter-count">${matchedCount} result(s)</span>
+                        </form>
 
                         <div class="table-wrapper">
                             <table>
@@ -268,23 +284,39 @@
 
                                 <tbody>
                                     <%
-                                        if (categories != null && !categories.isEmpty()) {
-                                            for (Category category : categories) {
+                                        if (listedItems != null && !listedItems.isEmpty()) {
+                                            for (Category category : listedItems) {
                                     %>
                                     <tr>
                                         <td><%= category.getCategoryId()%></td>
 
-                                        <td>
-                                            <%= HtmlUtils.escape(category.getCategoryName(), "")%>
+                                        <td title="<%= HtmlUtils.escape(category.getCategoryName(), "")%>">
+                                            <%
+                                                String categoryName = category.getCategoryName() != null
+                                                        ? category.getCategoryName() : "";
+
+                                                String shortCategoryName = categoryName.length() > 30
+                                                        ? categoryName.substring(0, 30) + "..."
+                                                        : categoryName;
+                                            %>
+                                            <%= HtmlUtils.escape(shortCategoryName, "")%>
+                                        </td>
+
+                                        <td title="<%= HtmlUtils.escape(category.getDescription(), "")%>">
+                                            <%
+                                                String description = category.getDescription() != null
+                                                        ? category.getDescription() : "";
+
+                                                String shortDescription = description.length() > 60
+                                                        ? description.substring(0, 60) + "..."
+                                                        : description;
+                                            %>
+                                            <%= HtmlUtils.escape(shortDescription, "")%>
                                         </td>
 
                                         <td>
-                                            <%= HtmlUtils.escape(category.getDescription(), "")%>
-                                        </td>
-
-                                        <td>
-                                              <span class="status <%= category.getStatus() != null
-                                                ? category.getStatus().toLowerCase() : ""%>">
+                                            <span class="status <%= category.getStatus() != null
+                                                      ? category.getStatus().toLowerCase() : ""%>">
                                                 <%= HtmlUtils.escape(category.getStatus(), "")%>
                                             </span>
                                         </td>
@@ -325,6 +357,16 @@
                                 </tbody>
                             </table>
                         </div>
+                        <c:if test="${totalPages gt 1}">
+                            <nav class="admin-list-pages" aria-label="Pagination">
+                                <c:if test="${page gt 1}"><a class="view-button" href="${ctx}/admin/categories?${fn:escapeXml(filterQuery)}page=${page - 1}">Previous</a></c:if>
+                                <c:forEach var="p" begin="1" end="${totalPages}">
+                                    <a class="${p eq page ? 'add-button' : 'view-button'}" href="${ctx}/admin/categories?${fn:escapeXml(filterQuery)}page=${p}">${p}</a>
+                                </c:forEach>
+                                <c:if test="${page lt totalPages}"><a class="view-button" href="${ctx}/admin/categories?${fn:escapeXml(filterQuery)}page=${page + 1}">Next</a></c:if>
+                                </nav>
+                        </c:if>
+
                     </div>
 
                 </section>

@@ -1,6 +1,9 @@
 package controller;
 
 import dao.VoucherDAO;
+import utils.AdminListFilter;
+import java.util.List;
+import java.util.stream.Collectors;
 import model.Voucher;
 import utils.CsrfUtils;
 import utils.DBContext;
@@ -45,7 +48,23 @@ public class VoucherController extends HttpServlet {
                 request.setAttribute("voucher", voucher);
                 request.getRequestDispatcher(UPDATE_VIEW).forward(request, response);
             } else {
-                request.setAttribute("vouchers", voucherDAO.getAllVouchers());
+                List<Voucher> all = voucherDAO.getAllVouchers();
+                String keyword = AdminListFilter.param(request, "keyword");
+                String status = AdminListFilter.param(request, "status");
+                String type = AdminListFilter.param(request, "type");
+                List<Voucher> filtered = all.stream().filter(v
+                        -> (AdminListFilter.contains(v.getVoucherCode(), keyword)
+                        || AdminListFilter.contains(v.getVoucherName(), keyword)
+                        || Integer.toString(v.getVoucherId()).contains(keyword))
+                        && AdminListFilter.matches(v.getStatus(), status)
+                        && AdminListFilter.matches(v.getDiscountType(), type))
+                        .collect(Collectors.toList());
+                request.setAttribute("allVouchers", all);
+                request.setAttribute("vouchers", AdminListFilter.page(request, filtered,
+                        AdminListFilter.query("keyword", keyword, "status", status, "type", type)));
+                request.setAttribute("keyword", keyword);
+                request.setAttribute("selectedStatus", status);
+                request.setAttribute("selectedType", type);
                 request.getRequestDispatcher(LIST_VIEW).forward(request, response);
             }
         } catch (SQLException e) {
@@ -59,17 +78,23 @@ public class VoucherController extends HttpServlet {
         String action = request.getParameter("action");
         try {
             switch (action == null ? "" : action) {
-                case "create" -> save(request, response, false);
-                case "update" -> save(request, response, true);
-                case "activate", "deactivate" -> changeStatus(request, response, "activate".equals(action));
-                default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                case "create" ->
+                    save(request, response, false);
+                case "update" ->
+                    save(request, response, true);
+                case "activate", "deactivate" ->
+                    changeStatus(request, response, "activate".equals(action));
+                default ->
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
         } catch (SQLException e) {
             throw new ServletException(e);
         }
     }
 
-    /** Tạo mới hoặc cập nhật voucher; lỗi dữ liệu thì hiển thị lại form. */
+    /**
+     * Tạo mới hoặc cập nhật voucher; lỗi dữ liệu thì hiển thị lại form.
+     */
     private void save(HttpServletRequest request, HttpServletResponse response, boolean update)
             throws ServletException, IOException, SQLException {
         int voucherId = 0;
@@ -114,7 +139,9 @@ public class VoucherController extends HttpServlet {
         request.getRequestDispatcher(update ? UPDATE_VIEW : CREATE_VIEW).forward(request, response);
     }
 
-    /** Ngừng / kích hoạt voucher (không xóa cứng). */
+    /**
+     * Ngừng / kích hoạt voucher (không xóa cứng).
+     */
     private void changeStatus(HttpServletRequest request, HttpServletResponse response, boolean activate)
             throws IOException, SQLException {
         if (!CsrfUtils.isValid(request)) {
