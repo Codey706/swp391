@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="THỂ THAO">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#164c67"/><stop offset="1" stop-color="#22b8aa"/></linearGradient></defs>
+<rect width="960" height="540" fill="url(#bg)"/>
+<circle cx="870" cy="90" r="210" fill="white" opacity=".055"/>
+<circle cx="-50" cy="490" r="210" fill="white" opacity=".055"/>
+<path d="M0 460 Q320 375 575 450 T960 415 V540 H0Z" fill="#000" opacity=".13"/>
+<circle cx="740" cy="270" r="128" fill="none" stroke="white" stroke-width="15" opacity=".7"/><path d="M680 160 L790 195 L815 310 L720 380 L615 305 Z M615 305 L740 270 L790 195 M740 270 L815 310" fill="none" stroke="white" stroke-width="11" opacity=".7"/>
+<rect x="70" y="140" width="63" height="8" rx="4" fill="white" opacity=".8"/>
+<text x="70" y="245" fill="white" font-family="Arial, sans-serif" font-size="70" font-weight="800">THỂ THAO</text>
+<text x="74" y="293" fill="white" opacity=".87" font-family="Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="2">GIẢI ĐẤU &amp; SỨC TRẺ</text>
+<text x="74" y="452" fill="white" opacity=".75" font-family="Arial, sans-serif" font-size="24" letter-spacing="3">LIGHT TICKET</text>
+</svg>

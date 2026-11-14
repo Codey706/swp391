@@ -14,9 +14,9 @@ import utils.CsrfUtils;
 import utils.ValidationUtils;
 
 /**
- * UC-33 Moderate Reviews. GET /admin/reviews?status=&rating=&keyword=&page= :
- * danh sách đánh giá có lọc, phân trang. POST /admin/reviews :
- * action=hide|show, reviewId — ẩn/hiện (đổi Reviews.status), không xóa.
+ * UC-33 Moderate Reviews.
+ * GET  /admin/reviews?status=&rating=&keyword=&page= : danh sách đánh giá có lọc, phân trang.
+ * POST /admin/reviews : action=hide|show, reviewId — ẩn/hiện (đổi Reviews.status), không xóa.
  */
 @WebServlet("/admin/reviews")
 public class AdminReviewController extends HttpServlet {
@@ -29,7 +29,6 @@ public class AdminReviewController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         String status = request.getParameter("status");
         if (!ReviewDAO.ACTIVE.equals(status) && !ReviewDAO.HIDDEN.equals(status)) {
             status = null;
@@ -50,7 +49,7 @@ public class AdminReviewController extends HttpServlet {
             request.setAttribute("page", page);
             request.setAttribute("totalPages", totalPages);
         } catch (SQLException e) {
-            throw new ServletException("Cannot load reviews", e);
+            throw new ServletException(e);
         }
         request.setAttribute("status", status);
         request.setAttribute("rating", rating);
@@ -79,7 +78,7 @@ public class AdminReviewController extends HttpServlet {
         try {
             reviewDAO.setStatus(reviewId, newStatus);
         } catch (SQLException e) {
-            throw new ServletException("Cannot update review", e);
+            throw new ServletException(e);
         }
         // Giữ nguyên bộ lọc / trang đang xem (chỉ nhận chuỗi query do chính trang gửi lên)
         String back = request.getParameter("back");

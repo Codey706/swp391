@@ -1,12 +1,12 @@
 package controller.Staff;
 
-import static controller.Staff.StaffController.ERROR_GENERIC;
 import dao.StaffCustomerDAO;
 import dao.StaffEventDAO;
 import model.Auth;
 import model.StaffAssignment;
 import model.StaffCustomer;
 import utils.Constants;
+import utils.ValidationUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,21 +19,17 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * GET /staff/customers : thông tin khách hàng có vé trong các sự kiện được phân
- * công cho Staff. Tham số: tab (all|checked|unchecked), keyword, page,
- * customerId, eventId.
+ * GET /staff/customers : thông tin khách hàng có vé trong các sự kiện được phân công cho Staff.
+ * Tham số: tab (all|checked|unchecked), keyword, page, customerId, eventId.
  *
- * customerId / eventId chỉ là gợi ý chọn: server luôn kiểm tra lại với phạm vi
- * sự kiện của staff (lấy từ session) và trả 403 nếu nằm ngoài phạm vi.
+ * customerId / eventId chỉ là gợi ý chọn: server luôn kiểm tra lại với phạm vi sự kiện của staff
+ * (lấy từ session) và trả 403 nếu nằm ngoài phạm vi.
  */
 @WebServlet(name = "StaffCustomerController", urlPatterns = {"/staff/customers"})
 public class StaffCustomerController extends StaffController {
 
-    private static final Logger LOGGER = Logger.getLogger(StaffCustomerController.class.getName());
     private static final String VIEW = "/WEB-INF/views/staff/customers.jsp";
     private static final int KEYWORD_MAX_LENGTH = 100;
 
@@ -51,36 +47,32 @@ public class StaffCustomerController extends StaffController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        Auth staff = getAuthenticatedStaff(request, response);
-        if (staff == null) {
-            return;
-        }
-        int staffId = staff.getUserId();
-
-        String tabParam = request.getParameter("tab");
-        String tab = tabParam != null && TAB_LABELS.containsKey(tabParam) ? tabParam : StaffCustomerDAO.TAB_ALL;
-        String keyword = request.getParameter("keyword") == null ? "" : request.getParameter("keyword").trim();
-        if (keyword.length() > KEYWORD_MAX_LENGTH) {
-            keyword = keyword.substring(0, KEYWORD_MAX_LENGTH);
-        }
-        Integer requestedCustomer = parseId(request.getParameter("customerId"));
-        Integer requestedEvent = parseId(request.getParameter("eventId"));
-        if ((request.getParameter("customerId") != null && requestedCustomer == null)
-                || (request.getParameter("eventId") != null && requestedEvent == null)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        int pageSize = Constants.STAFF_CUSTOMER_PAGE_SIZE;
-        LocalDateTime now = LocalDateTime.now();
-
         try {
+            Auth staff = currentStaff(request);
+            int staffId = staff.getUserId();
+
+            String tabParam = request.getParameter("tab");
+            String tab = tabParam != null && TAB_LABELS.containsKey(tabParam) ? tabParam : StaffCustomerDAO.TAB_ALL;
+            String keyword = request.getParameter("keyword") == null ? "" : request.getParameter("keyword").trim();
+            if (keyword.length() > KEYWORD_MAX_LENGTH) {
+                keyword = keyword.substring(0, KEYWORD_MAX_LENGTH);
+            }
+            Integer requestedCustomer = parseId(request.getParameter("customerId"));
+            Integer requestedEvent = parseId(request.getParameter("eventId"));
+            if ((request.getParameter("customerId") != null && requestedCustomer == null)
+                    || (request.getParameter("eventId") != null && requestedEvent == null)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            int pageSize = Constants.STAFF_CUSTOMER_PAGE_SIZE;
+            LocalDateTime now = LocalDateTime.now();
+
             // ----- Danh sách khách hàng (bên trái)
             Map<String, Integer> tabCounts = customerDAO.countByTab(staffId);
             int totalResults = customerDAO.countCustomers(staffId, tab, keyword);
             int totalPages = Math.max(1, (int) Math.ceil(totalResults / (double) pageSize));
-            int currentPage = Math.min(Math.max(parsePage(request.getParameter("page")), 1), totalPages);
+            int currentPage = Math.min(Math.max(ValidationUtils.parseIntOrDefault(request.getParameter("page"), 1), 1), totalPages);
             List<StaffCustomer> customers = customerDAO.findCustomers(staffId, tab, keyword, currentPage, pageSize);
 
             request.setAttribute("customers", customers);
@@ -129,35 +121,18 @@ public class StaffCustomerController extends StaffController {
                 request.setAttribute("tickets", customerDAO.findTickets(staffId, customerId, eventId));
                 request.setAttribute("history", customerDAO.findCheckInHistory(staffId, customerId, eventId));
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Cannot load customer information, staffId=" + staffId, e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ERROR_GENERIC);
-            return;
-        }
 
-        request.setAttribute("tabLabels", TAB_LABELS);
-        request.setAttribute("selectedTab", tab);
-        request.setAttribute("keyword", keyword);
-        request.getRequestDispatcher(VIEW).forward(request, response);
+            request.setAttribute("tabLabels", TAB_LABELS);
+            request.setAttribute("selectedTab", tab);
+            request.setAttribute("keyword", keyword);
+            request.getRequestDispatcher(VIEW).forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
     }
 
     private static Integer parseId(String value) {
-        if (value == null || value.trim().isEmpty()) {
-            return null;
-        }
-        try {
-            int id = Integer.parseInt(value.trim());
-            return id > 0 ? id : null;
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private static int parsePage(String value) {
-        try {
-            return Integer.parseInt(value == null ? "" : value.trim());
-        } catch (NumberFormatException e) {
-            return 1;
-        }
+        int id = ValidationUtils.parseIntOrDefault(value, 0);
+        return id > 0 ? id : null;
     }
 }

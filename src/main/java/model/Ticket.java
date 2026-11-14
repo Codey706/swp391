@@ -22,6 +22,7 @@ public class Ticket {
     private String ticketName;
     private String seatLabel;
     private LocalDateTime eventStartTime;
+    private LocalDateTime eventEndTime;
 
     public Ticket() {
     }
@@ -126,4 +127,18 @@ public class Ticket {
         return eventStartTime == null ? ""
                 : eventStartTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm '·' dd/MM/yyyy"));
     }
+
+    public LocalDateTime getEventEndTime() {
+        return eventEndTime;
+    }
+
+    public void setEventEndTime(LocalDateTime eventEndTime) {
+        this.eventEndTime = eventEndTime;
+    }
+
+    public boolean isExpired() {
+        return eventEndTime != null
+                && !LocalDateTime.now().isBefore(eventEndTime);
+    }
+
 }

@@ -65,7 +65,7 @@ public class SeatMapDAO {
             + "seat_type, status) VALUES (?, NULL, ?, ?, ?, ?, ?, 'Available')";
 
     /** Các hạng vé ACTIVE của sự kiện, dùng để gán giá cho từng khu. */
-    public List<EventTicket> getTickets(int eventId) {
+    public List<EventTicket> getTickets(int eventId) throws SQLException {
         String sql = "SELECT event_ticket_id, ticket_name, price, quantity, available_quantity "
                 + "FROM Event_Tickets WHERE event_id = ? AND status = ? ORDER BY event_ticket_id";
         List<EventTicket> tickets = new ArrayList<>();
@@ -85,16 +85,10 @@ public class SeatMapDAO {
                     tickets.add(t);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return tickets;
     }
 
-    /**
-     * @throws SQLException để controller phân biệt "chưa có sơ đồ" (danh sách
-     * rỗng) với lỗi DB (ví dụ database chưa có bảng Event_Zones trong db.sql).
-     */
     public List<EventZone> getZones(int eventId) throws SQLException {
         List<EventZone> zones = new ArrayList<>();
         try (Connection connection = DBContext.getConnection();
@@ -126,6 +120,45 @@ public class SeatMapDAO {
     }
 
     /**
+     * Đối chiếu hạng vé với ghế đang có trong database: hạng thuộc khu ngồi phải có số vé đúng bằng
+     * số ghế và không được gắn thêm khu đứng. Dùng khi lưu sự kiện và khi gửi duyệt.
+     *
+     * @return thông báo lỗi cho từng hạng sai; rỗng nếu khớp
+     */
+    public List<String> findSeatTicketMismatches(int eventId) throws SQLException {
+        String sql = "SELECT et.ticket_name, et.quantity, "
+                + "SUM(CASE WHEN z.zone_type = 'STANDING' THEN 1 ELSE 0 END) AS standing_zones, "
+                + "(SELECT COUNT(*) FROM Event_Seats es JOIN Event_Zones sz ON sz.zone_id = es.zone_id "
+                + " WHERE sz.event_ticket_id = et.event_ticket_id AND sz.zone_type = 'SEATED') AS seats "
+                + "FROM Event_Tickets et JOIN Event_Zones z ON z.event_ticket_id = et.event_ticket_id "
+                + "WHERE et.event_id = ? AND et.status = ? "
+                + "GROUP BY et.event_ticket_id, et.ticket_name, et.quantity "
+                + "HAVING SUM(CASE WHEN z.zone_type = 'SEATED' THEN 1 ELSE 0 END) > 0 "
+                + "ORDER BY et.event_ticket_id";
+        List<String> problems = new ArrayList<>();
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, eventId);
+            statement.setString(2, Constants.TICKET_ACTIVE);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("ticket_name");
+                    int quantity = rs.getInt("quantity");
+                    int seats = rs.getInt("seats");
+                    if (rs.getInt("standing_zones") > 0) {
+                        problems.add("Hạng vé \"" + name + "\" đang gắn cả khu ngồi lẫn khu đứng. "
+                                + "Mỗi hạng vé chỉ được thuộc một loại khu.");
+                    } else if (quantity != seats) {
+                        problems.add("Hạng vé \"" + name + "\" có " + quantity + " vé nhưng khu ngồi có "
+                                + seats + " ghế. Hãy lưu lại sơ đồ ghế để đồng bộ.");
+                    }
+                }
+            }
+        }
+        return problems;
+    }
+
+    /**
      * Thay toàn bộ sơ đồ của sự kiện bằng danh sách khu mới: lưu/cập nhật hạng
      * vé, ghi các khu, sinh ghế cho khu ngồi, tất cả trong một transaction (lỗi ở
      * đâu thì rollback hết). Số lượng vé của hạng vé được gán cho khu luôn bằng
@@ -133,23 +166,17 @@ public class SeatMapDAO {
      *
      * @param zones mỗi khu mang eventTicketId = refId của hạng vé trong tickets
      */
-    public boolean saveLayout(int eventId, List<EventZone> zones, List<TicketChange> tickets) {
+    public void saveLayout(int eventId, List<EventZone> zones, List<TicketChange> tickets) throws SQLException {
         try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 deleteLayout(connection, eventId);
                 writeLayout(connection, eventId, zones, tickets);
                 connection.commit();
-                return true;
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
-            } finally {
-                connection.setAutoCommit(true);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 
@@ -219,22 +246,16 @@ public class SeatMapDAO {
     }
 
     /** Xóa toàn bộ sơ đồ ghế của sự kiện (khu + ghế). */
-    public boolean clearLayout(int eventId) {
+    public void clearLayout(int eventId) throws SQLException {
         try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 deleteLayout(connection, eventId);
                 connection.commit();
-                return true;
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;
-            } finally {
-                connection.setAutoCommit(true);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 

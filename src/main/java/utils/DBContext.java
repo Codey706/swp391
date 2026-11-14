@@ -1,4 +1,3 @@
-
 package utils;
 
 import java.sql.Connection;
@@ -8,8 +7,9 @@ import java.sql.SQLException;
 public class DBContext {
 
     // Có thể ghi đè bằng biến môi trường LTM_DB_URL / LTM_DB_USER / LTM_DB_PASSWORD
+    // để mỗi máy dùng cấu hình riêng mà không phải sửa code.
     private static final String URL = env("LTM_DB_URL",
-              "jdbc:sqlserver://127.0.0.1:1433;"
+              "jdbc:sqlserver://localhost:1433;"
             + "databaseName=LightTicketDB;"
             + "encrypt=false;"
             + "trustServerCertificate=true");
@@ -23,8 +23,12 @@ public class DBContext {
         } catch (ClassNotFoundException e) {
             throw new SQLException("SQL Server JDBC Driver not found", e);
         }
-
         return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    /** Lỗi vi phạm UNIQUE constraint (2627) / unique index (2601) của SQL Server. */
+    public static boolean isDuplicateKey(SQLException e) {
+        return e.getErrorCode() == 2627 || e.getErrorCode() == 2601;
     }
 
     private static String env(String name, String defaultValue) {

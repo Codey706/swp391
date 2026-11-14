@@ -32,6 +32,7 @@ public class TicketDAO {
             t.ticket_status,
             e.event_name,
             e.start_time,
+            e.end_time,
             v.venue_name,
             et.ticket_name,
             es.seat_label
@@ -83,6 +84,11 @@ public class TicketDAO {
                         );
                     }
 
+                    Timestamp endTime = rs.getTimestamp("end_time");
+                    if (endTime != null) {
+                        ticket.setEventEndTime(endTime.toLocalDateTime());
+                    }
+
                     tickets.add(ticket);
                 }
             }
@@ -97,7 +103,7 @@ public class TicketDAO {
     public List<Ticket> getTicketsByOrderId(int orderId) throws SQLException {
         String sql = """
             SELECT t.ticket_id, o.order_id, t.ticket_code, t.qr_code, t.ticket_status,
-                   e.event_name, e.start_time, v.venue_name, et.ticket_name, es.seat_label
+                   e.event_name, e.start_time, e.end_time, v.venue_name, et.ticket_name, es.seat_label
             FROM Tickets t
             JOIN Order_Details od ON od.order_detail_id = t.order_detail_id
             JOIN Orders o ON o.order_id = od.order_id
@@ -126,6 +132,10 @@ public class TicketDAO {
                     Timestamp startTime = rs.getTimestamp("start_time");
                     if (startTime != null) {
                         ticket.setEventStartTime(startTime.toLocalDateTime());
+                    }
+                    Timestamp endTime = rs.getTimestamp("end_time");
+                    if (endTime != null) {
+                        ticket.setEventEndTime(endTime.toLocalDateTime());
                     }
                     tickets.add(ticket);
                 }

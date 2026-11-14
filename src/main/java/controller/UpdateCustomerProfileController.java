@@ -1,93 +1,43 @@
 package controller;
 
 import dao.UserDAO;
-import java.io.IOException;
-import java.sql.SQLException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
 import model.Auth;
 import model.User;
 import utils.Constants;
+import utils.SessionUtils;
 import utils.ValidationUtils;
 
-@WebServlet(
-        name = "UpdateCustomerProfileController",
-        urlPatterns = {"/UpdateCustomerProfileController"}
-)
+/** Customer sửa hồ sơ của chính mình. */
+@WebServlet(name = "UpdateCustomerProfileController", urlPatterns = {"/UpdateCustomerProfileController"})
 public class UpdateCustomerProfileController extends HttpServlet {
 
-    private UserDAO userDao = new UserDAO();
+    private static final String EDIT_VIEW = "/WEB-INF/views/customer/edit.jsp";
+
+    private final UserDAO userDao = new UserDAO();
 
     @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        HttpSession session = request.getSession();
-
-        Auth sessionUser = (Auth) session.getAttribute("user");
-        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
-
-        //Chưa đăng nhập
-        if (userId == null) {
-            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-            return;
-        }
-
         try {
-
-            // Lấy thông tin user từ database
-            User user = userDao.getUserById(userId);
-
-            // Không tìm thấy user
-            if (user == null) {
-                response.sendError(
-                        HttpServletResponse.SC_NOT_FOUND,
-                        "Customer not found"
-                );
-                return;
-            }
-
-            // Gửi user sang edit.jsp
-            request.setAttribute("user", user);
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/customer/edit.jsp"
-            ).forward(request, response);
-
+            request.setAttribute("user", userDao.getUserById(SessionUtils.currentUser(request).getUserId()));
+            request.getRequestDispatcher(EDIT_VIEW).forward(request, response);
         } catch (SQLException e) {
-
-            throw new ServletException(
-                    "Cannot load customer information", e
-            );
+            throw new ServletException(e);
         }
     }
 
     @Override
-    protected void doPost(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // Hỗ trợ tiếng Việt
-        request.setCharacterEncoding("UTF-8");
-
-        HttpSession session = request.getSession();
-
-        Auth sessionUser = (Auth) session.getAttribute("user");
-        Integer userId = (sessionUser == null) ? null : sessionUser.getUserId();
-
-        // Chưa đăng nhập
-        if (userId == null) {
-            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-            return;
-        }
-
+        Auth sessionUser = SessionUtils.currentUser(request);
+        int userId = sessionUser.getUserId();
         String fullName = trim(request.getParameter("fullName"));
         String email = trim(request.getParameter("email"));
         String phone = trim(request.getParameter("phone"));
@@ -95,15 +45,13 @@ public class UpdateCustomerProfileController extends HttpServlet {
 
         User user = new User();
         user.setUserId(userId);
+        user.setUsername(sessionUser.getUsername());
         user.setFullName(fullName);
         user.setEmail(email);
         user.setPhone(phone.isEmpty() ? null : phone);
         user.setAddress(address.isEmpty() ? null : address);
 
         try {
-            // ==============================
-            // Validation: lỗi thì hiển thị lại form kèm dữ liệu đã nhập
-            // ==============================
             String error = null;
             if (!ValidationUtils.isLengthBetween(fullName,
                     Constants.PROFILE_FULL_NAME_MIN_LENGTH, Constants.PROFILE_FULL_NAME_MAX_LENGTH)) {
@@ -119,50 +67,27 @@ public class UpdateCustomerProfileController extends HttpServlet {
                 error = "Email này đã được sử dụng bởi tài khoản khác.";
             } else if (!phone.isEmpty() && userDao.existsPhoneOfOtherUser(phone, userId)) {
                 error = "Số điện thoại này đã được sử dụng bởi tài khoản khác.";
+            } else if (!userDao.updateCustomerProfile(user)) {
+                error = "Không thể cập nhật hồ sơ. Tài khoản của bạn có thể không còn hoạt động.";
             }
 
             if (error != null) {
-                User current = userDao.getUserById(userId);
-                if (current != null) {
-                    user.setUsername(current.getUsername());
-                }
+                // Hiển thị lại form kèm dữ liệu đã nhập
                 request.setAttribute("errorMessage", error);
                 request.setAttribute("user", user);
-                request.getRequestDispatcher(
-                        "/WEB-INF/views/customer/edit.jsp"
-                ).forward(request, response);
+                request.getRequestDispatcher(EDIT_VIEW).forward(request, response);
                 return;
             }
-
-            // ==============================
-            // Update Database
-            // ==============================
-            if (userDao.updateCustomerProfile(user)) {
-                // Đồng bộ thông tin mới vào session để Header cập nhật ngay lập tức
-                sessionUser.setFullName(user.getFullName());
-                sessionUser.setEmail(user.getEmail());
-                sessionUser.setPhone(user.getPhone());
-                sessionUser.setAddress(user.getAddress());
-                session.setAttribute("user", sessionUser);
-
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/CustomerProfileController"
-                );
-                return;
-            }
-
-            response.sendError(
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Update profile failed"
-            );
-
         } catch (SQLException e) {
-
-            throw new ServletException(
-                    "Cannot update customer profile", e
-            );
+            throw new ServletException(e);
         }
+
+        // Đồng bộ thông tin mới vào session để Header cập nhật ngay
+        sessionUser.setFullName(user.getFullName());
+        sessionUser.setEmail(user.getEmail());
+        sessionUser.setPhone(user.getPhone());
+        sessionUser.setAddress(user.getAddress());
+        response.sendRedirect(request.getContextPath() + "/CustomerProfileController");
     }
 
     private static String trim(String value) {

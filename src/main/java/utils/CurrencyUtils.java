@@ -9,10 +9,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-/**
- *
- * @author TRUC MAI
- */
 public class CurrencyUtils {
 
     private CurrencyUtils() {

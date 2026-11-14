@@ -7,186 +7,99 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.User;
+import utils.Constants;
+import utils.ValidationUtils;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
+/** Admin sửa thông tin, role, trạng thái của tài khoản (tài khoản Admin chỉ sửa thông tin cá nhân). */
 @WebServlet("/admin/user-edit")
 public class UserEditController extends HttpServlet {
 
-    private UserDAO userDAO;
+    private final UserDAO userDAO = new UserDAO();
 
-    @Override
-    public void init() {
-        userDAO = new UserDAO();
-    }
-
-    // Mở trang Edit User
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        String id = request.getParameter("id");
-
-        try {
-
-            int userId = Integer.parseInt(id);
-
-            User user = userDAO.getUserById(userId);
-
-            if (user == null) {
-                response.sendError(
-                        HttpServletResponse.SC_NOT_FOUND,
-                        "User not found"
-                );
-                return;
-            }
-
-            request.setAttribute("user", user);
-
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/admin/user-edit.jsp"
-            ).forward(request, response);
-
-        } catch (NumberFormatException e) {
-
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid user ID"
-            );
-
-        } catch (SQLException e) {
-
-            throw new ServletException(
-                    "Cannot load user for editing",
-                    e
-            );
+        int userId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), 0);
+        if (userId <= 0) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID");
+            return;
         }
-    }
-
-    // Update User
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
-
         try {
-            int userId = Integer.parseInt(request.getParameter("userId"));
-
-            String fullName = request.getParameter("fullName");
-            String phone = request.getParameter("phone");
-            String address = request.getParameter("address");
-            String role = request.getParameter("role");
-            String status = request.getParameter("status");
-
-            // Kiểm tra user tồn tại
-            User existingUser = userDAO.getUserById(userId);
-
-            if (existingUser == null) {
+            User user = userDAO.getUserById(userId);
+            if (user == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
                 return;
             }
+            request.setAttribute("user", user);
+            request.getRequestDispatcher("/WEB-INF/views/admin/user-edit.jsp").forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
+    }
 
-            // Không cho chỉnh sửa Role hoặc Status của Admin
-            // Nếu là Admin thì chỉ cho cập nhật thông tin cá nhân
-            boolean isAdmin = "ADMIN".equalsIgnoreCase(existingUser.getRole());
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int userId = ValidationUtils.parseIntOrDefault(request.getParameter("userId"), 0);
+        String fullName = request.getParameter("fullName") == null ? "" : request.getParameter("fullName").trim();
+        String role = request.getParameter("role");
+        String status = request.getParameter("status");
+        if (userId <= 0) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid user ID");
+            return;
+        }
+        if (!ValidationUtils.isLengthBetween(fullName,
+                Constants.PROFILE_FULL_NAME_MIN_LENGTH, Constants.PROFILE_FULL_NAME_MAX_LENGTH)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Full name must be "
+                    + Constants.PROFILE_FULL_NAME_MIN_LENGTH + "-" + Constants.PROFILE_FULL_NAME_MAX_LENGTH + " characters");
+            return;
+        }
 
-            if (isAdmin) {
-                role = existingUser.getRole();
-                status = existingUser.getStatus();
+        try {
+            User existing = userDAO.getUserById(userId);
+            if (existing == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
+                return;
             }
-
-            // Kiểm tra Role nếu không phải Admin
-            if (!isAdmin) {
-                if (role == null
-                        || (!"ORGANIZER".equalsIgnoreCase(role)
-                        && !"STAFF".equalsIgnoreCase(role)
-                        && !"CUSTOMER".equalsIgnoreCase(role))) {
-
-                    response.sendError(
-                            HttpServletResponse.SC_BAD_REQUEST,
-                            "Invalid role"
-                    );
-                    return;
-                }
+            // Tài khoản Admin: không cho đổi role / status
+            boolean isAdmin = Constants.ROLE_ADMIN.equalsIgnoreCase(existing.getRole());
+            if (!isAdmin && canonicalRole(role) == null) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid role");
+                return;
             }
-
-            // Kiểm tra Status nếu không phải Admin
-            if (!isAdmin) {
-                if (status == null
-                        || (!"ACTIVE".equalsIgnoreCase(status)
-                        && !"INACTIVE".equalsIgnoreCase(status))) {
-
-                    response.sendError(
-                            HttpServletResponse.SC_BAD_REQUEST,
-                            "Invalid status"
-                    );
-                    return;
-                }
-            }
-
-            // Cập nhật thông tin cá nhân
-            User user = new User();
-            user.setUserId(userId);
-            user.setFullName(fullName);
-            user.setPhone(phone);
-            user.setAddress(address);
-
-            boolean infoUpdated = userDAO.updateUser(user);
-
-            if (!infoUpdated) {
-                response.sendError(
-                        HttpServletResponse.SC_CONFLICT,
-                        "Cannot update user information"
-                );
+            if (!isAdmin && !("ACTIVE".equalsIgnoreCase(status) || "INACTIVE".equalsIgnoreCase(status))) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid status");
                 return;
             }
 
-            /// Cập nhật Role nếu không phải Admin
-if (!isAdmin) {
-                boolean roleUpdated = userDAO.updateUserRole(
-                        userId, role.toUpperCase()
-                );
-
-                if (!roleUpdated) {
-                    response.sendError(
-                            HttpServletResponse.SC_CONFLICT,
-                            "Cannot update user role"
-                    );
-                    return;
-                }
+            User user = new User();
+            user.setUserId(userId);
+            user.setFullName(fullName);
+            user.setPhone(request.getParameter("phone"));
+            user.setAddress(request.getParameter("address"));
+            boolean updated = userDAO.updateUser(user)
+                    && (isAdmin || userDAO.updateUserRole(userId, canonicalRole(role))
+                    && userDAO.updateUserStatus(userId, status.toUpperCase()));
+            if (!updated) {
+                response.sendError(HttpServletResponse.SC_CONFLICT, "Cannot update user");
+                return;
             }
-
-            // Cập nhật Status nếu không phải Admin
-            if (!isAdmin) {
-                boolean statusUpdated = userDAO.updateUserStatus(
-                        userId, status.toUpperCase()
-                );
-
-                if (!statusUpdated) {
-                    response.sendError(
-                            HttpServletResponse.SC_CONFLICT,
-                            "Cannot update user status"
-                    );
-                    return;
-                }
-            }
-
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/admin/user-detail?id="
-                    + userId
-            );
-
-        } catch (NumberFormatException e) {
-            response.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid user ID"
-            );
-
+            response.sendRedirect(request.getContextPath() + "/admin/user-detail?id=" + userId);
         } catch (SQLException e) {
-            throw new ServletException("Cannot update user", e);
+            throw new ServletException(e);
         }
+    }
+
+    /** Role theo đúng dạng toàn hệ thống dùng (Customer/Organizer/Staff); null nếu không hợp lệ. */
+    private static String canonicalRole(String role) {
+        for (String valid : new String[]{Constants.ROLE_ORGANIZER, Constants.ROLE_STAFF, Constants.ROLE_CUSTOMER}) {
+            if (valid.equalsIgnoreCase(role)) {
+                return valid;
+            }
+        }
+        return null;
     }
 }

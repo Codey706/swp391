@@ -14,7 +14,8 @@ import java.io.IOException;
 public class SelectEventController extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         String keyword = request.getParameter("keyword");
         String target = request.getContextPath() + "/home";
         if (keyword != null && !keyword.isBlank()) {

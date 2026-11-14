@@ -33,6 +33,17 @@
             <c:choose>
                 <c:when test="${empty shDashboard}">
                     <a class="sh-link ${param.active == 'tickets' ? 'is-active' : ''}" href="${shCtx}/customer/booking-history">Vé của tôi</a>
+
+                    <c:if test="${shRole == 'customer'}">
+                        <a class="sh-link ${param.active == 'wishlist' ? 'is-active' : ''}"
+                           href="${shCtx}/customer/wishlist">
+
+                            <i class="ph ph-heart"></i>
+                            Yêu thích
+
+                        </a>
+                    </c:if>
+
                 </c:when>
                 <c:otherwise>
                     <a class="sh-link" href="${shDashboard}">Về Dashboard</a>

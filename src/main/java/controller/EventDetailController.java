@@ -15,11 +15,12 @@ import java.util.List;
 import model.EventZone;
 import model.Venue;
 import dao.TicketBookingDAO;
-import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import model.Auth;
 import utils.Constants;
 import utils.CsrfUtils;
+import utils.SessionUtils;
+import utils.ValidationUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,50 +30,60 @@ import model.Event;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import dao.WishlistDAO;
 
 /**
- * Controller for displaying a public event's detail page.
- * URL pattern: /event/detail?id=123
+ * Trang chi tiết sự kiện công khai: /event/detail?id=123
  */
 @WebServlet("/event/detail")
 public class EventDetailController extends HttpServlet {
-    private static final long serialVersionUID = 1L;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String idParam = request.getParameter("id");
-        int eventId = 0;
-        try {
-            eventId = Integer.parseInt(idParam);
-        } catch (NumberFormatException ignored) {
-        }
+        int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("id"), 0);
         if (eventId <= 0) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid event id");
             return;
         }
-        EventDAO dao = new EventDAO();
-        Event event = dao.getPublicEventById(eventId);
-        if (event == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Event not found");
-            return;
-        }
         try {
+            Event event = new EventDAO().getPublicEventById(eventId);
+            if (event == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Event not found");
+                return;
+            }
             request.setAttribute("tickets", new TicketBookingDAO().getActiveTickets(eventId));
             loadReviews(request, eventId);
             loadVenueAndSeatMap(request, event);
+
+            Auth customer = SessionUtils.currentUser(request);
+
+            boolean isFavorite = false;
+
+            if (customer != null
+                    && Constants.ROLE_CUSTOMER.equalsIgnoreCase(customer.getRole())) {
+
+                isFavorite = new WishlistDAO().isFavorite(
+                        customer.getUserId(), eventId
+                );
+
+                CsrfUtils.expose(request);
+            }
+
+            request.setAttribute("isFavorite", isFavorite);
+
+            // Chỉ mở đặt vé khi sự kiện chưa bắt đầu (cùng điều kiện với TicketBookingDAO.getBookableEvent)
+            request.setAttribute("event", event);
+            request.setAttribute("bookable", event.getStartTime() != null && event.getStartTime().isAfter(LocalDateTime.now()));
+            request.getRequestDispatcher("/WEB-INF/views/event/event-detail.jsp").forward(request, response);
         } catch (SQLException e) {
-            throw new ServletException("Cannot load event tickets", e);
+            throw new ServletException(e);
         }
-        // Chỉ mở đặt vé khi sự kiện chưa bắt đầu (cùng điều kiện với TicketBookingDAO.getBookableEvent)
-        boolean bookable = event.getStartTime() != null && event.getStartTime().isAfter(LocalDateTime.now());
-        request.setAttribute("event", event);
-        request.setAttribute("bookable", bookable);
-        request.getRequestDispatcher("/WEB-INF/views/event/event-detail.jsp")
-                .forward(request, response);
     }
 
-    /** UC-19: đánh giá công khai + quyền đánh giá của khách đang đăng nhập. */
+    /**
+     * UC-19: đánh giá công khai + quyền đánh giá của khách đang đăng nhập.
+     */
     private void loadReviews(HttpServletRequest request, int eventId) throws SQLException {
         ReviewDAO reviewDAO = new ReviewDAO();
         double[] summary = reviewDAO.summary(eventId);
@@ -80,25 +91,20 @@ public class EventDetailController extends HttpServlet {
         request.setAttribute("reviewCount", (int) summary[1]);
         request.setAttribute("reviews", reviewDAO.findPublic(eventId, 20));
 
-        HttpSession session = request.getSession(false);
-        Object user = session == null ? null : session.getAttribute(Constants.SESSION_USER);
-        if (user instanceof Auth auth && Constants.ROLE_CUSTOMER.equalsIgnoreCase(auth.getRole())) {
+        Auth auth = SessionUtils.currentUser(request);
+        if (auth != null && Constants.ROLE_CUSTOMER.equalsIgnoreCase(auth.getRole())) {
             Map<String, Object> mine = reviewDAO.findByCustomerAndEvent(auth.getUserId(), eventId);
             request.setAttribute("myReview", mine);
             request.setAttribute("canReview", mine == null && reviewDAO.findCheckedInTicket(auth.getUserId(), eventId) > 0);
             CsrfUtils.expose(request);
         }
-        if (session != null && session.getAttribute("reviewMessage") != null) {
-            request.setAttribute("reviewMessage", session.getAttribute("reviewMessage"));
-            request.setAttribute("reviewOk", session.getAttribute("reviewOk"));
-            session.removeAttribute("reviewMessage");
-            session.removeAttribute("reviewOk");
-        }
+        SessionUtils.moveFlash(request, "reviewMessage", "reviewOk");
     }
 
     /**
-     * UC-11: địa chỉ địa điểm và sơ đồ ghế chỉ xem. Dùng lại SeatStatusSupport của trang Staff,
-     * nhưng gộp "đang giữ / đã đặt / đã check-in" thành một trạng thái "đã bán" cho khách.
+     * UC-11: địa chỉ địa điểm và sơ đồ ghế chỉ xem. Dùng lại SeatStatusSupport
+     * của trang Staff, nhưng gộp "đang giữ / đã đặt / đã check-in" thành một
+     * trạng thái "đã bán" cho khách.
      */
     private void loadVenueAndSeatMap(HttpServletRequest request, Event event) throws SQLException {
         Venue venue = new VenueDAO().getVenueById(event.getVenueId());

@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,99 +41,95 @@ public class EventCreateController extends EventController {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        if (getAuthenticatedOrganizer(request, response) == null) {
-            return;
+        try {
+            showForm(request, response, null, null, new ArrayList<>(), "draft");
+        } catch (SQLException e) {
+            throw new ServletException(e);
         }
-        showForm(request, response, null, null, new ArrayList<>(), "draft");
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        Auth organizer = getAuthenticatedOrganizer(request, response);
-        if (organizer == null) {
-            return;
-        }
-
-        Event event = buildEventFromRequest(request, organizer.getUserId());
-        boolean submitForApproval = isSubmitAction(request);
-        boolean seated = MODE_SEATED.equals(request.getParameter("ticketMode"));
-
-        Map<String, String> errors = validateEventInformation(event, 0);
-
-        // ---- Hạng vé: theo số lượng hoặc theo sơ đồ ghế
-        List<EventTicket> tickets = new ArrayList<>();
-        LayoutRequest layout = null;
-        List<TicketChange> changes = new ArrayList<>();
-        List<String> seatErrors = new ArrayList<>();
-        boolean hasTickets;
-
-        if (seated) {
-            layout = SeatMapSupport.parse(request.getParameter("layoutJson"));
-            if (layout == null) {
-                seatErrors.add("Dữ liệu sơ đồ ghế không hợp lệ. Vui lòng thử lại.");
-            } else {
-                int venueCapacity = event.getVenueId() > 0 && !errors.containsKey("venueId")
-                        ? eventDAO.getVenueCapacity(event.getVenueId()) : -1;
-                SeatMapSupport.validate(layout, new ArrayList<>(), venueCapacity,
-                        this::validateTicket, seatErrors, changes);
-            }
-            if (!seatErrors.isEmpty()) {
-                errors.put("tickets", "Vui lòng kiểm tra lại sơ đồ ghế và hạng vé.");
-            }
-            hasTickets = layout != null && seatErrors.isEmpty() && !layout.zones.isEmpty();
-        } else {
-            tickets = buildTicketsFromRequest(request);
-            validateTickets(tickets, event.getVenueId(), errors);
-            hasTickets = !tickets.isEmpty();
-        }
-
-        // ---- Ảnh sự kiện (bắt buộc khi gửi duyệt)
-        Part imagePart = null;
-        String imageError;
         try {
-            imagePart = request.getPart("eventImage");
-            imageError = validateEventImage(imagePart);
-        } catch (IllegalStateException e) { // vượt giới hạn @MultipartConfig
-            imageError = "Ảnh vượt quá dung lượng tối đa 5MB.";
-        }
-        if (imageError != null) {
-            errors.put("eventImage", imageError);
-        }
+            Auth organizer = currentOrganizer(request);
 
-        // ---- Điều kiện để gửi duyệt
-        if (submitForApproval) {
-            if (!hasTickets && !errors.containsKey("tickets")) {
-                errors.put("tickets", "Cần có ít nhất một hạng vé để gửi duyệt. "
-                        + "Hãy cấu hình vé ở bước 3, hoặc chọn \"Lưu nháp\" để làm sau.");
+            Event event = buildEventFromRequest(request, organizer.getUserId());
+            boolean submitForApproval = isSubmitAction(request);
+            boolean seated = MODE_SEATED.equals(request.getParameter("ticketMode"));
+
+            Map<String, String> errors = validateEventInformation(event, 0);
+
+            // ---- Hạng vé: theo số lượng hoặc theo sơ đồ ghế
+            List<EventTicket> tickets = new ArrayList<>();
+            LayoutRequest layout = null;
+            List<TicketChange> changes = new ArrayList<>();
+            List<String> seatErrors = new ArrayList<>();
+            boolean hasTickets;
+
+            if (seated) {
+                layout = SeatMapSupport.parse(request.getParameter("layoutJson"));
+                if (layout == null) {
+                    seatErrors.add("Dữ liệu sơ đồ ghế không hợp lệ. Vui lòng thử lại.");
+                } else {
+                    int venueCapacity = event.getVenueId() > 0 && !errors.containsKey("venueId")
+                            ? eventDAO.getVenueCapacity(event.getVenueId()) : -1;
+                    SeatMapSupport.validate(layout, new ArrayList<>(), venueCapacity,
+                            this::validateTicket, seatErrors, changes);
+                }
+                if (!seatErrors.isEmpty()) {
+                    errors.put("tickets", "Vui lòng kiểm tra lại sơ đồ ghế và hạng vé.");
+                }
+                hasTickets = layout != null && seatErrors.isEmpty() && !layout.zones.isEmpty();
+            } else {
+                tickets = buildTicketsFromRequest(request);
+                validateTickets(tickets, event.getVenueId(), errors);
+                hasTickets = !tickets.isEmpty();
             }
-            if (!hasFile(imagePart) && !errors.containsKey("eventImage")) {
-                errors.put("eventImage", "Cần có ảnh poster để gửi duyệt. "
-                        + "Hãy chọn ảnh ở bước 1, hoặc chọn \"Lưu nháp\" để làm sau.");
+
+            // ---- Ảnh sự kiện (bắt buộc khi gửi duyệt)
+            Part imagePart = null;
+            String imageError;
+            try {
+                imagePart = request.getPart("eventImage");
+                imageError = validateEventImage(imagePart);
+            } catch (IllegalStateException e) { // vượt giới hạn @MultipartConfig
+                imageError = "Ảnh vượt quá dung lượng tối đa 5MB.";
             }
-        }
-
-        // ---- Lưu: sự kiện + hạng vé (+ sơ đồ) cùng một transaction, luôn ở trạng thái DRAFT
-        if (errors.isEmpty()) {
-            boolean created = seated
-                    ? eventDAO.createEventWithSeatMap(event, layout.zones, changes)
-                    : eventDAO.createEventWithTickets(event, tickets);
-            if (!created) {
-                errors.put("general", "Không thể tạo sự kiện. Vui lòng thử lại sau.");
+            if (imageError != null) {
+                errors.put("eventImage", imageError);
             }
-        }
 
-        if (!errors.isEmpty()) {
-            showForm(request, response, event, errors, seatErrors, submitForApproval ? "submit" : "draft",
-                    tickets, layout, seated, request.getParameter("layoutJson"));
-            return;
-        }
+            // ---- Điều kiện để gửi duyệt
+            if (submitForApproval) {
+                if (!hasTickets && !errors.containsKey("tickets")) {
+                    errors.put("tickets", "Cần có ít nhất một hạng vé để gửi duyệt. "
+                            + "Hãy cấu hình vé ở bước 3, hoặc chọn \"Lưu nháp\" để làm sau.");
+                }
+                if (!hasFile(imagePart) && !errors.containsKey("eventImage")) {
+                    errors.put("eventImage", "Cần có ảnh poster để gửi duyệt. "
+                            + "Hãy chọn ảnh ở bước 1, hoặc chọn \"Lưu nháp\" để làm sau.");
+                }
+            }
 
-        boolean imageSaved = !hasFile(imagePart) || saveEventImage(imagePart, event.getEventId());
-        redirectToList(request, response, "successMessage",
-                buildResultMessage(event, submitForApproval, imageSaved, seated, tickets, layout));
+            // ---- Lưu: sự kiện + hạng vé (+ sơ đồ) cùng một transaction, luôn ở trạng thái DRAFT
+            if (!errors.isEmpty()) {
+                showForm(request, response, event, errors, seatErrors, submitForApproval ? "submit" : "draft",
+                        tickets, layout, seated, request.getParameter("layoutJson"));
+                return;
+            }
+            if (seated) {
+                eventDAO.createEventWithSeatMap(event, layout.zones, changes);
+            } else {
+                eventDAO.createEventWithTickets(event, tickets);
+            }
+
+            boolean imageSaved = !hasFile(imagePart) || saveEventImage(imagePart, event.getEventId());
+            redirectToList(request, response, "successMessage",
+                    buildResultMessage(event, submitForApproval, imageSaved, seated, tickets, layout));
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
     }
 
     /**
@@ -140,7 +137,7 @@ public class EventCreateController extends EventController {
      * đã tồn tại ở DRAFT nên mọi lỗi ở đây chỉ làm nó giữ nguyên là bản nháp.
      */
     private String buildResultMessage(Event event, boolean submitForApproval, boolean imageSaved,
-            boolean seated, List<EventTicket> tickets, LayoutRequest layout) {
+            boolean seated, List<EventTicket> tickets, LayoutRequest layout) throws SQLException {
         StringBuilder detail = new StringBuilder();
         if (seated && layout != null) {
             int seats = 0;
@@ -183,7 +180,7 @@ public class EventCreateController extends EventController {
     // ---------------------------------------------------------------- Hiển thị form
     private void showForm(HttpServletRequest request, HttpServletResponse response, Event event,
             Map<String, String> errors, List<String> seatErrors, String publishChoice)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         showForm(request, response, event, errors, seatErrors, publishChoice,
                 new ArrayList<>(), null, false, null);
     }
@@ -191,7 +188,7 @@ public class EventCreateController extends EventController {
     private void showForm(HttpServletRequest request, HttpServletResponse response, Event event,
             Map<String, String> errors, List<String> seatErrors, String publishChoice,
             List<EventTicket> tickets, LayoutRequest layout, boolean seated, String layoutJson)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         loadFormOptions(request);
         if (event != null) {
             request.setAttribute("event", event);

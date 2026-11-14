@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package utils;
 
 import java.io.IOException;
@@ -13,6 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Cấu hình VNPay Sandbox. Thứ tự lấy giá trị: biến môi trường VNPAY_TMN_CODE / VNPAY_HASH_SECRET,
+ * rồi src/main/resources/vnpay.properties (bỏ qua giá trị mẫu "YOUR_...").
  *
  * @author BT
  */
@@ -20,8 +18,8 @@ public final class VnPayConfig {
 
     private static final Logger LOGGER = Logger.getLogger(VnPayConfig.class.getName());
 
-    public static final String PAYMENT_URL
-            = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    public static final String PAYMENT_URL =
+            "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
     private static final Properties FILE_CONFIG = loadFileConfig();
 
@@ -36,9 +34,7 @@ public final class VnPayConfig {
         return require("VNPAY_HASH_SECRET", "vnpay.hashSecret");
     }
 
-    /**
-     * true khi đã có đủ TMN code và hash secret.
-     */
+    /** true khi đã có đủ TMN code và hash secret. */
     public static boolean isConfigured() {
         return value("VNPAY_TMN_CODE", "vnpay.tmnCode") != null
                 && value("VNPAY_HASH_SECRET", "vnpay.hashSecret") != null;

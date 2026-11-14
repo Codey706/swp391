@@ -6,13 +6,12 @@ import model.Event;
 import model.EventTicket;
 import utils.Constants;
 import utils.DateTimeUtils;
+import utils.SessionUtils;
 import utils.ValidationUtils;
 
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import java.io.File;
@@ -21,6 +20,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,12 +34,11 @@ import java.util.Set;
 
 /**
  * Lớp cha của các controller quản lý sự kiện (Organizer): Create / List /
- * Update / Delete. Chứa phần dùng chung: kiểm tra đăng nhập/role, flash message,
+ * Update / Delete. Chứa phần dùng chung:
  * đọc form, validate thông tin sự kiện + hạng vé + ảnh, lưu/xóa file ảnh.
  * Không tự map URL; các controller con khai báo @WebServlet riêng.
  */
 public abstract class EventController extends HttpServlet {
-
 
     protected static final String CREATE_EVENT_VIEW = "/WEB-INF/views/organizer/create-event.jsp";
     protected static final String EDIT_EVENT_VIEW = "/WEB-INF/views/organizer/edit-event.jsp";
@@ -52,32 +51,16 @@ public abstract class EventController extends HttpServlet {
 
     protected final EventDAO eventDAO = new EventDAO();
 
-    /**
-     * Yêu cầu đã đăng nhập và có role Organizer.
-     *
-     * @return Auth hợp lệ, hoặc null nếu đã redirect / gửi lỗi.
-     */
-    protected Auth getAuthenticatedOrganizer(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        HttpSession session = request.getSession(false);
-        Object sessionUser = session == null ? null : session.getAttribute(Constants.SESSION_USER);
-        if (!(sessionUser instanceof Auth)) {
-            response.sendRedirect(request.getContextPath() + "/Auth?action=login");
-            return null;
-        }
-        Auth loggedIn = (Auth) sessionUser;
-        if (!Constants.ROLE_ORGANIZER.equalsIgnoreCase(loggedIn.getRole())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return null;
-        }
-        return loggedIn;
+    /** Organizer đang đăng nhập (AuthFilter đã kiểm tra đăng nhập + role). */
+    protected Auth currentOrganizer(HttpServletRequest request) {
+        return SessionUtils.currentUser(request);
     }
 
     /**
      * Lấy sự kiện theo tham số eventId, chỉ trả về nếu thuộc organizer đang
      * đăng nhập.
      */
-    protected Event loadOwnedEvent(HttpServletRequest request, Auth organizer) {
+    protected Event loadOwnedEvent(HttpServletRequest request, Auth organizer) throws SQLException {
         int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("eventId"), 0);
         return eventId <= 0 ? null : eventDAO.getEventByIdAndOrganizer(eventId, organizer.getUserId());
     }
@@ -99,33 +82,16 @@ public abstract class EventController extends HttpServlet {
     /**
      * Nạp danh mục + địa điểm cho các dropdown của form tạo/sửa.
      */
-    protected void loadFormOptions(HttpServletRequest request) {
+    protected void loadFormOptions(HttpServletRequest request) throws SQLException {
         request.setAttribute("categories", eventDAO.getActiveCategories());
         request.setAttribute("venues", eventDAO.getActiveVenues());
-        moveFlashMessage(request, "successMessage");
+        SessionUtils.moveFlash(request, "successMessage");
     }
 
     protected void redirectToList(HttpServletRequest request, HttpServletResponse response,
             String attribute, String message) throws IOException {
         request.getSession().setAttribute(attribute, message);
         response.sendRedirect(request.getContextPath() + PATH_LIST);
-    }
-
-    /**
-     * Chuyển thông báo flash (lưu tạm trong session qua lần redirect) sang
-     * request để JSP hiển thị một lần.
-     */
-    protected void moveFlashMessage(HttpServletRequest request, String... keys) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return;
-        }
-        for (String key : keys) {
-            if (session.getAttribute(key) != null) {
-                request.setAttribute(key, session.getAttribute(key));
-                session.removeAttribute(key);
-            }
-        }
     }
 
     // ---------------------------------------------------------------- Đọc dữ liệu form
@@ -208,7 +174,7 @@ public abstract class EventController extends HttpServlet {
      * khi tạo mới)
      * @return map field -> thông báo lỗi; rỗng nếu hợp lệ.
      */
-    protected Map<String, String> validateEventInformation(Event event, int excludeEventId) {
+    protected Map<String, String> validateEventInformation(Event event, int excludeEventId) throws SQLException {
         Map<String, String> errors = new LinkedHashMap<>();
 
         // Tên sự kiện
@@ -281,7 +247,8 @@ public abstract class EventController extends HttpServlet {
      * @param venueId địa điểm đã chọn; &lt;= 0 hoặc không hợp lệ thì bỏ qua
      * kiểm tra sức chứa
      */
-    protected void validateTickets(List<EventTicket> tickets, int venueId, Map<String, String> errors) {
+    protected void validateTickets(List<EventTicket> tickets, int venueId, Map<String, String> errors)
+            throws SQLException {
         if (tickets.isEmpty()) {
             return;
         }
@@ -401,7 +368,7 @@ public abstract class EventController extends HttpServlet {
      * Lưu ảnh thành event-{id}-banner.{ext} trong assets/uploads rồi cập nhật
      * Events.event_image.
      */
-    protected boolean saveEventImage(Part imagePart, int eventId) {
+    protected boolean saveEventImage(Part imagePart, int eventId) throws SQLException {
         String uploadDir = getServletContext().getRealPath(Constants.UPLOAD_DIR);
         if (uploadDir == null) {
             return false; // ứng dụng chạy từ WAR chưa giải nén, không ghi được vào thư mục web
@@ -415,7 +382,7 @@ public abstract class EventController extends HttpServlet {
             imagePart.write(new File(directory, fileName).getAbsolutePath());
             return eventDAO.updateEventImage(eventId, "assets/uploads/" + fileName);
         } catch (IOException e) {
-            e.printStackTrace(); // sự kiện đã tạo xong, chỉ thiếu ảnh
+            log("Cannot save event image, eventId=" + eventId, e); // sự kiện đã tạo xong, chỉ thiếu ảnh
             return false;
         }
     }
@@ -438,7 +405,7 @@ public abstract class EventController extends HttpServlet {
                 Files.deleteIfExists(file);
             }
         } catch (IOException e) {
-            e.printStackTrace(); // sự kiện đã xóa, chỉ còn sót file ảnh
+            log("Cannot delete event image " + imagePath, e); // sự kiện đã xóa, chỉ còn sót file ảnh
         }
     }
 }

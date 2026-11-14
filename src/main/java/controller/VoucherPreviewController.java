@@ -30,7 +30,6 @@ public class VoucherPreviewController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         JsonObject json = new JsonObject();
         int eventId = ValidationUtils.parseIntOrDefault(request.getParameter("eventId"), -1);
         String code = request.getParameter("voucherCode");
@@ -57,7 +56,7 @@ public class VoucherPreviewController extends HttpServlet {
             json.addProperty("ok", false);
             json.addProperty("message", e.getMessage());
         } catch (SQLException e) {
-            throw new ServletException("Cannot preview voucher", e);
+            throw new ServletException(e);
         }
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

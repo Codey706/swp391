@@ -27,10 +27,6 @@ public final class DateTimeUtils {
         }
     }
 
-    public static String formatDateTimeLocal(LocalDateTime dateTime) {
-        return dateTime == null ? "" : dateTime.format(DATETIME_LOCAL);
-    }
-
     public static String formatDateTime(LocalDateTime dateTime) {
         return dateTime == null ? "" : dateTime.format(DISPLAY);
     }
