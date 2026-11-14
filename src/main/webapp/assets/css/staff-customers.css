@@ -190,34 +190,13 @@
     font-weight: 700;
     white-space: nowrap;
 }
-.sc-badge.is-ok {
-    background: #e7f6ee;
-    color: #13804b;
-}
-.sc-badge.is-none {
-    background: #efeff1;
-    color: #55555c;
-}
-.sc-badge.is-partial {
-    background: #fff4dc;
-    color: #9a5b07;
-}
-.sc-badge.is-cancelled {
-    background: #ffe7e2;
-    color: #b42e1d;
-}
-.sc-badge.is-live {
-    background: #fff4dc;
-    color: #9a5b07;
-}
-.sc-badge.is-soon {
-    background: #e7f6ee;
-    color: #13804b;
-}
-.sc-badge.is-ended {
-    background: #e4e4e7;
-    color: #55555c;
-}
+.sc-badge.is-ok { background: #e7f6ee; color: #13804b; }
+.sc-badge.is-none { background: #efeff1; color: #55555c; }
+.sc-badge.is-partial { background: #fff4dc; color: #9a5b07; }
+.sc-badge.is-cancelled { background: #ffe7e2; color: #b42e1d; }
+.sc-badge.is-live { background: #fff4dc; color: #9a5b07; }
+.sc-badge.is-soon { background: #e7f6ee; color: #13804b; }
+.sc-badge.is-ended { background: #e4e4e7; color: #55555c; }
 
 /* ---------- Thẻ khách hàng ---------- */
 .sc-profile {

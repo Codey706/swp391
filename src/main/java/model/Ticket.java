@@ -1,15 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-/**
- *
- * @author BT
- */
 public class Ticket {
 
     private int ticketId;
@@ -27,7 +21,11 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket(int ticketId, int orderId, String ticketCode, String qrCode, String ticketStatus, String eventName, String venueName, String ticketName, String seatLabel, LocalDateTime eventStartTime) {
+    public Ticket(int ticketId, int orderId, String ticketCode,
+            String qrCode, String ticketStatus, String eventName,
+            String venueName, String ticketName, String seatLabel,
+            LocalDateTime eventStartTime) {
+
         this.ticketId = ticketId;
         this.orderId = orderId;
         this.ticketCode = ticketCode;
@@ -121,11 +119,12 @@ public class Ticket {
     }
 
     /**
-     * "19:30 · 15/11/2026" — cách hiển thị thời gian trên vé điện tử.
+     * Hiển thị thời gian bắt đầu sự kiện.
      */
     public String getEventStartLabel() {
         return eventStartTime == null ? ""
-                : eventStartTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm '·' dd/MM/yyyy"));
+                : eventStartTime.format(
+                        DateTimeFormatter.ofPattern("HH:mm '·' dd/MM/yyyy"));
     }
 
     public LocalDateTime getEventEndTime() {
@@ -140,5 +139,4 @@ public class Ticket {
         return eventEndTime != null
                 && !LocalDateTime.now().isBefore(eventEndTime);
     }
-
 }

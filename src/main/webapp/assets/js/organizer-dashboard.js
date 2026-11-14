@@ -13,27 +13,27 @@
         data: {
             labels: [],
             datasets: [{
-                    label: 'Doanh thu',
-                    data: [],
-                    borderColor: '#ff5b49',
-                    backgroundColor: function (ctx) {
-                        var area = ctx.chart.chartArea;
-                        if (!area) {
-                            return 'rgba(255, 91, 73, 0.12)';
-                        }
-                        var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-                        g.addColorStop(0, 'rgba(255, 91, 73, 0.28)');
-                        g.addColorStop(1, 'rgba(255, 91, 73, 0)');
-                        return g;
-                    },
-                    fill: true,
-                    tension: 0.35,
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#ff5b49',
-                    pointBorderWidth: 2
-                }]
+                label: 'Doanh thu',
+                data: [],
+                borderColor: '#ff5b49',
+                backgroundColor: function (ctx) {
+                    var area = ctx.chart.chartArea;
+                    if (!area) {
+                        return 'rgba(255, 91, 73, 0.12)';
+                    }
+                    var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+                    g.addColorStop(0, 'rgba(255, 91, 73, 0.28)');
+                    g.addColorStop(1, 'rgba(255, 91, 73, 0)');
+                    return g;
+                },
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#ff5b49',
+                pointBorderWidth: 2
+            }]
         },
         options: {
             responsive: true,

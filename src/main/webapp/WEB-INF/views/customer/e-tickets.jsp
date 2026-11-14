@@ -501,15 +501,15 @@
             }
         </style>
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-    </head>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+</head>
 
     <body>
         <jsp:include page="booking-header.jsp"/>
@@ -657,13 +657,10 @@
         <script>
             // Mở từ "In vé" ở trang chi tiết đơn (?print=1): đợi ảnh QR tải xong rồi mở hộp thoại in.
             (function () {
-                if (!/[?&]print=1(&|$)/.test(location.search))
-                    return;
-                window.addEventListener('load', function () {
-                    window.print();
-                });
+                if (!/[?&]print=1(&|$)/.test(location.search)) return;
+                window.addEventListener('load', function () { window.print(); });
             })();
         </script>
-        <jsp:include page="/WEB-INF/views/common/site-footer.jsp"/>
-    </body>
+    <jsp:include page="/WEB-INF/views/common/site-footer.jsp"/>
+</body>
 </html>
