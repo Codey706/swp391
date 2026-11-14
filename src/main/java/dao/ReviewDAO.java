@@ -27,16 +27,63 @@ public class ReviewDAO {
             + "r.created_at, u.full_name, u.username, e.event_name "
             + "FROM Reviews r JOIN Users u ON u.user_id = r.customer_id JOIN Events e ON e.event_id = r.event_id ";
 
-    /** Vé đã check-in (đơn Paid) của khách cho sự kiện, dùng làm Reviews.ticket_id; -1 nếu không có. */
-    public int findCheckedInTicket(int customerId, int eventId) throws SQLException {
-        String sql = "SELECT TOP 1 t.ticket_id FROM Tickets t "
-                + "JOIN Order_Details od ON od.order_detail_id = t.order_detail_id "
-                + "JOIN Orders o ON o.order_id = od.order_id "
-                + "WHERE o.customer_id = ? AND t.event_id = ? AND o.status = 'Paid' AND t.ticket_status = 'CheckedIn' "
-                + "ORDER BY t.check_in_time, t.ticket_id";
+    /**
+     * Vé đã check-in (đơn Paid) của khách cho sự kiện, dùng làm
+     * Reviews.ticket_id; -1 nếu không có.
+     */
+    public int findCheckedInTicket(int customerId, int eventId)
+            throws SQLException {
+
+        String sql = """
+                SELECT TOP 1 t.ticket_id
+                FROM Tickets t
+                JOIN Order_Details od
+                    ON od.order_detail_id = t.order_detail_id
+                JOIN Orders o
+                    ON o.order_id = od.order_id
+                JOIN Events e
+                    ON e.event_id = t.event_id
+                WHERE o.customer_id = ?
+                  AND t.event_id = ?
+                  AND o.status = 'Paid'
+                  AND t.ticket_status = 'CheckedIn'
+                  AND e.status = 'ACTIVE'
+                  AND e.end_time <= GETDATE()
+                ORDER BY t.check_in_time, t.ticket_id
+                """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, customerId);
             ps.setInt(2, eventId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
+    }
+
+    public int findEventIdByOrder(int customerId, int orderId)
+            throws SQLException {
+
+        String sql = """
+                SELECT TOP 1 e.event_id
+                FROM Orders o
+                JOIN Order_Details od
+                    ON od.order_id = o.order_id
+                JOIN Event_Tickets et
+                    ON et.event_ticket_id = od.event_ticket_id
+                JOIN Events e
+                    ON e.event_id = et.event_id
+                WHERE o.customer_id = ?
+                  AND o.order_id = ?
+                ORDER BY od.order_detail_id
+                """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, customerId);
+            ps.setInt(2, orderId);
+
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getInt(1) : -1;
             }
@@ -45,7 +92,8 @@ public class ReviewDAO {
 
     /** Đánh giá của khách cho sự kiện (bất kể trạng thái), null nếu chưa có. */
     public Map<String, Object> findByCustomerAndEvent(int customerId, int eventId) throws SQLException {
-        List<Map<String, Object>> list = query(SELECT + "WHERE r.customer_id = ? AND r.event_id = ?", customerId, eventId);
+        List<Map<String, Object>> list = query(SELECT + "WHERE r.customer_id = ? AND r.event_id = ?", customerId,
+                eventId);
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -86,7 +134,7 @@ public class ReviewDAO {
             ps.setInt(1, eventId);
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
-                return new double[]{rs.getDouble(1), rs.getInt(2)};
+                return new double[] { rs.getDouble(1), rs.getInt(2) };
             }
         }
     }

@@ -63,6 +63,15 @@
                 <c:when test="${empty umDashboard}">
                     <a class="um-item" role="menuitem" href="${umCtx}/customer/booking-history">
                         <i class="ph ph-ticket" aria-hidden="true"></i>Vé của tôi
+
+                        <a class="um-item"
+                           role="menuitem"
+                           href="${umCtx}/customer/wishlist">
+
+                            <i class="ph ph-heart" aria-hidden="true"></i>
+                            Sự kiện yêu thích
+
+                        </a>
                     </a>
                 </c:when>
                 <c:otherwise>

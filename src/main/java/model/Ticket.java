@@ -1,31 +1,31 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-/**
- *
- * @author BT
- */
 public class Ticket {
+
     private int ticketId;
-private int orderId;
-private String ticketCode;
-private String qrCode;
-private String ticketStatus;
-private String eventName;
-private String venueName;
-private String ticketName;
-private String seatLabel;
-private LocalDateTime eventStartTime;
+    private int orderId;
+    private String ticketCode;
+    private String qrCode;
+    private String ticketStatus;
+    private String eventName;
+    private String venueName;
+    private String ticketName;
+    private String seatLabel;
+    private LocalDateTime eventStartTime;
+    private LocalDateTime eventEndTime;
 
     public Ticket() {
     }
 
-    public Ticket(int ticketId, int orderId, String ticketCode, String qrCode, String ticketStatus, String eventName, String venueName, String ticketName, String seatLabel, LocalDateTime eventStartTime) {
+    public Ticket(int ticketId, int orderId, String ticketCode,
+            String qrCode, String ticketStatus, String eventName,
+            String venueName, String ticketName, String seatLabel,
+            LocalDateTime eventStartTime) {
+
         this.ticketId = ticketId;
         this.orderId = orderId;
         this.ticketCode = ticketCode;
@@ -118,10 +118,25 @@ private LocalDateTime eventStartTime;
         this.eventStartTime = eventStartTime;
     }
 
-    /** "19:30 · 15/11/2026" — cách hiển thị thời gian trên vé điện tử. */
+    /**
+     * Hiển thị thời gian bắt đầu sự kiện.
+     */
     public String getEventStartLabel() {
         return eventStartTime == null ? ""
-                : eventStartTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm '·' dd/MM/yyyy"));
+                : eventStartTime.format(
+                        DateTimeFormatter.ofPattern("HH:mm '·' dd/MM/yyyy"));
     }
 
+    public LocalDateTime getEventEndTime() {
+        return eventEndTime;
+    }
+
+    public void setEventEndTime(LocalDateTime eventEndTime) {
+        this.eventEndTime = eventEndTime;
+    }
+
+    public boolean isExpired() {
+        return eventEndTime != null
+                && !LocalDateTime.now().isBefore(eventEndTime);
+    }
 }

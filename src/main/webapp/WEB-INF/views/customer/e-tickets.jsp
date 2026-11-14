@@ -556,10 +556,25 @@
                                             VÉ ĐIỆN TỬ
                                         </span>
                                         <c:choose>
-                                            <c:when test="${st == 'Valid'}"><span class="status">Còn hiệu lực</span></c:when>
-                                            <c:when test="${st == 'CheckedIn'}"><span class="status is-checked-in">Đã check-in</span></c:when>
-                                            <c:when test="${st == 'Cancelled'}"><span class="status is-cancelled">Đã huỷ</span></c:when>
-                                            <c:otherwise><span class="status"><c:out value="${st}"/></span></c:otherwise>
+                                            <c:when test="${st == 'Cancelled'}">
+                                                <span class="status is-cancelled">Đã hủy</span>
+                                            </c:when>
+
+                                            <c:when test="${st == 'CheckedIn'}">
+                                                <span class="status is-checked-in">Đã check-in</span>
+                                            </c:when>
+
+                                            <c:when test="${ticket.expired}">
+                                                <span class="status is-cancelled">Hết hạn</span>
+                                            </c:when>
+
+                                            <c:when test="${st == 'Valid'}">
+                                                <span class="status">Còn hiệu lực</span>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <span class="status"><c:out value="${st}"/></span>
+                                            </c:otherwise>
                                         </c:choose>
                                     </div>
 
@@ -606,7 +621,7 @@
                                                         <c:out value="${ticket.seatLabel}"/>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        Không có ghế cố định
+                                                        Khu đứng - Không có ghế cố định
                                                     </c:otherwise>
                                                 </c:choose>
                                             </span>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="LỄ HỘI">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#752b24"/><stop offset="1" stop-color="#f7a03e"/></linearGradient></defs>
+<rect width="960" height="540" fill="url(#bg)"/>
+<circle cx="870" cy="90" r="210" fill="white" opacity=".055"/>
+<circle cx="-50" cy="490" r="210" fill="white" opacity=".055"/>
+<path d="M0 460 Q320 375 575 450 T960 415 V540 H0Z" fill="#000" opacity=".13"/>
+<path d="M625 150 Q740 350 855 150" fill="none" stroke="white" stroke-width="12" opacity=".7"/><path d="M650 195 L700 250 L750 195 L800 250 L850 195" fill="none" stroke="white" stroke-width="11" opacity=".7"/><circle cx="740" cy="320" r="68" fill="white" opacity=".22"/>
+<rect x="70" y="140" width="63" height="8" rx="4" fill="white" opacity=".8"/>
+<text x="70" y="245" fill="white" font-family="Arial, sans-serif" font-size="70" font-weight="800">LỄ HỘI</text>
+<text x="74" y="293" fill="white" opacity=".87" font-family="Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="2">VĂN HÓA &amp; ẨM THỰC</text>
+<text x="74" y="452" fill="white" opacity=".75" font-family="Arial, sans-serif" font-size="24" letter-spacing="3">LIGHT TICKET</text>
+</svg>
