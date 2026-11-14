@@ -11,27 +11,27 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Venue Management - Light Ticket</title>
+        <title>Manage Venues - Light Ticket</title>
 
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=5">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=6">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
 
     <body class="admin-portal-page">
 
         <%
             List<Venue> venues
-                    = (List<Venue>) request.getAttribute("venues");
+                    = (List<Venue>) request.getAttribute("allVenues");
 
             int totalVenues = venues != null ? venues.size() : 0;
             int activeVenues = 0;
@@ -47,6 +47,7 @@
                 }
             }
 
+            List<Venue> listedItems = (List<Venue>) request.getAttribute("venues");
             String contextPath = request.getContextPath();
 
             String keyword = (String) request.getAttribute("keyword");
@@ -214,7 +215,7 @@
                     <!-- Page Heading -->
                     <div class="page-heading">
                         <div>
-                            <h1>Venue Management</h1>
+                            <h1>Manage Venues</h1>
                             <p>
                                 Quản lý địa điểm tổ chức sự kiện
                                 trong hệ thống Light Ticket
@@ -265,6 +266,21 @@
                         </div>
 
                         <!-- Table -->
+                        <form method="get" action="${ctx}/admin/venues" class="admin-list-filter" role="search">
+                            <label class="admin-filter-search">
+                                <span class="visually-hidden">Search</span>
+                                <input type="search" name="keyword" maxlength="100" class="form-control" placeholder="Search venue name or address..." value="${fn:escapeXml(keyword)}">
+                            </label>
+                            <select name="status" class="form-select" aria-label="Filter status">
+                                <option value="ALL" ${(selectedStatus eq 'ALL' or (empty selectedStatus and 'ALL' eq 'ALL')) ? 'selected' : ''}>All statuses</option>
+                                <option value="ACTIVE" ${selectedStatus eq 'ACTIVE' ? 'selected' : ''}>Active</option>
+                                <option value="INACTIVE" ${selectedStatus eq 'INACTIVE' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                            <button type="submit" class="add-button">Filter</button>
+                            <a href="${ctx}/admin/venues" class="view-button admin-filter-reset">Reset</a>
+                            <span class="admin-filter-count">${matchedCount} result(s)</span>
+                        </form>
+
                         <div class="table-wrapper">
 
                             <table>
@@ -284,8 +300,8 @@
                                 <tbody>
 
                                     <%
-                                        if (venues != null && !venues.isEmpty()) {
-                                            for (Venue venue : venues) {
+                                        if (listedItems != null && !listedItems.isEmpty()) {
+                                            for (Venue venue : listedItems) {
                                                 String venueStatus = venue.getStatus() != null
                                                         ? venue.getStatus().toLowerCase()
                                                         : "unknown";
@@ -294,12 +310,30 @@
                                     <tr>
                                         <td><%= venue.getVenueId()%></td>
 
-                                        <td>
-                                                <strong><%= HtmlUtils.escape(venue.getVenueName(), "")%></strong>
+                                        <td title="<%= HtmlUtils.escape(venue.getVenueName(), "")%>">
+                                            <strong>
+                                                <%
+                                                    String venueName = venue.getVenueName() != null
+                                                            ? venue.getVenueName() : "";
+
+                                                    String shortVenueName = venueName.length() > 40
+                                                            ? venueName.substring(0, 40) + "..."
+                                                            : venueName;
+                                                %>
+                                                <%= HtmlUtils.escape(shortVenueName, "")%>
+                                            </strong>
                                         </td>
 
-                                        <td>
-                                            <%= HtmlUtils.escape(venue.getAddress(), "")%>
+                                        <td title="<%= HtmlUtils.escape(venue.getAddress(), "")%>">
+                                            <%
+                                                String address = venue.getAddress() != null
+                                                        ? venue.getAddress() : "";
+
+                                                String shortAddress = address.length() > 40
+                                                        ? address.substring(0, 40) + "..."
+                                                        : address;
+                                            %>
+                                            <%= HtmlUtils.escape(shortAddress, "")%>
                                         </td>
 
                                         <td><%= venue.getCapacity()%></td>
@@ -351,6 +385,16 @@
                             </table>
 
                         </div>
+                        <c:if test="${totalPages gt 1}">
+                            <nav class="admin-list-pages" aria-label="Pagination">
+                                <c:if test="${page gt 1}"><a class="view-button" href="${ctx}/admin/venues?${fn:escapeXml(filterQuery)}page=${page - 1}">Previous</a></c:if>
+                                <c:forEach var="p" begin="1" end="${totalPages}">
+                                    <a class="${p eq page ? 'add-button' : 'view-button'}" href="${ctx}/admin/venues?${fn:escapeXml(filterQuery)}page=${p}">${p}</a>
+                                </c:forEach>
+                                <c:if test="${page lt totalPages}"><a class="view-button" href="${ctx}/admin/venues?${fn:escapeXml(filterQuery)}page=${page + 1}">Next</a></c:if>
+                                </nav>
+                        </c:if>
+
                     </div>
                 </section>
 
@@ -365,34 +409,34 @@
 
         <!-- Điều khiển sidebar trên màn hình nhỏ -->
         <script>
-            (function () {
-                const sidebar = document.getElementById('adminSidebar');
-                const backdrop = document.getElementById('adminSidebarBackdrop');
-                const openButton = document.getElementById('adminSidebarOpen');
-                const closeButton = document.getElementById('adminSidebarClose');
+                                        (function () {
+                                            const sidebar = document.getElementById('adminSidebar');
+                                            const backdrop = document.getElementById('adminSidebarBackdrop');
+                                            const openButton = document.getElementById('adminSidebarOpen');
+                                            const closeButton = document.getElementById('adminSidebarClose');
 
-                function openSidebar() {
-                    sidebar.classList.add('is-open');
-                    backdrop.classList.add('is-visible');
-                    openButton.setAttribute('aria-expanded', 'true');
-                }
+                                            function openSidebar() {
+                                                sidebar.classList.add('is-open');
+                                                backdrop.classList.add('is-visible');
+                                                openButton.setAttribute('aria-expanded', 'true');
+                                            }
 
-                function closeSidebar() {
-                    sidebar.classList.remove('is-open');
-                    backdrop.classList.remove('is-visible');
-                    openButton.setAttribute('aria-expanded', 'false');
-                }
+                                            function closeSidebar() {
+                                                sidebar.classList.remove('is-open');
+                                                backdrop.classList.remove('is-visible');
+                                                openButton.setAttribute('aria-expanded', 'false');
+                                            }
 
-                openButton.addEventListener('click', openSidebar);
-                closeButton.addEventListener('click', closeSidebar);
-                backdrop.addEventListener('click', closeSidebar);
+                                            openButton.addEventListener('click', openSidebar);
+                                            closeButton.addEventListener('click', closeSidebar);
+                                            backdrop.addEventListener('click', closeSidebar);
 
-                document.addEventListener('keydown', function (event) {
-                    if (event.key === 'Escape') {
-                        closeSidebar();
-                    }
-                });
-            })();
+                                            document.addEventListener('keydown', function (event) {
+                                                if (event.key === 'Escape') {
+                                                    closeSidebar();
+                                                }
+                                            });
+                                        })();
         </script>
 
     </body>

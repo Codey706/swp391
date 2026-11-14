@@ -55,7 +55,6 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Tạo sự kiện
     // ------------------------------------------------------------------
-
     /**
      * Tạo sự kiện cùng các hạng vé trong MỘT transaction: lỗi ở bất kỳ hạng vé
      * nào thì sự kiện cũng không được tạo. Danh sách hạng vé có thể rỗng.
@@ -89,7 +88,10 @@ public class EventDAO {
         }
     }
 
-    /** Tạo sự kiện kèm hạng vé + sơ đồ ghế (khu, ghế) trong cùng một transaction. */
+    /**
+     * Tạo sự kiện kèm hạng vé + sơ đồ ghế (khu, ghế) trong cùng một
+     * transaction.
+     */
     public void createEventWithSeatMap(Event event, List<EventZone> zones,
             List<SeatMapDAO.TicketChange> tickets) throws SQLException {
         try (Connection connection = DBContext.getConnection()) {
@@ -106,7 +108,9 @@ public class EventDAO {
         }
     }
 
-    /** Insert sự kiện và gán event_id được sinh ra vào đối tượng. */
+    /**
+     * Insert sự kiện và gán event_id được sinh ra vào đối tượng.
+     */
     private void insertEvent(Connection connection, Event event) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_EVENT, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, event.getOrganizerId());
@@ -135,20 +139,28 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Truy vấn sự kiện
     // ------------------------------------------------------------------
-
-    /** Chỉ trả về sự kiện đã được duyệt (ACTIVE); bản nháp / chờ duyệt / bị từ chối không công khai. */
+    /**
+     * Chỉ trả về sự kiện đã được duyệt (ACTIVE); bản nháp / chờ duyệt / bị từ
+     * chối không công khai.
+     */
     public Event getPublicEventById(int eventId) throws SQLException {
         return findOne(SELECT_EVENT_COLUMNS + "WHERE e.event_id = ? AND e.status = ?",
                 eventId, Constants.EVENT_ACTIVE);
     }
 
-    /** Lấy sự kiện theo id nhưng chỉ khi thuộc về organizer (kiểm tra ownership). */
+    /**
+     * Lấy sự kiện theo id nhưng chỉ khi thuộc về organizer (kiểm tra
+     * ownership).
+     */
     public Event getEventByIdAndOrganizer(int eventId, int organizerId) throws SQLException {
         return findOne(SELECT_EVENT_COLUMNS + "WHERE e.event_id = ? AND e.organizer_id = ?",
                 eventId, organizerId);
     }
 
-    /** Danh sách sự kiện của organizer, có tìm theo tên, lọc theo trạng thái, phân trang. */
+    /**
+     * Danh sách sự kiện của organizer, có tìm theo tên, lọc theo trạng thái,
+     * phân trang.
+     */
     public List<Event> getEventsByOrganizer(int organizerId, String keyword,
             String status, int page, int pageSize) throws SQLException {
         List<Object> params = new ArrayList<>();
@@ -165,7 +177,16 @@ public class EventDAO {
         return queryInt(sql, params.toArray());
     }
 
-    /** Danh sách sự kiện đang chờ Admin duyệt. */
+    /**
+     * Admin can inspect all event statuses, including pending submissions.
+     */
+    public Event getEventForAdmin(int eventId) throws SQLException {
+        return findOne(SELECT_EVENT_COLUMNS + "WHERE e.event_id = ?", eventId);
+    }
+
+    /**
+     * Danh sách sự kiện đang chờ Admin duyệt.
+     */
     public List<Event> getEventsPendingApproval(int page, int pageSize) throws SQLException {
         String sql = SELECT_EVENT_COLUMNS + "WHERE e.status = ? "
                 + "ORDER BY e.created_at ASC, e.event_id ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -176,13 +197,14 @@ public class EventDAO {
         return queryInt("SELECT COUNT(*) FROM Events WHERE status = ?", Constants.EVENT_PENDING_APPROVAL);
     }
 
-    /** UC-29: {email, họ tên organizer, tên sự kiện} để gửi thông báo duyệt; null nếu không có. */
+    /**
+     * UC-29: {email, họ tên organizer, tên sự kiện} để gửi thông báo duyệt;
+     * null nếu không có.
+     */
     public String[] getOrganizerContact(int eventId) throws SQLException {
         String sql = "SELECT u.email, u.full_name, e.event_name FROM Events e "
                 + "JOIN Users u ON u.user_id = e.organizer_id WHERE e.event_id = ?";
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, eventId);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, eventId); ResultSet rs = statement.executeQuery()) {
             return rs.next() ? new String[]{rs.getString(1), rs.getString(2), rs.getString(3)} : null;
         }
     }
@@ -190,7 +212,6 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Kiểm tra dữ liệu
     // ------------------------------------------------------------------
-
     public boolean existsDuplicateEvent(int organizerId, String eventName,
             Timestamp startTime, int excludeEventId) throws SQLException {
         return exists("SELECT 1 FROM Events WHERE organizer_id = ? AND LOWER(event_name) = LOWER(?) "
@@ -198,7 +219,10 @@ public class EventDAO {
                 organizerId, eventName, startTime, excludeEventId);
     }
 
-    /** Hai khoảng thời gian giao nhau khi: start_cũ < end_mới AND end_cũ > start_mới. */
+    /**
+     * Hai khoảng thời gian giao nhau khi: start_cũ < end_mới AND end_cũ >
+     * start_mới.
+     */
     public boolean existsVenueConflict(int venueId, Timestamp startTime, Timestamp endTime,
             String cancelledStatus, String rejectedStatus, int excludeEventId) throws SQLException {
         return exists("SELECT 1 FROM Events WHERE venue_id = ? AND status NOT IN (?, ?) "
@@ -214,7 +238,9 @@ public class EventDAO {
         return exists("SELECT 1 FROM Venues WHERE venue_id = ? AND status = 'ACTIVE'", venueId);
     }
 
-    /** Sự kiện đã có đơn hàng nào chưa. */
+    /**
+     * Sự kiện đã có đơn hàng nào chưa.
+     */
     public boolean hasSalesData(int eventId) throws SQLException {
         return exists("SELECT 1 FROM Order_Details od "
                 + "JOIN Event_Tickets et ON od.event_ticket_id = et.event_ticket_id "
@@ -224,7 +250,6 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Danh mục, địa điểm
     // ------------------------------------------------------------------
-
     public Map<Integer, String> getActiveCategories() throws SQLException {
         return getIdNameMap("SELECT category_id, category_name FROM Categories "
                 + "WHERE status = 'ACTIVE' ORDER BY category_name");
@@ -236,10 +261,8 @@ public class EventDAO {
 
     public Map<Integer, Integer> getVenueCapacities() throws SQLException {
         Map<Integer, Integer> result = new LinkedHashMap<>();
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        "SELECT venue_id, capacity FROM Venues WHERE status = 'ACTIVE'");
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(
+                "SELECT venue_id, capacity FROM Venues WHERE status = 'ACTIVE'"); ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 result.put(rs.getInt(1), rs.getInt(2));
             }
@@ -247,11 +270,11 @@ public class EventDAO {
         return result;
     }
 
-    /** Sức chứa địa điểm; -1 nếu không tồn tại. */
+    /**
+     * Sức chứa địa điểm; -1 nếu không tồn tại.
+     */
     public int getVenueCapacity(int venueId) throws SQLException {
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, "SELECT capacity FROM Venues WHERE venue_id = ?", venueId);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, "SELECT capacity FROM Venues WHERE venue_id = ?", venueId); ResultSet rs = statement.executeQuery()) {
             return rs.next() ? rs.getInt(1) : -1;
         }
     }
@@ -259,13 +282,10 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Thống kê
     // ------------------------------------------------------------------
-
     public Map<String, Integer> countEventsByStatus(int organizerId) throws SQLException {
         Map<String, Integer> counts = new LinkedHashMap<>();
         String sql = "SELECT UPPER(status), COUNT(*) FROM Events WHERE organizer_id = ? GROUP BY UPPER(status)";
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, organizerId);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, organizerId); ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 counts.put(rs.getString(1), rs.getInt(2));
             }
@@ -284,14 +304,12 @@ public class EventDAO {
 
         Map<String, Number> summary = new LinkedHashMap<>();
         try (Connection connection = DBContext.getConnection()) {
-            try (PreparedStatement statement = prepare(connection, ticketSql, organizerId);
-                    ResultSet rs = statement.executeQuery()) {
+            try (PreparedStatement statement = prepare(connection, ticketSql, organizerId); ResultSet rs = statement.executeQuery()) {
                 rs.next();
                 summary.put("ticketTotal", rs.getInt(1));
                 summary.put("ticketSold", rs.getInt(2));
             }
-            try (PreparedStatement statement = prepare(connection, revenueSql, organizerId);
-                    ResultSet rs = statement.executeQuery()) {
+            try (PreparedStatement statement = prepare(connection, revenueSql, organizerId); ResultSet rs = statement.executeQuery()) {
                 rs.next();
                 summary.put("revenue", rs.getBigDecimal(1));
             }
@@ -302,8 +320,9 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Cập nhật trạng thái / nội dung
     // ------------------------------------------------------------------
-
-    /** Cập nhật thông tin sự kiện (không gồm ảnh). */
+    /**
+     * Cập nhật thông tin sự kiện (không gồm ảnh).
+     */
     public boolean updateEvent(Event event) throws SQLException {
         return update("UPDATE Events SET category_id = ?, venue_id = ?, event_name = ?, description = ?, "
                 + "start_time = ?, end_time = ?, status = ?, updated_at = GETDATE() "
@@ -325,21 +344,28 @@ public class EventDAO {
                 Constants.EVENT_DRAFT, Constants.EVENT_REJECTED);
     }
 
-    /** Admin duyệt sự kiện; chỉ cập nhật nếu trạng thái hiện tại vẫn là PENDING_APPROVAL. */
+    /**
+     * Admin duyệt sự kiện; chỉ cập nhật nếu trạng thái hiện tại vẫn là
+     * PENDING_APPROVAL.
+     */
     public boolean approveEvent(int eventId) throws SQLException {
         return update("UPDATE Events SET status = ?, cancellation_reason = NULL, updated_at = GETDATE() "
                 + "WHERE event_id = ? AND status = ?",
                 Constants.EVENT_ACTIVE, eventId, Constants.EVENT_PENDING_APPROVAL);
     }
 
-    /** Admin từ chối sự kiện đang chờ duyệt và lưu lý do. */
+    /**
+     * Admin từ chối sự kiện đang chờ duyệt và lưu lý do.
+     */
     public boolean rejectEvent(int eventId, String reason) throws SQLException {
         return update("UPDATE Events SET status = ?, cancellation_reason = ?, updated_at = GETDATE() "
                 + "WHERE event_id = ? AND status = ?",
                 Constants.EVENT_REJECTED, reason, eventId, Constants.EVENT_PENDING_APPROVAL);
     }
 
-    /** Xóa sự kiện cùng staff, ghế, khu, hạng vé trong một transaction. */
+    /**
+     * Xóa sự kiện cùng staff, ghế, khu, hạng vé trong một transaction.
+     */
     public boolean deleteEvent(int eventId, int organizerId) throws SQLException {
         try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
@@ -366,12 +392,15 @@ public class EventDAO {
         }
     }
 
-    public enum CancelResult { CANCELLED, NOT_ACTIVE, HAS_PAID_ORDERS }
+    public enum CancelResult {
+        CANCELLED, NOT_ACTIVE, HAS_PAID_ORDERS
+    }
 
     /**
      * UC-20: Organizer hủy sự kiện ACTIVE của chính mình khi CHƯA có đơn Paid.
-     * Khóa dòng sự kiện để không có đơn nào kịp thanh toán xen giữa lúc kiểm tra và lúc hủy
-     * (thanh toán đến sau sẽ bị PaymentDAO chuyển sang RefundPending vì sự kiện không còn ACTIVE).
+     * Khóa dòng sự kiện để không có đơn nào kịp thanh toán xen giữa lúc kiểm
+     * tra và lúc hủy (thanh toán đến sau sẽ bị PaymentDAO chuyển sang
+     * RefundPending vì sự kiện không còn ACTIVE).
      */
     public CancelResult cancelEvent(int eventId, int organizerId, String reason) throws SQLException {
         try (Connection connection = DBContext.getConnection()) {
@@ -399,8 +428,7 @@ public class EventDAO {
     private CancelResult checkCancellable(Connection connection, int eventId, int organizerId) throws SQLException {
         try (PreparedStatement statement = prepare(connection,
                 "SELECT status FROM Events WITH (UPDLOCK, ROWLOCK) WHERE event_id = ? AND organizer_id = ?",
-                eventId, organizerId);
-                ResultSet rs = statement.executeQuery()) {
+                eventId, organizerId); ResultSet rs = statement.executeQuery()) {
             if (!rs.next() || !Constants.EVENT_ACTIVE.equalsIgnoreCase(rs.getString(1))) {
                 return CancelResult.NOT_ACTIVE;
             }
@@ -408,8 +436,7 @@ public class EventDAO {
         try (PreparedStatement statement = prepare(connection,
                 "SELECT 1 FROM Orders o JOIN Order_Details od ON od.order_id = o.order_id "
                 + "JOIN Event_Tickets et ON et.event_ticket_id = od.event_ticket_id "
-                + "WHERE et.event_id = ? AND o.status = 'Paid'", eventId);
-                ResultSet rs = statement.executeQuery()) {
+                + "WHERE et.event_id = ? AND o.status = 'Paid'", eventId); ResultSet rs = statement.executeQuery()) {
             return rs.next() ? CancelResult.HAS_PAID_ORDERS : CancelResult.CANCELLED;
         }
     }
@@ -417,7 +444,6 @@ public class EventDAO {
     // ------------------------------------------------------------------
     // Hàm hỗ trợ
     // ------------------------------------------------------------------
-
     private String buildListFilter(int organizerId, String keyword, String status, List<Object> params) {
         StringBuilder where = new StringBuilder("WHERE e.organizer_id = ?");
         params.add(organizerId);
@@ -431,19 +457,19 @@ public class EventDAO {
             params.add("%" + escaped + "%");
         }
         if (status != null && !status.isBlank()) {
-    if ("ENDED".equalsIgnoreCase(status)) {
-        where.append(
-            " AND e.status = 'ACTIVE' AND e.end_time < GETDATE()"
-        );
-    } else if ("ACTIVE".equalsIgnoreCase(status)) {
-        where.append(
-            " AND e.status = 'ACTIVE' AND e.end_time >= GETDATE()"
-        );
-    } else {
-        where.append(" AND e.status = ?");
-        params.add(status.trim());
-    }
-}
+            if ("ENDED".equalsIgnoreCase(status)) {
+                where.append(
+                        " AND e.status = 'ACTIVE' AND e.end_time < GETDATE()"
+                );
+            } else if ("ACTIVE".equalsIgnoreCase(status)) {
+                where.append(
+                        " AND e.status = 'ACTIVE' AND e.end_time >= GETDATE()"
+                );
+            } else {
+                where.append(" AND e.status = ?");
+                params.add(status.trim());
+            }
+        }
         return where.toString();
     }
 
@@ -456,18 +482,14 @@ public class EventDAO {
     }
 
     private Event findOne(String sql, Object... params) throws SQLException {
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, params);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, params); ResultSet rs = statement.executeQuery()) {
             return rs.next() ? mapEvent(rs) : null;
         }
     }
 
     private List<Event> findMany(String sql, Object... params) throws SQLException {
         List<Event> events = new ArrayList<>();
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, params);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, params); ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 events.add(mapEvent(rs));
             }
@@ -476,33 +498,26 @@ public class EventDAO {
     }
 
     private boolean exists(String sql, Object... params) throws SQLException {
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, params);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, params); ResultSet rs = statement.executeQuery()) {
             return rs.next();
         }
     }
 
     private int queryInt(String sql, Object... params) throws SQLException {
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, params);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, params); ResultSet rs = statement.executeQuery()) {
             return rs.next() ? rs.getInt(1) : 0;
         }
     }
 
     private boolean update(String sql, Object... params) throws SQLException {
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = prepare(connection, sql, params)) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = prepare(connection, sql, params)) {
             return statement.executeUpdate() > 0;
         }
     }
 
     private Map<Integer, String> getIdNameMap(String sql) throws SQLException {
         Map<Integer, String> items = new LinkedHashMap<>();
-        try (Connection connection = DBContext.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet rs = statement.executeQuery()) {
+        try (Connection connection = DBContext.getConnection(); PreparedStatement statement = connection.prepareStatement(sql); ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 items.put(rs.getInt(1), rs.getString(2));
             }

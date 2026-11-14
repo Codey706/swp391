@@ -1,6 +1,8 @@
 package controller;
 
 import dao.EventDAO;
+import dao.SeatMapDAO;
+import model.Event;
 import utils.Constants;
 import utils.EmailService;
 import utils.ValidationUtils;
@@ -14,11 +16,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/** Admin duyệt / từ chối sự kiện đang chờ duyệt. */
+/**
+ * Admin duyệt / từ chối sự kiện đang chờ duyệt.
+ */
 @WebServlet("/admin/events")
 public class AdminEventController extends HttpServlet {
 
     private static final String LIST_VIEW = "/WEB-INF/views/admin/event-list.jsp";
+    private static final String DETAIL_VIEW = "/WEB-INF/views/admin/event-detail.jsp";
     private static final int REASON_MAX_LENGTH = 1000;
 
     private final EventDAO eventDAO = new EventDAO();
@@ -27,6 +32,24 @@ public class AdminEventController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            String eventIdRaw = request.getParameter("id");
+            if (eventIdRaw != null) {
+                int eventId = ValidationUtils.parseIntOrDefault(eventIdRaw, 0);
+                if (eventId <= 0) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid event ID.");
+                    return;
+                }
+                Event event = eventDAO.getEventForAdmin(eventId);
+                if (event == null) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Event not found.");
+                    return;
+                }
+                request.setAttribute("event", event);
+                request.setAttribute("tickets", new SeatMapDAO().getTickets(eventId));
+                request.setAttribute("organizer", eventDAO.getOrganizerContact(eventId));
+                request.getRequestDispatcher(DETAIL_VIEW).forward(request, response);
+                return;
+            }
             int pageSize = Constants.EVENT_PAGE_SIZE;
             int totalEvents = eventDAO.countEventsPendingApproval();
             int totalPages = (int) Math.ceil((double) totalEvents / pageSize);
@@ -78,10 +101,14 @@ public class AdminEventController extends HttpServlet {
         } catch (SQLException e) {
             throw new ServletException(e);
         }
-        response.sendRedirect(request.getContextPath() + "/admin/events?" + result);
+        boolean returnToDetail = "detail".equals(request.getParameter("returnTo"));
+        response.sendRedirect(request.getContextPath() + "/admin/events" + (returnToDetail ? "?id=" + eventId + "&" : "?") + result);
     }
 
-    /** UC-29: gửi email kết quả duyệt cho Organizer (chạy nền, lỗi gửi mail không ảnh hưởng việc duyệt). */
+    /**
+     * UC-29: gửi email kết quả duyệt cho Organizer (chạy nền, lỗi gửi mail
+     * không ảnh hưởng việc duyệt).
+     */
     private void notifyOrganizer(int eventId, boolean approved, String reason) throws SQLException {
         String[] contact = eventDAO.getOrganizerContact(eventId);
         if (contact == null || contact[0] == null) {

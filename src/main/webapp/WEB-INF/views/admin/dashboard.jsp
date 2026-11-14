@@ -13,17 +13,17 @@
 
 
         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=5">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin.css?v=6">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
-    <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
-    <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
-</head>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/phosphor/fill.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/ui.css">
+        <script src="${pageContext.request.contextPath}/assets/js/ui.js" defer></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css?v=20261109">
+        <script src="${pageContext.request.contextPath}/assets/js/motion.js?v=20261109" defer></script>
+    </head>
 
     <body class="admin-portal-page">
 
@@ -172,160 +172,101 @@
                 </div>
             </div>
 
-            <!-- Nội dung Dashboard -->
+            <!-- Dashboard analytics: numbers and tables are served from SQL Server. -->
             <main class="admin-content">
-                <section class="content">
-
-                    <div class="page-heading">
-                        <div>
-                            <h1>Admin Dashboard</h1>
-                            <p>Manage your Light Ticket system</p>
-                        </div>
+                <section class="content lt-analytics">
+                    <div class="page-heading lt-heading">
+                        <div><h1>Admin Dashboard</h1><p>System performance &amp; management overview</p></div>
+                        <form method="get" action="${ctx}/admin" class="lt-period">
+                            <label for="ltDays">Revenue period</label>
+                            <select name="days" id="ltDays" onchange="this.form.submit()">
+                                <option value="7" ${selectedDays == 7 ? 'selected' : ''}>Last 7 days</option>
+                                <option value="30" ${selectedDays == 30 ? 'selected' : ''}>Last 30 days</option>
+                                <option value="90" ${selectedDays == 90 ? 'selected' : ''}>Last 90 days</option>
+                            </select>
+                        </form>
                     </div>
-
-                    <%-- UC-35: số liệu hệ thống --%>
-                    <div class="stats">
-                        <div class="stat-card total"><p>Users</p><h2><fmt:formatNumber value="${userTotal}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card customer"><p>Customers</p><h2><fmt:formatNumber value="${usersByRole['Customer']}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card organizer"><p>Organizers</p><h2><fmt:formatNumber value="${usersByRole['Organizer']}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card staff"><p>Staff</p><h2><fmt:formatNumber value="${usersByRole['Staff']}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card active"><p>Paid orders</p><h2><fmt:formatNumber value="${paidOrders}" pattern="#,##0"/></h2></div>
-                        <div class="stat-card total"><p>Revenue (VND)</p><h2><fmt:formatNumber value="${revenue}" pattern="#,##0"/></h2></div>
+                    <div class="lt-kpis">
+                        <a class="lt-kpi" href="${ctx}/admin/orders?status=Paid"><span class="lt-icon"><i class="ph ph-currency-circle-dollar"></i></span><span class="lt-kpi-label">Total revenue</span><strong><fmt:formatNumber value="${revenue}" pattern="#,##0"/> ₫</strong><small>Paid orders · All time <i class="ph ph-arrow-up-right"></i></small></a>
+                        <a class="lt-kpi" href="${ctx}/admin/orders"><span class="lt-icon"><i class="ph ph-shopping-cart"></i></span><span class="lt-kpi-label">Paid orders</span><strong><fmt:formatNumber value="${paidOrders}" pattern="#,##0"/></strong><small>View transactions <i class="ph ph-arrow-up-right"></i></small></a>
+                        <a class="lt-kpi" href="${ctx}/admin/users"><span class="lt-icon"><i class="ph ph-users-three"></i></span><span class="lt-kpi-label">Total users</span><strong><fmt:formatNumber value="${userTotal}" pattern="#,##0"/></strong><small><fmt:formatNumber value="${usersByRole['Organizer']}" pattern="#,##0"/> organizers · View users <i class="ph ph-arrow-up-right"></i></small></a>
+                        <a class="lt-kpi" href="${ctx}/admin/events"><span class="lt-icon"><i class="ph ph-calendar-check"></i></span><span class="lt-kpi-label">Total events</span><strong><fmt:formatNumber value="${eventTotal}" pattern="#,##0"/></strong><small><fmt:formatNumber value="${pendingEvents}" pattern="#,##0"/> awaiting approval <i class="ph ph-arrow-up-right"></i></small></a>
                     </div>
-
-                    <div class="stats">
-                        <a class="stat-card inactive" href="${ctx}/admin/events" style="text-decoration:none">
-                            <p>Events awaiting approval</p><h2><fmt:formatNumber value="${pendingEvents}" pattern="#,##0"/></h2>
-                        </a>
-                        <c:forEach var="entry" items="${eventsByStatus}">
-                            <c:if test="${entry.key ne 'PENDING_APPROVAL'}">
-                                <div class="stat-card"><p>Events · <c:out value="${entry.key}"/></p><h2><fmt:formatNumber value="${entry.value}" pattern="#,##0"/></h2></div>
-                            </c:if>
-                        </c:forEach>
-                        <c:if test="${refundPending gt 0}">
-                            <div class="stat-card inactive" title="Thanh toán VNPay đến sau khi đơn đã hủy: cần hoàn tiền thủ công (Payments.payment_status = RefundPending)">
-                                <p>Payments to refund</p><h2><fmt:formatNumber value="${refundPending}" pattern="#,##0"/></h2>
+                    <div class="lt-chart-grid">
+                        <section class="lt-panel lt-revenue">
+                            <div class="lt-panel-head"><div><h2><i class="ph ph-chart-line-up"></i> Revenue overview</h2><p>Revenue from paid orders in the last ${selectedDays} days</p></div><span class="lt-chart-unit">VND</span></div>
+                            <div class="lt-chart-container"><svg id="ltRevenueChart" viewBox="0 0 740 250" preserveAspectRatio="none" role="img" aria-label="Revenue by day"></svg><div id="ltChartEmpty" class="lt-chart-empty" hidden>No paid orders in this period</div></div>
+                            <div class="lt-chart-data" id="ltChartData" hidden>
+                                <c:forEach var="point" items="${revenueTrend}"><span data-day="${point.day}" data-amount="${point.amount}"></span></c:forEach>
+                                </div>
+                            </section>
+                            <section class="lt-panel lt-status-panel">
+                                <div class="lt-panel-head"><div><h2><i class="ph ph-chart-donut"></i> Order status</h2><p>All-time order distribution</p></div></div>
+                                        <c:set var="paidCount" value="${orderStatuses['Paid']}"/><c:set var="pendingCount" value="${orderStatuses['Pending']}"/><c:set var="cancelledCount" value="${orderStatuses['Cancelled']}"/>
+                                        <c:set var="paidPct" value="${orderTotal gt 0 ? paidCount * 100 / orderTotal : 0}"/><c:set var="pendingPct" value="${orderTotal gt 0 ? pendingCount * 100 / orderTotal : 0}"/>
+                            <div class="lt-donut-wrap"><div class="lt-donut" style="--paid:${paidPct}%;--pending:${pendingPct}%;"><div><strong><fmt:formatNumber value="${orderTotal}" pattern="#,##0"/></strong><small>Orders</small></div></div></div>
+                            <div class="lt-status-legend">
+                                <a href="${ctx}/admin/orders?status=Paid"><i class="lt-dot lt-dot-paid"></i><span>Paid</span><strong><fmt:formatNumber value="${paidCount}" pattern="#,##0"/></strong></a>
+                                <a href="${ctx}/admin/orders?status=Pending"><i class="lt-dot lt-dot-pending"></i><span>Pending</span><strong><fmt:formatNumber value="${pendingCount}" pattern="#,##0"/></strong></a>
+                                <a href="${ctx}/admin/orders?status=Cancelled"><i class="lt-dot lt-dot-cancelled"></i><span>Cancelled</span><strong><fmt:formatNumber value="${cancelledCount}" pattern="#,##0"/></strong></a>
                             </div>
-                        </c:if>
+                        </section>
                     </div>
+                    <div class="lt-tables-grid">
+                        <section class="lt-panel"><div class="lt-panel-head"><h2><i class="ph ph-receipt"></i> Recent transactions</h2><a href="${ctx}/admin/orders">View all orders <i class="ph ph-arrow-right"></i></a></div>
+                            <div class="lt-table-scroll"><table class="lt-table"><thead><tr><th>Order</th><th>Customer</th><th>Event</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+                                        <c:forEach var="order" items="${recentOrders}"><tr><td><strong><c:out value="${order.code}"/></strong></td><td><c:out value="${order.customer}"/></td><td><c:out value="${empty order.event ? '—' : order.event}"/></td><td><fmt:formatNumber value="${order.amount}" pattern="#,##0"/> ₫</td><td><span class="lt-chip lt-chip-${fn:toLowerCase(order.status)}"><c:out value="${order.status}"/></span></td><td><a href="${ctx}/admin/orders?id=${order.id}">View</a></td></tr></c:forEach>
+                                        <c:if test="${empty recentOrders}"><tr><td colspan="6" class="lt-empty">No orders yet.</td></tr></c:if>
+                                        </tbody></table></div>
+                            </section>
+                            <section class="lt-panel"><div class="lt-panel-head"><h2><i class="ph ph-clock-countdown"></i> Events awaiting approval</h2><a href="${ctx}/admin/events">View all <i class="ph ph-arrow-right"></i></a></div>
+                            <div class="lt-table-scroll"><table class="lt-table"><thead><tr><th>Event</th><th>Organizer</th><th>Submitted</th><th>Action</th></tr></thead><tbody>
+                                        <c:forEach var="event" items="${pendingEventPreview}"><tr><td><strong><c:out value="${event.name}"/></strong></td><td><c:out value="${event.organizer}"/></td><td><fmt:formatDate value="${event.created}" pattern="dd/MM/yyyy"/></td><td><a href="${ctx}/admin/events">Review</a></td></tr></c:forEach>
+                                        <c:if test="${empty pendingEventPreview}"><tr><td colspan="4" class="lt-empty">No events awaiting approval.</td></tr></c:if>
+                                        </tbody></table></div>
+                            </section>
+                        </div>                                    
+                    </section>
+                    <footer class="admin-page-footer">
+                        © 2026 Light Ticket Platform JSC. All rights reserved.
+                    </footer>
+                </main>
+            </div>
 
-                    <!-- Dashboard Cards -->
-                    <div class="dashboard-grid">
-
-                        <!-- Users -->
-                        <a href="${ctx}/admin/users" class="dashboard-card">
-                            <div class="dashboard-icon">
-                                <i class="ph ph-users"></i>
-                            </div>
-
-                            <div class="dashboard-info">
-                                <h2>Users</h2>
-                                <p>Manage system users</p>
-                            </div>
-                        </a>
-
-                        <!-- Events -->
-                        <a href="${ctx}/admin/events" class="dashboard-card">
-                            <div class="dashboard-icon">
-                                <i class="ph ph-calendar"></i>
-                            </div>
-
-                            <div class="dashboard-info">
-                                <h2>Events</h2>
-                                <p>Manage events</p>
-                            </div>
-                        </a>
-
-                        <!-- Categories -->
-                        <a href="${ctx}/admin/categories" class="dashboard-card">
-                            <div class="dashboard-icon">
-                                <i class="ph ph-folder"></i>
-                            </div>
-
-                            <div class="dashboard-info">
-                                <h2>Categories</h2>
-                                <p>Manage event categories</p>
-                            </div>
-                        </a>
-
-                        <!-- Venues -->
-                        <a href="${ctx}/admin/venues" class="dashboard-card">
-                            <div class="dashboard-icon">
-                                <i class="ph ph-map-pin"></i>
-                            </div>
-
-                            <div class="dashboard-info">
-                                <h2>Venues</h2>
-                                <p>Manage event venues</p>
-                            </div>
-                        </a>
-
-                        <!-- Vouchers -->
-                        <a href="${ctx}/admin/vouchers" class="dashboard-card">
-                            <div class="dashboard-icon">
-                                <i class="ph ph-ticket"></i>
-                            </div>
-
-                            <div class="dashboard-info">
-                                <h2>Vouchers</h2>
-                                <p>Manage vouchers</p>
-                            </div>
-                        </a>
-
-                        <!-- Reviews -->
-                        <a href="${ctx}/admin/reviews" class="dashboard-card">
-                            <div class="dashboard-icon">
-                                <i class="ph ph-star"></i>
-                            </div>
-
-                            <div class="dashboard-info">
-                                <h2>Reviews</h2>
-                                <p>Manage customer reviews</p>
-                            </div>
-                        </a>
-
-                    </div>
-                </section>
-
-                <footer class="admin-page-footer">
-                    © 2026 Light Ticket Platform JSC. All rights reserved.
-                </footer>
-            </main>
-        </div>
-
+            <script src="${ctx}/assets/js/admin-dashboard.js?v=1" defer></script>
         <!-- Bootstrap JS dùng cho dropdown -->
         <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.js"></script>
 
         <!-- Điều khiển sidebar trên màn hình nhỏ -->
         <script>
-            (function () {
-                const sidebar = document.getElementById('adminSidebar');
-                const backdrop = document.getElementById('adminSidebarBackdrop');
-                const openButton = document.getElementById('adminSidebarOpen');
-                const closeButton = document.getElementById('adminSidebarClose');
+                                (function () {
+                                    const sidebar = document.getElementById('adminSidebar');
+                                    const backdrop = document.getElementById('adminSidebarBackdrop');
+                                    const openButton = document.getElementById('adminSidebarOpen');
+                                    const closeButton = document.getElementById('adminSidebarClose');
 
-                function openSidebar() {
-                    sidebar.classList.add('is-open');
-                    backdrop.classList.add('is-visible');
-                    openButton.setAttribute('aria-expanded', 'true');
-                }
+                                    function openSidebar() {
+                                        sidebar.classList.add('is-open');
+                                        backdrop.classList.add('is-visible');
+                                        openButton.setAttribute('aria-expanded', 'true');
+                                    }
 
-                function closeSidebar() {
-                    sidebar.classList.remove('is-open');
-                    backdrop.classList.remove('is-visible');
-                    openButton.setAttribute('aria-expanded', 'false');
-                }
+                                    function closeSidebar() {
+                                        sidebar.classList.remove('is-open');
+                                        backdrop.classList.remove('is-visible');
+                                        openButton.setAttribute('aria-expanded', 'false');
+                                    }
 
-                openButton.addEventListener('click', openSidebar);
-                closeButton.addEventListener('click', closeSidebar);
-                backdrop.addEventListener('click', closeSidebar);
+                                    openButton.addEventListener('click', openSidebar);
+                                    closeButton.addEventListener('click', closeSidebar);
+                                    backdrop.addEventListener('click', closeSidebar);
 
-                document.addEventListener('keydown', function (event) {
-                    if (event.key === 'Escape') {
-                        closeSidebar();
-                    }
-                });
-            })();
+                                    document.addEventListener('keydown', function (event) {
+                                        if (event.key === 'Escape') {
+                                            closeSidebar();
+                                        }
+                                    });
+                                })();
         </script>
 
     </body>
